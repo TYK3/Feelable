@@ -1,0 +1,59 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  body{margin:0;font-family:Inter,sans-serif;background:#fff}
+  .row{display:flex;align-items:center;gap:28px;padding:18px 28px}
+  .light{background:#FFFBF0}.dark{background:#17171C;color:#fff}
+  .lab{width:90px;font-weight:700;font-size:14px}
+  svg{display:block}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- A: T = drawn stroke (top bar) + braille dots (stem) -->
+    <symbol id="A" viewBox="0 0 64 64">
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="#FFD23F"/>
+      <path d="M15 20.5 C 24 16.5, 37 23.5, 49 18.5" fill="none" stroke="#17171C" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="32" cy="33" r="5" fill="#17171C"/>
+      <circle cx="32" cy="45" r="5" fill="#17171C"/>
+      <circle cx="32" cy="57" r="0" fill="#17171C"/>
+    </symbol>
+    <!-- A2: same but three dots, tighter -->
+    <symbol id="A2" viewBox="0 0 64 64">
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="#FFD23F"/>
+      <path d="M14 19 C 23 15, 38 22, 50 17" fill="none" stroke="#17171C" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="32" cy="30.5" r="4.6" fill="#17171C"/>
+      <circle cx="32" cy="40.5" r="4.6" fill="#17171C"/>
+      <circle cx="32" cy="50.5" r="4.6" fill="#17171C"/>
+    </symbol>
+    <!-- B: heart traced as one sketch line, braille column inside -->
+    <symbol id="B" viewBox="0 0 64 64">
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="#FFD23F"/>
+      <path d="M32 50 C 20 42, 13 35, 13 26.5 C 13 20, 18 16, 23.5 16 C 27.5 16, 30.5 18.5, 32 22 C 33.5 18.5, 36.5 16, 40.5 16 C 46 16, 51 20, 51 26.5 C 51 35, 44 42, 32 50 Z" fill="none" stroke="#17171C" stroke-width="5" stroke-linejoin="round"/>
+      <circle cx="27" cy="28" r="3.4" fill="#17171C"/>
+      <circle cx="37" cy="28" r="3.4" fill="#17171C"/>
+      <circle cx="32" cy="37" r="3.4" fill="#17171C"/>
+    </symbol>
+    <!-- C: braille "t" cell, one dot being touched (ring = touch/sound) -->
+    <symbol id="C" viewBox="0 0 64 64">
+      <rect x="2" y="2" width="60" height="60" rx="15" fill="#FFD23F"/>
+      <circle cx="24" cy="32" r="5.2" fill="#17171C"/>
+      <circle cx="24" cy="46" r="5.2" fill="#17171C"/>
+      <circle cx="40" cy="18" r="5.2" fill="#17171C"/>
+      <circle cx="40" cy="32" r="5.2" fill="#17171C"/>
+      <circle cx="40" cy="18" r="10" fill="none" stroke="#17171C" stroke-width="2.6" opacity=".9"/>
+      <circle cx="24" cy="18" r="2" fill="#3A2E00" opacity=".25"/>
+      <circle cx="40" cy="46" r="2" fill="#3A2E00" opacity=".25"/>
+    </symbol>
+  </defs>
+</svg>
+<script>
+  const ids=["A","A2","B","C"], sizes=[160,64,32,16];
+  for(const bg of ["light","dark"]){
+    for(const id of ids){
+      const r=document.createElement("div");r.className="row "+bg;
+      r.innerHTML=`<div class=lab>${id}</div>`+sizes.map(s=>`<svg width=${s} height=${s}><use href="#${id}"/></svg>`).join("");
+      document.body.appendChild(r);
+    }
+  }
+</script>
+</body></html>

@@ -1,0 +1,223 @@
+[
+  {
+    "id": "plant-cell",
+    "title": "Plant cell",
+    "file": "plant-cell.png",
+    "kind": "colour",
+    "expected_parts": [
+      "cell wall",
+      "cytoplasm",
+      "vacuole",
+      "nucleus",
+      "chloroplast",
+      "mitochondrion"
+    ],
+    "min_parts": 5,
+    "photo": false,
+    "description": "Classic textbook plant cell with five chloroplasts, three mitochondria and ribosome clutter."
+  },
+  {
+    "id": "heart",
+    "title": "Human heart",
+    "file": "heart.png",
+    "kind": "colour",
+    "expected_parts": [
+      "right atrium",
+      "left atrium",
+      "right ventricle",
+      "left ventricle",
+      "aorta",
+      "pulmonary artery",
+      "vena cava",
+      "septum",
+      "heart wall"
+    ],
+    "min_parts": 8,
+    "photo": false,
+    "description": "Front view of the heart with four colour-coded chambers, great vessels and septum."
+  },
+  {
+    "id": "skull-lateral",
+    "title": "Skull, side view",
+    "file": "skull-lateral.jpg",
+    "kind": "anatomy",
+    "expected_parts": [
+      "parietal bone",
+      "frontal bone",
+      "temporal bone",
+      "maxilla",
+      "nasal bone",
+      "zygomatic bone",
+      "mastoid process",
+      "styloid process",
+      "zygomatic process",
+      "coronal suture"
+    ],
+    "min_parts": 10,
+    "photo": false,
+    "credit": "OpenStax Anatomy & Physiology, CC BY 4.0",
+    "description": "Dense textbook figure: 24 labels in small print, pointer lines crossing coloured bones."
+  },
+  {
+    "id": "digestive-system",
+    "title": "Digestive system",
+    "file": "digestive-system.jpg",
+    "kind": "anatomy",
+    "expected_parts": [
+      "liver",
+      "stomach",
+      "pancreas",
+      "spleen",
+      "gall bladder",
+      "duodenum",
+      "jejunum",
+      "ileum",
+      "ascending colon",
+      "descending colon",
+      "sigmoid colon",
+      "esophagus",
+      "pharynx",
+      "tongue"
+    ],
+    "min_parts": 12,
+    "photo": false,
+    "credit": "OpenStax Anatomy & Physiology, CC BY 4.0",
+    "description": "Dense textbook figure: 24 organs of the digestive tract with headings and long pointer lines."
+  },
+  {
+    "id": "water-cycle",
+    "title": "Water cycle",
+    "file": "water-cycle.png",
+    "kind": "colour",
+    "expected_parts": [
+      "sun",
+      "cloud",
+      "mountain",
+      "sea"
+    ],
+    "min_parts": 3,
+    "photo": false,
+    "description": "Landscape scene with sun, clouds, rain, mountain and sea, and curved process arrows.",
+    "arrow_labels": [
+      "evaporation",
+      "condensation",
+      "precipitation",
+      "collection"
+    ]
+  },
+  {
+    "id": "plant-cell-photo",
+    "title": "Plant cell (phone photo)",
+    "file": "plant-cell-photo.jpg",
+    "kind": "photo",
+    "expected_parts": [
+      "cell wall",
+      "cytoplasm",
+      "vacuole",
+      "nucleus",
+      "chloroplast",
+      "mitochondrion"
+    ],
+    "min_parts": 5,
+    "photo": true,
+    "description": "The plant cell printed in a textbook, photographed at an angle on a wooden table."
+  },
+  {
+    "id": "animal-cell",
+    "title": "Animal cell",
+    "file": "animal-cell.png",
+    "kind": "colour",
+    "expected_parts": [
+      "cell membrane",
+      "cytoplasm",
+      "nucleus",
+      "nucleolus",
+      "mitochondrion",
+      "golgi body"
+    ],
+    "min_parts": 5,
+    "photo": false,
+    "description": "Irregular animal cell with nucleus, nucleolus, mitochondria, golgi body and ribosomes."
+  },
+  {
+    "id": "earth-layers",
+    "title": "Layers of the Earth",
+    "file": "earth-layers.png",
+    "kind": "colour",
+    "expected_parts": [
+      "crust",
+      "mantle",
+      "outer core",
+      "inner core"
+    ],
+    "min_parts": 3,
+    "photo": false,
+    "description": "Globe with a wedge cut away to show the crust, mantle, outer core and inner core."
+  },
+  {
+    "id": "bar-chart",
+    "title": "Favourite fruit (bar chart)",
+    "file": "bar-chart.png",
+    "kind": "chart",
+    "expected_parts": [
+      "apple",
+      "banana",
+      "orange",
+      "grapes",
+      "kiwi"
+    ],
+    "min_parts": 4,
+    "photo": false,
+    "description": "Five coloured bars with axes, ticks, gridlines, value labels and axis titles."
+  },
+  {
+    "id": "circuit",
+    "title": "Series circuit",
+    "file": "circuit.png",
+    "kind": "lineart",
+    "expected_parts": [
+      "battery",
+      "switch",
+      "bulb",
+      "resistor"
+    ],
+    "min_parts": 2,
+    "photo": false,
+    "description": "Black line-art series circuit: cell, closed switch, bulb and resistor in one loop."
+  },
+  {
+    "id": "flower",
+    "title": "Parts of a flower",
+    "file": "flower.png",
+    "kind": "colour",
+    "expected_parts": [
+      "petal",
+      "sepal",
+      "stamen",
+      "carpel",
+      "stigma",
+      "stem",
+      "leaf"
+    ],
+    "min_parts": 6,
+    "photo": false,
+    "description": "Side view of a flower with petals, sepals, stamens, carpel, stigma, stem and leaves."
+  },
+  {
+    "id": "volcano",
+    "title": "Inside a volcano",
+    "file": "volcano.png",
+    "kind": "colour",
+    "expected_parts": [
+      "ash cloud",
+      "lava",
+      "vent",
+      "cone",
+      "crust",
+      "magma chamber"
+    ],
+    "min_parts": 5,
+    "photo": false,
+    "description": "Cross-section of a volcano: magma chamber, vent, cone, lava flow, ash cloud and crust."
+  }
+]

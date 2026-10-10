@@ -1,0 +1,39 @@
+/* Feelable design tokens — CONTRACT §5. Shared by the teacher app and touch mode.
+   OWNER: Web-Teacher. Keep these exact values; add new tokens below the contract block. */
+:root {
+  /* contract tokens */
+  --bg: #FFFBF0;
+  --surface: #FFFFFF;
+  --ink: #17171C;
+  --muted: #6E6C76;
+  --line: #E9E2CF;
+  --banana: #FFD23F;
+  --banana-ink: #3A2E00;
+  --ok: #1E9650;
+  --warn: #C77700;
+  --err: #C8463C;
+  --focus: #2F6FE4;
+  --radius: 16px;
+  --radius-pill: 999px;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --shadow: 0 4px 0 #E9E2CF;
+
+  /* extras (teacher app) */
+  --banana-soft: #FFF1BF;
+  --banana-deep: #F2BE00;
+  --ink-2: #2B2B33;
+  --line-strong: #D9CFB4;
+  --cream-2: #FBF3DE;
+  --ok-soft: #E3F4EA;
+  --warn-soft: #FFF1DC;
+  --err-soft: #FBE7E5;
+  --radius-sm: 10px;
+  --shadow-lift: 0 6px 0 #E9E2CF;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+
+  /* v2 (Frontend) */
+  --display: "Bricolage Grotesque Variable", var(--font);
+  --ok-ink: #12663A;     /* AA text on ok-soft / white */
+  --warn-ink: #7A4A00;   /* AA text on warn-soft */
+  --err-ink: #9A2E25;    /* AA text on err-soft */
+}

@@ -1,0 +1,4 @@
+# job outputs (full job folders, PDFs/STLs) are large and regenerable
+runs/*/jobs/
+__pycache__/
+runs/

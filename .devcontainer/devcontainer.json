@@ -1,0 +1,37 @@
+{
+  "name": "Feelable",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+  "postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y -qq libgl1 libglib2.0-0 && pip install -r backend/requirements.txt && cd web && npm ci && npm run build",
+  "forwardPorts": [
+    8000
+  ],
+  "portsAttributes": {
+    "8000": {
+      "label": "Feelable app",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "dbaeumer.vscode-eslint"
+      ]
+    },
+    "codespaces": {
+      "openFiles": [
+        "README.md"
+      ]
+    }
+  },
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb"
+  },
+  "postStartCommand": "nohup bash -c './run.sh > /tmp/feelable.log 2>&1' &"
+}

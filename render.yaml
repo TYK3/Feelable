@@ -1,0 +1,15 @@
+# Render Blueprint: one free Docker web service built from this repo's Dockerfile.
+# Deploy: https://render.com/deploy?repo=https://github.com/TYK3/feelable
+services:
+  - type: web
+    name: feelable
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash

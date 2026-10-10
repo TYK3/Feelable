@@ -1,0 +1,117 @@
+[
+ {
+  "check": "home loads with sample gallery",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "check": "upload plant-cell",
+  "passed": true,
+  "detail": "6 parts, 6/6 names, 4.7s"
+ },
+ {
+  "check": "upload heart",
+  "passed": true,
+  "detail": "9 parts, 9/9 names, 5.2s"
+ },
+ {
+  "check": "upload water-cycle",
+  "passed": true,
+  "detail": "4 parts, 4/4 names, 4.8s"
+ },
+ {
+  "check": "upload plant-cell-photo",
+  "passed": true,
+  "detail": "6 parts, 6/6 names, 5.7s"
+ },
+ {
+  "check": "upload animal-cell",
+  "passed": true,
+  "detail": "6 parts, 6/6 names, 4.7s"
+ },
+ {
+  "check": "upload earth-layers",
+  "passed": true,
+  "detail": "5 parts, 4/4 names, 4.8s"
+ },
+ {
+  "check": "upload bar-chart",
+  "passed": true,
+  "detail": "5 parts, 5/5 names, 4.6s"
+ },
+ {
+  "check": "upload circuit",
+  "passed": true,
+  "detail": "4 parts, 4/4 names, 3.6s"
+ },
+ {
+  "check": "PDF download",
+  "passed": true,
+  "detail": "2 pages, 151 KB"
+ },
+ {
+  "check": "STL download",
+  "passed": true,
+  "detail": "23992 faces, watertight=True"
+ },
+ {
+  "check": "rename part persists",
+  "passed": true,
+  "detail": "was 'heart wall'"
+ },
+ {
+  "check": "unknown job shows friendly page",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "check": "non-image upload rejected",
+  "passed": true,
+  "detail": "That file isn't an image we can read (PNG, JPEG or WebP)"
+ },
+ {
+  "check": "no page errors (desktop)",
+  "passed": true,
+  "detail": ""
+ },
+ {
+  "check": "touch phone plant-cell",
+  "passed": true,
+  "detail": "6/6 "
+ },
+ {
+  "check": "touch phone animal-cell",
+  "passed": true,
+  "detail": "6/6 "
+ },
+ {
+  "check": "touch phone bar-chart",
+  "passed": true,
+  "detail": "5/5 "
+ },
+ {
+  "check": "touch phone earth-layers",
+  "passed": true,
+  "detail": "5/5 "
+ },
+ {
+  "check": "touch desktop plant-cell",
+  "passed": true,
+  "detail": "6/6 "
+ },
+ {
+  "check": "touch desktop animal-cell",
+  "passed": true,
+  "detail": "6/6 "
+ },
+ {
+  "check": "touch desktop bar-chart",
+  "passed": true,
+  "detail": "5/5 "
+ },
+ {
+  "check": "touch desktop earth-layers",
+  "passed": true,
+  "detail": "5/5 "
+ }
+]

@@ -1,0 +1,81 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;width:1600px;height:620px;overflow:hidden}
+  .stage{position:relative;width:1600px;height:620px;background:linear-gradient(180deg,#FFFBF0,#FFF5D6)}
+  .card{position:absolute;top:44px;width:440px;height:532px;background:#fff;border-radius:30px;
+    box-shadow:0 5px 0 #EDE3C6, 0 18px 40px rgba(138,106,0,.10);overflow:hidden}
+  .card svg{position:absolute;left:0;top:0}
+  .txt{position:absolute;left:36px;right:32px;top:358px;font-family:"Inter",sans-serif;color:#17171C}
+  .badge{display:inline-flex;width:40px;height:40px;border-radius:50%;background:#FFD23F;align-items:center;justify-content:center;
+    font-weight:800;font-size:20px;box-shadow:0 3px 0 #E0B400;margin-bottom:14px}
+  h3{margin:0;font-family:"Inter Display","Inter",sans-serif;font-size:31px;font-weight:800;letter-spacing:-0.025em}
+  p{margin:10px 0 0;font-size:18.5px;line-height:1.45;color:#55535E;font-weight:500}
+  .arrow{position:absolute;top:220px}
+</style></head><body>
+<div class="stage" id="stage"></div>
+<script src="art.js"></script>
+<script>
+  const X = [64, 580, 1096];
+  const steps = [
+    ["Snap a diagram", "Photograph a textbook page, or upload an image you already have."],
+    ["Get a tactile graphic", "A swell-paper PDF with braille labels, plus a 3D-printable relief."],
+    ["Touch it, hear it", "On a phone, touch a part to hear its name. Double-tap to hear more."],
+  ];
+  const art = [];
+  // 1: textbook page + phone camera
+  art[0] = `
+    <g transform="translate(40 50) rotate(-5)">
+      <rect width="250" height="270" rx="10" fill="#FBF6E8" stroke="#E6DCBF" stroke-width="2"/>
+      <rect x="22" y="22" width="150" height="12" rx="6" fill="#D8CFB6"/>
+      <rect x="22" y="44" width="200" height="8" rx="4" fill="#E6DECA"/>
+      <rect x="22" y="58" width="180" height="8" rx="4" fill="#E6DECA"/>
+      <g transform="translate(22 82) scale(0.52)">${textbookCell()}</g>
+      <rect x="22" y="232" width="200" height="8" rx="4" fill="#E6DECA"/>
+      <rect x="22" y="246" width="140" height="8" rx="4" fill="#E6DECA"/>
+    </g>
+    <g transform="translate(232 70) rotate(7)" filter="url(#soft-sm)">
+      <rect width="150" height="270" rx="24" fill="#17171C"/>
+      <rect x="7" y="7" width="136" height="256" rx="18" fill="#FBF6E8"/>
+      <g transform="translate(14 78) scale(0.305)">${textbookCell()}</g>
+      <path d="M16 72v-12h12M134 72v-12h-12M16 168v12h12M134 168v12h-12" fill="none" stroke="#FFD23F" stroke-width="4" stroke-linecap="round"/>
+      <rect x="7" y="200" width="136" height="63" fill="#17171C" opacity=".9"/>
+      <circle cx="75" cy="232" r="19" fill="#fff"/><circle cx="75" cy="232" r="14" fill="#FFD23F"/>
+      <rect x="53" y="13" width="44" height="8" rx="4" fill="#17171C"/>
+    </g>`;
+  // 2: swell paper + relief
+  art[1] = `
+    <g transform="translate(36 36) rotate(-4)">
+      <rect width="300" height="216" rx="10" fill="#fff" filter="url(#soft-sm)"/>
+      <rect width="300" height="216" rx="10" fill="none" stroke="#EDE3C6" stroke-width="1.5"/>
+      <g transform="translate(22 22) scale(0.64)">${plantCell({ labels: true })}</g>
+      <rect x="236" y="-14" width="58" height="28" rx="8" fill="#17171C"/>
+      <text x="265" y="5" text-anchor="middle" font-family="Inter" font-weight="800" font-size="14" fill="#FFD23F">PDF</text>
+    </g>
+    <g transform="translate(286 270) scale(0.5)">${reliefTile()}</g>
+    <g transform="translate(392 206)"><rect x="-30" y="-14" width="58" height="28" rx="8" fill="#17171C"/>
+      <text x="-1" y="5" text-anchor="middle" font-family="Inter" font-weight="800" font-size="14" fill="#FFD23F">STL</text></g>`;
+  // 3: touch mode with finger
+  art[2] = `<g transform="translate(34 0)">
+    <g transform="translate(150 22) rotate(-4)" filter="url(#soft-sm)">${phone()}</g>
+    ${waves(330, 120, "#17171C", false, 3)}
+    <circle cx="203" cy="123" r="20" fill="none" stroke="#FFD23F" stroke-width="5"/>
+    <g transform="translate(203 127) rotate(46) scale(0.66)">${hand()}</g></g>
+    ${heartShape(84, 70, 1.1, "#FF8A65")}
+    ${heartShape(56, 104, 0.7, "#FFB199")}`;
+
+  let html = "";
+  X.forEach((x, i) => {
+    html += `<div class="card" style="left:${x}px">
+      <svg width="440" height="350" viewBox="0 0 440 350">${defs()}<rect width="440" height="350" fill="#FFF8E3"/>${art[i]}</svg>
+      <div class="txt"><div class="badge">${i + 1}</div><h3>${steps[i][0]}</h3><p>${steps[i][1]}</p></div></div>`;
+  });
+  // arrows between cards
+  [X[0] + 440, X[1] + 440].forEach((x) => {
+    html += `<svg class="arrow" style="left:${x + 8}px" width="60" height="60" viewBox="0 0 60 60">
+      <path d="M8 31 C 20 26, 34 34, 48 29" fill="none" stroke="#17171C" stroke-width="6" stroke-linecap="round"/>
+      <path d="M36 17 L 50 29 L 37 42" fill="none" stroke="#17171C" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  });
+  document.getElementById("stage").innerHTML = html;
+</script>
+</body></html>

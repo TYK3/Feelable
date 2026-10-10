@@ -1,0 +1,63 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#FFFBF0}
+  .stage{position:relative;width:1200px;height:630px;overflow:hidden;
+    background:linear-gradient(100deg,#FFFBF0 0%,#FFF8E4 45%,#FFF3CC 100%)}
+  svg.art{position:absolute;inset:0}
+  .copy{position:absolute;left:72px;top:0;height:630px;width:560px;display:flex;flex-direction:column;justify-content:center;
+    font-family:"Inter Display","Inter",sans-serif;color:#17171C}
+  .brand{display:flex;align-items:center;gap:16px}
+  .brand h1{margin:0;font-size:64px;font-weight:800;letter-spacing:-0.035em;line-height:1}
+  .motto{margin:26px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.025em;line-height:1.1}
+  .hl{position:relative;white-space:nowrap;display:inline-block}
+  .hl svg{position:absolute;left:-6px;right:-8px;bottom:-4px;width:calc(100% + 14px);height:26px;z-index:0}
+  .hl span{position:relative;z-index:1}
+  .sub{margin:26px 0 0;font-family:"Inter",sans-serif;font-size:22px;line-height:1.45;color:#4A4852;font-weight:500;max-width:470px}
+  .sub b{color:#17171C;font-weight:700}
+.url{margin-top:30px;align-self:flex-start;font-family:Inter,sans-serif;font-weight:700;font-size:18px;background:#17171C;color:#FFD23F;padding:10px 18px;border-radius:999px}</style></head><body>
+<div class="stage">
+  <svg class="art" id="art" width="1200" height="630" viewBox="0 0 1200 630"></svg>
+  <div class="copy">
+    <div class="brand"><svg width="62" height="62" viewBox="0 0 64 64" id="m"></svg><h1>Feelable</h1></div>
+    <p class="motto">Every diagram, <span class="hl"><svg viewBox="0 0 100 20" preserveAspectRatio="none"><path d="M2 13 C 25 6, 60 16, 98 8 L 98 18 C 60 20, 25 18, 2 19Z" fill="#FFD23F"/></svg><span>feelable.</span></span></p>
+    <p class="sub">Snap a textbook diagram → a <b>tactile graphic</b> a blind student can <b>feel</b> and <b>hear</b>.</p>
+    <div class="url">feelable.onrender.com</div>
+  </div>
+</div>
+<script src="art.js"></script>
+<script>
+  document.getElementById("m").innerHTML = mark(0, 0, 64);
+  let s = defs();
+  let g = '';
+  // warm light
+  g += `<circle cx="1140" cy="170" r="470" fill="url(#glow)"/>`;
+
+  // faint braille confetti
+  const conf = [[60,46],[700,470],[770,60],[1560,40],[820,300]];
+  conf.forEach(([x,y],i)=>{ g += `<g opacity=".18">${braille(["c","h","n","v","m"][i], x, y, 9, 3.2, "#C9A100")}</g>`; });
+
+  // swell-paper sheet with the raised plant cell
+  g += `<g transform="translate(830 82) rotate(-3)">
+          <rect x="0" y="0" width="470" height="340" rx="14" fill="#FFFFFF" filter="url(#soft)"/>
+          <rect x="0" y="0" width="470" height="340" rx="14" fill="none" stroke="#EFE6CC" stroke-width="1.5"/>
+          <g transform="translate(35 34)">${plantCell({ labels: true })}</g>
+        </g>`;
+
+  // touch ripple where the finger lands
+  const tx = 975, ty = 222;
+  g += `<circle cx="${tx}" cy="${ty}" r="22" fill="none" stroke="#FFD23F" stroke-width="5" opacity=".95"/>`;
+  g += `<circle cx="${tx}" cy="${ty}" r="36" fill="none" stroke="#FFD23F" stroke-width="3.5" opacity=".55"/>`;
+  // the child's hand
+  g += `<g transform="translate(${tx} ${ty + 6}) rotate(-22)">${hand()}</g>`;
+
+  // phone in touch mode + sound
+  g += `<g transform="translate(1368 96) rotate(5)" filter="url(#soft-sm)">${phone()}</g>`;
+  g += waves(1352, 188, "#17171C", true, 3);
+  g += heartShape(1290, 92, 1.25, "#FF8A65");
+  g += heartShape(1252, 62, 0.8, "#FFB199");
+
+  s += `<g transform="translate(-70 108) scale(0.8)">${g}</g>`;
+  document.getElementById("art").innerHTML = s;
+</script>
+</body></html>

@@ -1,0 +1,8 @@
+web/node_modules
+web/dist
+backend/data
+**/__pycache__
+**/.pytest_cache
+qa/artifacts
+*.zip
+backend/sample_cache

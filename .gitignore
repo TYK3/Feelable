@@ -1,0 +1,12 @@
+node_modules/
+web/dist/
+backend/data/
+__pycache__/
+*.pyc
+.pytest_cache/
+qa/artifacts/
+.deps_ok
+backend/sample_cache/
+.claude/
+web/tsconfig.tsbuildinfo
+qa/retest-local/

@@ -1,0 +1,17 @@
+# Versions pinned to the set the full test suite passed with (Oct 2026).
+fastapi==0.142.4
+uvicorn==0.53.0
+python-multipart==0.0.32
+httpx==0.28.1
+numpy==2.5.3
+opencv-python-headless==5.0.0.93
+opencv-python==5.0.0.93
+pillow==12.3.0
+pillow-heif==1.8.0
+trimesh==5.1.1
+rapidocr-onnxruntime==1.2.3
+rapidfuzz==3.9.7
+onnxruntime==1.29.0
+shapely==2.2.0
+mapbox_earcut==2.1.0
+pytest>=8.0

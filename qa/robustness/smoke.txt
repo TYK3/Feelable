@@ -1,0 +1,27 @@
+# 25-image smoke set: one or two per category, biased towards known failure modes.
+# python qa/robustness/run.py --repo . --out qa/robustness/runs/smoke --only smoke
+tb-animal-cell          # labelled textbook: label fragments as names
+tb-plant-cell           # labelled textbook that works (regression guard)
+tb-phloem               # pale fills vanish, 'background' parts
+ul-apple-emoji          # clip art that works (regression guard)
+ul-horse-silhouette     # solid black silhouette -> giant raised slab
+ch-mpl-bars             # bars vanish
+ch-pop-pyramid          # half the chart vanishes
+mp-d3-albers-usa        # solid fill map
+fc-d2l-mlloop           # flowchart: box text should become names
+fc-mixed-circuit        # circuit branch lost
+ob-orange               # single object photo -> speckle
+ap-chelsea-cat          # animal photo -> speckle
+sc-volcano              # texture-heavy scene
+tx-phototest            # printed text page raised as print
+hw-htr-line             # handwriting raised as print
+lg-android              # flat logo -> blank tactile
+lg-github-svg           # solid black icon
+wf-noise                # noise -> 54% of page raised
+wf-strip-tall           # extreme aspect: 37 s, 5.3 GB
+wf-tiny-png             # 4x4 px upscaled into hallucinated shapes
+wf-zero-bytes           # error path message
+fx-user-mouse-photo     # the real failing user photo (brand OCR name, background parts)
+fx-four-shapes          # named-parts regression (expects 4)
+pv-ch-demand-curve-rot180  # upside-down phone photo not rotated
+pv-tb-plant-cell-blur   # blurred labels -> OCR garbage incl. profanity-like token

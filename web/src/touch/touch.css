@@ -1,0 +1,679 @@
+/* Touch mode styles. Scoped under .ts-touch; token values mirror CONTRACT §5 plus a dark surround. */
+.ts-touch {
+  --tt-surround: #0e0e12;
+  --tt-panel: #1b1b22;
+  --tt-panel-2: #26262f;
+  --tt-text: #ffffff;
+  --tt-dim: #b9b7c2;
+  --tt-banana: #ffd23f;
+  --tt-banana-ink: #3a2e00;
+  --tt-ink: #17171c;
+  --tt-focus: #2f6fe4;
+  --tt-err: #ff8a80;
+
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--tt-surround);
+  color: var(--tt-text);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.ts-touch *,
+.ts-touch *::before,
+.ts-touch *::after {
+  box-sizing: border-box;
+}
+.ts-touch h1,
+.ts-touch h2,
+.ts-touch p {
+  margin: 0;
+}
+.ts-touch :focus-visible {
+  outline: 4px solid var(--tt-focus);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 7px #ffffff;
+}
+
+.ts-t-sr {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------- buttons */
+.ts-t-btn {
+  appearance: none;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  min-height: 56px;
+  min-width: 56px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  background: transparent;
+  color: var(--tt-text);
+  cursor: pointer;
+  touch-action: manipulation;
+  text-align: center;
+  line-height: 1.15;
+}
+.ts-t-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.ts-t-btn-primary {
+  background: var(--tt-banana);
+  border-color: var(--tt-banana);
+  color: var(--tt-ink);
+}
+.ts-t-btn-primary:hover {
+  background: #ffdc66;
+}
+.ts-t-btn-small {
+  min-height: 44px;
+  font-size: 17px;
+  padding: 8px 16px;
+}
+.ts-t-btn-big {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  min-height: 76px;
+  border-radius: 18px;
+  font-size: 23px;
+  text-align: left;
+  background: var(--tt-panel-2);
+  border-color: #4a4a57;
+}
+.ts-t-btn-big:hover {
+  background: #31313c;
+  border-color: #ffffff;
+}
+.ts-t-btn-sub {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--tt-dim);
+  margin-top: 4px;
+}
+.ts-t-btn-exit {
+  width: 100%;
+  margin-top: 18px;
+  border-color: var(--tt-err);
+  color: var(--tt-err);
+}
+
+/* ---------------------------------------------------------------- loading / error */
+.ts-t-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  text-align: center;
+  padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right));
+}
+.ts-t-big {
+  font-size: clamp(30px, 7vw, 48px);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+.ts-t-lead {
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--tt-dim);
+  max-width: 30ch;
+  margin-top: 12px;
+}
+.ts-t-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ts-t-spinner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 8px solid #2e2e38;
+  border-top-color: var(--tt-banana);
+  animation: ts-t-spin 0.9s linear infinite;
+}
+@keyframes ts-t-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------------------------------------------------------- start */
+.ts-t-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  text-align: center;
+  cursor: pointer;
+  padding-left: max(20px, env(safe-area-inset-left));
+  padding-right: max(20px, env(safe-area-inset-right));
+}
+.ts-t-brand {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tt-banana);
+}
+.ts-t-start-title {
+  font-size: clamp(34px, 9vw, 64px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  max-width: 16ch;
+  overflow-wrap: anywhere;
+}
+.ts-t-start-btn {
+  appearance: none;
+  font: inherit;
+  font-size: clamp(30px, 8vw, 52px);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--tt-ink);
+  background: var(--tt-banana);
+  border: none;
+  border-radius: 32px;
+  padding: 34px 30px;
+  width: min(100%, 640px);
+  min-height: 160px;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 8px 0 #b38f12;
+}
+.ts-t-start-intro {
+  font-size: clamp(19px, 4.6vw, 24px);
+  line-height: 1.45;
+  color: #e9e7ef;
+  max-width: 30ch;
+}
+.ts-t-start-list {
+  margin-top: 6px;
+  font-size: 18px;
+}
+.ts-t-start-title {
+  font-family: "Bricolage Grotesque Variable", inherit;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+.ts-t-caps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 34em;
+}
+.ts-t-caps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  font-size: 15px;
+  font-weight: 600;
+  color: #e9e7ef;
+}
+.ts-t-caps li::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #5BD08A;
+}
+.ts-t-caps li.is-off::before {
+  background: #8a8794;
+}
+.ts-t-start-net {
+  font-size: 14px;
+  color: #b9b6c4;
+  max-width: 32ch;
+}
+.ts-t-update {
+  pointer-events: auto;
+  z-index: 5;
+  border-color: #5BD08A;
+}
+
+/* ---------------------------------------------------------------- explore */
+.ts-t-explore-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* never let long caption text widen the page */
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.ts-t-explore-shell > * {
+  min-width: 0;
+}
+.ts-t-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 6px 16px;
+  min-height: 72px;
+}
+.ts-t-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 22px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ts-t-top-btn {
+  padding: 10px 20px;
+}
+.ts-t-stage {
+  position: relative;
+  min-height: 0;
+}
+.ts-t-explore {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: crosshair;
+  outline: none;
+}
+.ts-t-explore:focus-visible {
+  outline: 4px solid var(--tt-focus);
+  outline-offset: -4px;
+  box-shadow: none;
+}
+.ts-t-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.ts-t-notice {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 18px;
+  border-radius: 16px;
+  background: var(--tt-panel-2);
+  border: 2px solid var(--tt-banana);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  pointer-events: none; /* touches pass through to the diagram */
+}
+.ts-t-notice .ts-t-btn {
+  pointer-events: auto;
+}
+.ts-t-notice span {
+  flex: 1;
+}
+
+.ts-t-caption {
+  /* Fixed height: a long description must never resize the diagram under the finger. */
+  height: 148px;
+  overflow: hidden;
+  padding: 14px 20px 16px;
+  background: var(--tt-panel);
+  border-top: 3px solid #33333d;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.ts-t-caption-main {
+  font-size: clamp(26px, 6.4vw, 36px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ts-t-caption-sub {
+  margin-top: 6px;
+  font-size: clamp(17px, 4.4vw, 21px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--tt-dim);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.ts-t-caption.is-on {
+  background: var(--tt-banana);
+  border-top-color: var(--tt-banana);
+  color: var(--tt-ink);
+}
+.ts-t-caption.is-on .ts-t-caption-sub {
+  color: var(--tt-banana-ink);
+}
+.ts-t-caption.is-finding:not(.is-on) {
+  border-top-color: var(--tt-banana);
+}
+
+/* ---------------------------------------------------------------- sheets (menu, list) */
+.ts-t-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgba(8, 8, 10, 0.78);
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right))
+    max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+  overflow-y: auto;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.ts-t-scrim-solid {
+  background: var(--tt-surround);
+  justify-content: center;
+}
+.ts-t-sheet {
+  width: min(100%, 520px);
+  background: var(--tt-panel);
+  border: 2px solid #3a3a45;
+  border-radius: 24px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
+}
+.ts-t-sheet-full {
+  width: min(100%, 720px);
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 8px 6px 24px;
+}
+.ts-t-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.ts-t-sheet-head h2 {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  outline: none;
+}
+.ts-t-menu-grid {
+  display: grid;
+  gap: 12px;
+}
+.ts-t-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.ts-t-part {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.ts-t-part-name {
+  font-size: 26px;
+}
+.ts-t-part.is-selected {
+  background: var(--tt-banana);
+  border-color: var(--tt-banana);
+  color: var(--tt-ink);
+}
+.ts-t-key {
+  flex: none;
+  min-width: 48px;
+  height: 48px;
+  padding: 0 10px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 900;
+  background: #ffffff;
+  color: var(--tt-ink);
+}
+.ts-t-desc {
+  font-size: 21px;
+  line-height: 1.45;
+  font-weight: 500;
+  color: #f2f0f7;
+  padding: 10px 6px 4px;
+}
+.ts-t-empty {
+  font-size: 22px;
+  color: var(--tt-dim);
+}
+
+.ts-t-setting {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--tt-panel-2);
+  display: grid;
+  gap: 10px;
+}
+.ts-t-setting label {
+  font-size: 21px;
+  font-weight: 700;
+}
+.ts-t-setting-title {
+  font-size: 21px;
+  font-weight: 700;
+}
+.ts-t-setting .ts-t-setting-sub {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--tt-dim);
+}
+/* UX10: the native select was white-on-white in some browsers inside the dark menu. */
+.ts-t-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 48px;
+  font: inherit;
+  font-size: 17px;
+  color: var(--tt-text);
+  background: var(--tt-panel)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffd23f' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")
+    no-repeat right 14px center;
+  border: 2px solid var(--tt-dim);
+  border-radius: 12px;
+  padding: 0 42px 0 14px;
+  color-scheme: dark;
+}
+.ts-t-select option {
+  color: var(--tt-text);
+  background: var(--tt-panel);
+}
+.ts-t-select:focus-visible {
+  outline: 4px solid var(--tt-focus);
+  outline-offset: 2px;
+}
+.ts-t-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--tt-panel);
+}
+.ts-t-seg-btn {
+  appearance: none;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  min-height: 48px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--tt-text);
+  background: transparent;
+  cursor: pointer;
+}
+.ts-t-seg-btn.is-on {
+  background: var(--tt-banana);
+  color: var(--tt-banana-ink);
+}
+.ts-t-seg-btn:focus-visible {
+  outline: 4px solid var(--tt-focus);
+  outline-offset: 2px;
+}
+.ts-t-setting input[type="range"] {
+  width: 100%;
+  height: 44px;
+  accent-color: var(--tt-banana);
+  touch-action: manipulation;
+}
+.ts-t-toggle {
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 72px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  border: 2px solid transparent;
+  background: var(--tt-panel-2);
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.ts-t-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ts-t-toggle-label {
+  display: block;
+  font-size: 21px;
+  font-weight: 700;
+}
+.ts-t-switch {
+  flex: none;
+  width: 64px;
+  height: 36px;
+  border-radius: 999px;
+  background: #4a4a57;
+  position: relative;
+  transition: background-color 160ms ease;
+}
+.ts-t-knob {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 160ms ease;
+}
+.ts-t-toggle[aria-checked="true"] .ts-t-switch {
+  background: var(--tt-banana);
+}
+.ts-t-toggle[aria-checked="true"] .ts-t-knob {
+  transform: translateX(28px);
+  background: var(--tt-ink);
+}
+
+@media (min-width: 900px) {
+  .ts-t-scrim:not(.ts-t-scrim-solid) {
+    padding-top: 84px;
+    padding-right: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-touch *,
+  .ts-touch *::before,
+  .ts-touch *::after {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Short landscape screens (phones on their side): controls and caption move to a side column
+   so the diagram gets the full height. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .ts-t-explore-shell {
+    grid-template-columns: minmax(0, 1fr) min(300px, 36vw);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "stage top" "stage cap";
+  }
+  .ts-t-stage {
+    grid-area: stage;
+  }
+  .ts-t-top {
+    grid-area: top;
+    flex-wrap: wrap;
+    padding: 10px 12px 6px;
+    min-height: 0;
+  }
+  .ts-t-title {
+    flex-basis: 100%;
+    font-size: 19px;
+  }
+  .ts-t-top-btn {
+    flex: 1;
+  }
+  .ts-t-caption {
+    grid-area: cap;
+    height: auto;
+    min-height: 0;
+    border-top: none;
+    border-left: 3px solid #33333d;
+    border-radius: 18px 0 0 0;
+  }
+  .ts-t-caption.is-on {
+    border-left-color: var(--tt-banana);
+  }
+  .ts-t-caption-main {
+    font-size: 28px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .ts-t-caption-sub {
+    font-size: 18px;
+    -webkit-line-clamp: 8;
+  }
+}
