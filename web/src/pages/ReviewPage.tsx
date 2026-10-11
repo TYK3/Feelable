@@ -397,7 +397,7 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
         <main className="page gone" id="main" tabIndex={-1}>
           <div className="gone__card">
             <h1 className="gone__title">This lesson didn't load.</h1>
-            <p className="gone__msg">{loadError.message} Check your connection, then try again.</p>
+            <p className="gone__msg">{loadError.message} Try again in a moment.</p>
             <Button variant="primary" size="lg" icon={<IconRefresh size={20} />} onClick={() => setReloadKey((k) => k + 1)}>
               Try again
             </Button>

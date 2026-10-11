@@ -236,8 +236,20 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
     if kind in _PHOTO_KINDS:
         issues.append({"code": "photo", "severity": "info",
                        "message": "Simplified from a photo — check the outline matches what you want to teach."})
+    # F02: characters the Braille code cannot represent are a publish blocker, never a silent omission.
+    from engine import braille as _braille
+    for p in inc:
+        bad = _braille.unsupported_chars(str(p.name))
+        if bad:
+            shown = " ".join(sorted(bad)[:8])
+            issues.append({"code": "braille_unsupported", "severity": "block", "action": "rename",
+                           "part_id": str(p.id),
+                           "message": f"Feelable cannot currently translate {shown} in “{p.name}”. "
+                                      "Rename it using plain letters and numbers."})
     blocked = any(i["severity"] == "block" for i in issues)
-    status = "blocked" if blocked else ("ready" if approved else "needs_review")
+    open_warnings = sum(1 for i in issues if i["severity"] == "warn")
+    # F04: approval records the teacher's decision; "Ready to teach" needs no open checks as well.
+    status = "blocked" if blocked else ("ready" if approved and open_warnings == 0 else "needs_review")
     return {
         "status": status,
         "approved": bool(approved),
@@ -347,7 +359,10 @@ def _save(job_dir: str, state: dict, result: dict) -> None:
     # TS-06 / UX01: students only ever see the last teacher-approved snapshot. Its JSON *and all
     # its media* are frozen together in an immutable bundle (pub/v<N>/), so later drafts (which
     # rewrite tactile.png etc. in the job folder) can't change what students touch.
-    if ((result.get("readiness") or {}).get("status")) == "ready":
+    # F04: a teacher's approval publishes the reviewed snapshot even while checks remain open
+    # (status "needs_review" then says so to students); blocked lessons are never published.
+    rd = result.get("readiness") or {}
+    if rd.get("approved") and rd.get("status") != "blocked":
         _publish_bundle(job_dir, result)
 
 

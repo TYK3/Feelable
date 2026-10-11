@@ -46,6 +46,8 @@ function errorFor(err: unknown, heic = false): ProcError {
       return { code, recovery: "retry", message: "The server is busy making other diagrams. Retry in a moment — your photo is still here." };
     case "network":
       return { code, recovery: "retry", message: "We couldn't reach the Feelable server. Check your connection, then retry." };
+    case "unavailable":
+      return { code, recovery: "retry", message: "The service is temporarily unavailable. Your diagram may still be processing. Try again." };
     case "server":
       return { code, recovery: "retry", message: "The server hit a problem while making this diagram. Retry, or try a clearer photo." };
     default:
@@ -490,8 +492,8 @@ export default function HomePage() {
 
         <footer className="footer">
           <p>
-            Made for Banana Hacks 2026. Feelable reads each picture with on-device OCR and computer vision, plus Gemini's
-            image understanding when AI is on.
+            Made for Banana Hacks 2026. Feelable processes your image on its server. Optional automatic descriptions send a
+            smaller image and detected labels to Google Gemini.
             Lessons stay on the free demo server for {health?.retention_hours ?? 24} hours.
           </p>
         </footer>

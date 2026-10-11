@@ -119,7 +119,7 @@ export default function TouchMode(props: { jobId: string; onExit?: () => void })
         else if (err instanceof ApiError && err.status === 404)
           setPhase({ kind: "error", heading: "Lesson no longer available", message: "This lesson is no longer on the demo server. Ask your teacher for a new link.", retry: false });
         else
-          setPhase({ kind: "error", heading: "We couldn't open this lesson", message: "Check your connection, then try again or go home.", retry: true });
+          setPhase({ kind: "error", heading: "We couldn't open this lesson", message: "The service may be busy or temporarily unavailable. Try again, or go home.", retry: true });
       });
     return () => {
       alive = false;

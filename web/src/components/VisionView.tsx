@@ -69,7 +69,7 @@ export function VisionView({
 
   const steps: { k: Layer; n: number; title: string; detail: string }[] = [
     { k: "read", n: 1, title: `Read ${read.length} ${read.length === 1 ? "label" : "labels"}`,
-      detail: repaired.length ? `${repaired.length} blurry ${repaired.length === 1 ? "word" : "words"} re-read up close and repaired` : "Text found and read with on-device OCR" },
+      detail: repaired.length ? `${repaired.length} blurry ${repaired.length === 1 ? "word" : "words"} re-read up close and repaired` : "Text found and read on the Feelable server" },
     { k: "followed", n: 2, title: `Followed ${st.pointers ?? v.leaders.length} pointer ${(st.pointers ?? v.leaders.length) === 1 ? "line" : "lines"}`,
       detail: "From each label to the thing it names" },
     { k: "traced", n: 3, title: `Traced ${traced.length} ${traced.length === 1 ? "shape" : "shapes"}`,

@@ -249,7 +249,11 @@ def test_readiness_rules(fake_engine):
     assert "Gemini rate limit" in rd["issues"][3]["message"] and rd["issues"][4]["severity"] == "info"
     assert rd["status"] == "needs_review" and rd["geometry"] == {"passed": 1, "total": 2}
     assert rd["unmatched_labels"] == ["vacuole"]
-    assert pipeline.build_readiness(a, checks, True, None)["status"] == "ready"
+    # F04: approval with open checks is not "ready to teach"; only a clean approved lesson is.
+    assert pipeline.build_readiness(a, checks, True, None)["status"] == "needs_review"
+    clean = fake_analysis()
+    clean.input_kind = "photo_object"
+    assert pipeline.build_readiness(clean, [{"rule": "ok", "passed": True, "detail": ""}], True, None)["status"] == "ready"
 
     a = fake_analysis()
     a.parts = a.parts * 3
