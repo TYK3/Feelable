@@ -3355,6 +3355,10 @@ def _refine_grounding(work: np.ndarray, parts: list[Part], labels: list[Label], 
         grounding.recover_siblings(work, parts, plural)
     except Exception:  # pragma: no cover - never lose the analysis over a refinement
         pass
+    try:
+        grounding.tidy_slivers(parts, N, plural)
+    except Exception:  # pragma: no cover
+        pass
     if left_out and any(not p.include for p in parts):
         dropped.append(f"{left_out} unlabelled {'piece' if left_out == 1 else 'pieces'} separated from named parts "
                        "(switched off; switch on in Fix parts if needed)")
@@ -3387,7 +3391,7 @@ def _refine_grounding(work: np.ndarray, parts: list[Part], labels: list[Label], 
         if _BOUNDARY_RE.search(nm):
             ttype = "boundary"
             try:
-                traced = grounding.trace_boundary(parts, x, y, reach=2 * r, min_len=6 * r)
+                traced = grounding.trace_boundary(parts, x, y, reach=3 * r, min_len=6 * r)
             except Exception:  # pragma: no cover
                 traced = None
             if traced is not None:
@@ -3416,7 +3420,7 @@ def _refine_grounding(work: np.ndarray, parts: list[Part], labels: list[Label], 
         x, y = tips[p.id][0]
         others = [q for q in parts if q is not p]
         try:
-            traced = grounding.trace_boundary(others, x, y, reach=2 * r, min_len=6 * r)
+            traced = grounding.trace_boundary(others, x, y, reach=3 * r, min_len=6 * r)
         except Exception:  # pragma: no cover
             traced = None
         p.target_type = "boundary"

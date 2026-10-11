@@ -34,7 +34,7 @@ export interface ReadinessIssue {
   severity: "block" | "warn" | "info";
   message: string;
   part_id?: string;
-  action?: "rename" | "include" | "split" | "merge" | "retake" | "reduce" | "draw" | "shorten" | "retitle" | "outline" | "retry";
+  action?: "rename" | "include" | "split" | "merge" | "retake" | "reduce" | "draw" | "shorten" | "retitle" | "outline" | "retry" | "trace";
   /** provider / engine diagnostics, shown collapsed (never the main message) */
   detail?: string;
   /** UX07: the label text of a possibly-missing part (action "draw"). */
@@ -121,6 +121,7 @@ export interface JobEdit {
   merge?: string[];              // v2: merge parts (first id kept)
   approved?: boolean;            // v2: teacher approval
   base_version?: number;         // v2: 409 on conflict
+  trace_boundary?: string;      // precision audit: trace a suture along the shared border
   add_part?: {
     name: string;
     polygon: [number, number][];
@@ -141,6 +142,8 @@ export interface Sample {
   kind: string;
   credit?: string;   // e.g. "OpenStax Anatomy & Physiology, CC BY 4.0"
   group?: "simple" | "complex";
+  /** precision audit: one of the ten featured, reviewed lessons (else extended library) */
+  featured?: boolean;
   objective?: string;
   /** reviewed corrections replayed when the example was prepared (0 = automatic result as is) */
   corrections?: number;

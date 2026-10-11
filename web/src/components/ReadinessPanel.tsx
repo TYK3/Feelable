@@ -16,6 +16,7 @@ const ACTION_LABEL: Record<string, string> = {
   shorten: "Edit title",
   retitle: "Edit title",
   outline: "Suggest outline",
+  trace: "Trace the border",
   retry: "Try again",
 };
 

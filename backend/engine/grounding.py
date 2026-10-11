@@ -806,7 +806,7 @@ def trace_boundary(parts: list[Part], x: int, y: int, reach: int, min_len: int) 
     near = [p for p in regs if p.mask[y0:y1, x0:x1].any()]
     if len(near) < 2:
         return None
-    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))   # bridges a drawn suture line
     best = None
     for i in range(len(near)):
         for j in range(i + 1, len(near)):
@@ -954,3 +954,38 @@ def recover_siblings(img: np.ndarray, parts: list[Part], is_plural) -> int:
         merged += 1
     parts[:] = [x for x in parts if x.mask is not None and x.mask.any()]
     return merged
+
+
+def tidy_slivers(parts: list[Part], N: int, is_plural=None) -> int:
+    """Hairline slivers a colour cluster leaves along other parts' borders (a parietal bone in 18
+    pieces) are not structure: drop pieces that vanish under a 5 px opening or are specks, and
+    hairline tails hanging off the body. Plural / repeated names keep their small pieces."""
+    k5 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    changed = 0
+    for p in parts:
+        if (p.mask is None or getattr(p, "target_type", "region") != "region"
+                or p.match_method in ("teacher", "ai") or not p.mask.any()):
+            continue
+        if is_plural is not None and is_plural(p.label_text or p.name):
+            continue
+        m = (p.mask > 0).astype(np.uint8)
+        body = cv2.morphologyEx(m, cv2.MORPH_OPEN, k5)
+        if body.sum() < 0.5 * m.sum():
+            continue                                  # a thin structure by nature: leave it alone
+        n, cc, st, _ = cv2.connectedComponentsWithStats(m, connectivity=8)
+        keep = np.zeros(n, bool)
+        for c in range(1, n):
+            comp = cc == c
+            if body[comp].sum() >= 20 and st[c, cv2.CC_STAT_AREA] >= max(60, int(0.0003 * N)):
+                keep[c] = True
+        if not keep.any():
+            continue
+        newm = keep[cc]
+        # hairline tails: pixels the opening removed that lie more than 4 px from the body
+        far = cv2.distanceTransform((body == 0).astype(np.uint8), cv2.DIST_L2, 3) > 4
+        newm &= ~((body == 0) & far)
+        if newm.sum() < m.sum():
+            _set_mask(p, (newm * 255).astype(np.uint8))
+            p.count = max(1, cv2.connectedComponents(newm.astype(np.uint8), connectivity=8)[0] - 1)
+            changed += 1
+    return changed

@@ -1,6 +1,6 @@
-// Prepared examples (handover: exactly 15 — ten to start with, five complex systems). Each card
-// says what a student learns from it and, honestly, that it was prepared in advance: it opens
-// instantly, unlike a fresh photo, and complex ones were checked and corrected in Feelable.
+// Prepared examples (precision audit): ten FEATURED lessons - five basic, five complex, each from a
+// different subject - with a Basic / Complex filter, then an extended library of earlier examples
+// that were not re-reviewed after the latest engine changes (said plainly on each card).
 import { useState } from "react";
 import type { Sample } from "../types";
 import { IconArrowRight } from "./Icons";
@@ -13,7 +13,7 @@ const KIND_LABEL: Record<string, string> = {
   photo: "Photo",
   anatomy: "Dense anatomy",
 };
-const START_WITH = 4;
+type Filter = "all" | "simple" | "complex";
 
 function Card({ s, onPick }: { s: Sample; onPick: (s: Sample) => void }) {
   return (
@@ -27,7 +27,11 @@ function Card({ s, onPick }: { s: Sample; onPick: (s: Sample) => void }) {
           <span className="sample__kind">{KIND_LABEL[s.kind] ?? s.kind}</span>
           {s.objective && <span className="sample__obj">{s.objective}</span>}
           <span className="sample__prep">
-            {s.corrections ? "Prepared example · checked and corrected in Feelable" : "Prepared example"}
+            {s.featured === false
+              ? "Earlier example · outlines not re-checked"
+              : s.corrections
+                ? "Prepared lesson · reviewed and corrected in Feelable"
+                : "Prepared lesson · reviewed"}
           </span>
           {s.credit && <span className="sample__credit">{s.credit}</span>}
           <span className="sample__go" aria-hidden="true"><IconArrowRight size={18} /></span>
@@ -48,6 +52,7 @@ export function SampleGallery({
   onPick: (s: Sample) => void;
 }) {
   const [all, setAll] = useState(false);
+  const [filter, setFilter] = useState<Filter>("all");
   if (failed) {
     return <p className="empty-note">Examples are unavailable right now. Upload your own diagram above.</p>;
   }
@@ -66,34 +71,49 @@ export function SampleGallery({
   if (samples.length === 0) {
     return <p className="empty-note">No examples on this server yet. Upload your own diagram above.</p>;
   }
-  const simple = samples.filter((s) => s.group !== "complex");
-  const complex = samples.filter((s) => s.group === "complex");
-  const shownSimple = all ? simple : simple.slice(0, START_WITH);
+  const anyFeatured = samples.some((s) => s.featured);
+  const featured = anyFeatured ? samples.filter((s) => s.featured) : samples;
+  const extended = anyFeatured ? samples.filter((s) => !s.featured) : [];
+  const shown = featured.filter((s) => filter === "all" || (filter === "complex" ? s.group === "complex" : s.group !== "complex"));
+  const nBasic = featured.filter((s) => s.group !== "complex").length;
+  const nComplex = featured.length - nBasic;
   return (
     <div className="gallery">
       <p className="gallery__note">
-        Examples open instantly because they were prepared in advance. Your own photos take longer to read.
+        Lessons open instantly because they were prepared and reviewed in advance. Your own photos take longer to
+        read, and you check what Feelable found.
       </p>
-      <h3 className="gallery__h" id="g-simple">Start with a simple diagram</h3>
-      <ul className="samples" aria-labelledby="g-simple">
-        {shownSimple.map((s) => (
+      <div className="segmented gallery__filter" role="group" aria-label="Show lessons">
+        {(
+          [
+            ["all", `All ${featured.length}`],
+            ["simple", `Basic ${nBasic}`],
+            ["complex", `Complex ${nComplex}`],
+          ] as [Filter, string][]
+        ).map(([k, label]) => (
+          <button key={k} type="button" className={`segmented__opt${filter === k ? " is-on" : ""}`} aria-pressed={filter === k} onClick={() => setFilter(k)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <ul className="samples" aria-label="Featured lessons">
+        {shown.map((s) => (
           <Card key={s.id} s={s} onPick={onPick} />
         ))}
       </ul>
-      {complex.length > 0 && (
+      {extended.length > 0 && (
         <>
-          <h3 className="gallery__h" id="g-complex">Explore {complex.length === 5 ? "five" : complex.length} complex systems</h3>
-          <ul className="samples samples--complex" aria-labelledby="g-complex">
-            {complex.map((s) => (
-              <Card key={s.id} s={s} onPick={onPick} />
-            ))}
-          </ul>
+          <button type="button" className="gallery__more" aria-expanded={all} onClick={() => setAll((v) => !v)}>
+            {all ? "Hide the extended library" : `Extended library: ${extended.length} earlier examples`}
+          </button>
+          {all && (
+            <ul className="samples" aria-label="Extended library">
+              {extended.map((s) => (
+                <Card key={s.id} s={s} onPick={onPick} />
+              ))}
+            </ul>
+          )}
         </>
-      )}
-      {simple.length > START_WITH && (
-        <button type="button" className="gallery__more" aria-expanded={all} onClick={() => setAll((v) => !v)}>
-          {all ? "Show fewer examples" : `Show all ${samples.length} examples`}
-        </button>
       )}
     </div>
   );

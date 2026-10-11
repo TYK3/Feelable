@@ -1,89 +1,141 @@
 [
   {
-    "id": "plant-cell",
-    "title": "Plant cell",
-    "file": "plant-cell.png",
+    "id": "flower",
+    "title": "Parts of a flower",
+    "file": "flower.png",
     "kind": "colour",
     "expected_parts": [
-      "cell wall",
-      "cytoplasm",
-      "vacuole",
-      "nucleus",
-      "chloroplast",
-      "mitochondrion"
+      "petal",
+      "sepal",
+      "stamen",
+      "carpel",
+      "stigma",
+      "stem",
+      "leaf"
     ],
-    "min_parts": 5,
+    "min_parts": 6,
     "photo": false,
-    "description": "Classic textbook plant cell with five chloroplasts, three mitochondria and ribosome clutter.",
-    "objective": "Find the organelles inside a plant cell.",
+    "description": "Side view of a flower with petals, sepals, stamens, carpel, stigma, stem and leaves.",
+    "objective": "Find the parts of a flower.",
     "group": "simple",
-    "review": [
-      {
-        "draw": "ribosomes",
-        "polygon": [
-          [
-            342,
-            342
-          ],
-          [
-            339,
-            348
-          ],
-          [
-            333,
-            351
-          ],
-          [
-            327,
-            348
-          ],
-          [
-            324,
-            342
-          ],
-          [
-            327,
-            336
-          ],
-          [
-            333,
-            333
-          ],
-          [
-            339,
-            336
-          ]
-        ],
-        "overlap": "cut"
-      },
-      {
-        "describe": "ribosomes",
-        "text": "Ribosomes: tiny dots scattered through the cytoplasm, too small to feel one by one. This spot marks where the label points."
-      }
-    ]
+    "review": [],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
   },
   {
-    "id": "heart",
-    "title": "Human heart",
-    "file": "heart.png",
+    "id": "earth-layers",
+    "title": "Layers of the Earth",
+    "file": "earth-layers.png",
     "kind": "colour",
     "expected_parts": [
-      "right atrium",
-      "left atrium",
-      "right ventricle",
-      "left ventricle",
-      "aorta",
-      "pulmonary artery",
-      "vena cava",
-      "septum",
-      "heart wall"
+      "crust",
+      "mantle",
+      "outer core",
+      "inner core"
+    ],
+    "min_parts": 3,
+    "photo": false,
+    "description": "Globe with a wedge cut away to show the crust, mantle, outer core and inner core.",
+    "objective": "Feel the Earth's layers from crust to core.",
+    "group": "simple",
+    "review": [],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
+  },
+  {
+    "id": "bar-chart",
+    "title": "Favourite fruit (bar chart)",
+    "file": "bar-chart.png",
+    "kind": "chart",
+    "expected_parts": [
+      "apple",
+      "banana",
+      "orange",
+      "grapes",
+      "kiwi"
+    ],
+    "min_parts": 4,
+    "photo": false,
+    "description": "Five coloured bars with axes, ticks, gridlines, value labels and axis titles.",
+    "objective": "Compare values by the height of bars.",
+    "group": "simple",
+    "review": [],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
+  },
+  {
+    "id": "water-cycle",
+    "title": "Water cycle",
+    "file": "water-cycle.png",
+    "kind": "colour",
+    "expected_parts": [
+      "sun",
+      "cloud",
+      "mountain",
+      "sea",
+      "evaporation",
+      "condensation",
+      "precipitation",
+      "collection"
     ],
     "min_parts": 8,
     "photo": false,
-    "description": "Front view of the heart with four colour-coded chambers, great vessels and septum.",
-    "objective": "Trace the four chambers and the great vessels.",
+    "description": "Landscape scene with sun, clouds, rain, mountain and sea, and curved process arrows.",
+    "objective": "Follow the water: evaporation from the sea, condensation into cloud, precipitation, collection.",
     "group": "simple",
-    "review": []
+    "review": [
+      {
+        "remove": "part 1"
+      }
+    ],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
+  },
+  {
+    "id": "shapes",
+    "title": "Four flat shapes",
+    "file": "shapes.png",
+    "kind": "colour",
+    "group": "simple",
+    "objective": "Find the circle, triangle, rectangle and square, and count their corners.",
+    "expected_parts": [
+      "circle",
+      "triangle",
+      "rectangle",
+      "square"
+    ],
+    "min_parts": 4,
+    "photo": false,
+    "credit": "Feelable original artwork, CC0",
+    "description": "A circle, a triangle, a rectangle and a square, each a different colour with its name beside it.",
+    "review": [
+      {
+        "title": "four flat shapes"
+      },
+      {
+        "describe": "circle",
+        "text": "Circle. A round shape with no corners and no straight sides."
+      },
+      {
+        "describe": "triangle",
+        "text": "Triangle. Three straight sides and three corners."
+      },
+      {
+        "describe": "rectangle",
+        "text": "Rectangle. Four straight sides and four square corners; two sides are longer than the others."
+      },
+      {
+        "describe": "square",
+        "text": "Square. Four equal straight sides and four square corners."
+      }
+    ],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
   },
   {
     "id": "skull-lateral",
@@ -108,7 +160,329 @@
     "description": "Dense textbook figure: 24 labels in small print, pointer lines crossing coloured bones.",
     "objective": "Tell the skull's bones apart and find the sutures and landmarks between them.",
     "group": "complex",
-    "review": []
+    "review": [
+      {
+        "remove": "part 24"
+      },
+      {
+        "remove": "ethmoid bone"
+      },
+      {
+        "outline": "ethmoid bone",
+        "inside": [
+          [
+            846,
+            369
+          ]
+        ],
+        "outside": [
+          [
+            871,
+            392
+          ],
+          [
+            811,
+            375
+          ],
+          [
+            939,
+            392
+          ],
+          [
+            860,
+            330
+          ]
+        ]
+      },
+      {
+        "outline": "lacrimal bone",
+        "inside": [
+          [
+            871,
+            390
+          ]
+        ],
+        "outside": [
+          [
+            846,
+            369
+          ],
+          [
+            882,
+            410
+          ],
+          [
+            939,
+            392
+          ]
+        ]
+      },
+      {
+        "outline": "greater wing of sphenoid bone",
+        "inside": [
+          [
+            739,
+            347
+          ],
+          [
+            755,
+            385
+          ]
+        ],
+        "lasso": [
+          [
+            700,
+            325
+          ],
+          [
+            760,
+            295
+          ],
+          [
+            805,
+            325
+          ],
+          [
+            805,
+            415
+          ],
+          [
+            760,
+            428
+          ],
+          [
+            700,
+            425
+          ]
+        ]
+      },
+      {
+        "outline": "occipital bone",
+        "into": "occipital bone",
+        "inside": [
+          [
+            240,
+            480
+          ],
+          [
+            300,
+            527
+          ]
+        ],
+        "outside": [
+          [
+            300,
+            250
+          ],
+          [
+            455,
+            515
+          ],
+          [
+            400,
+            450
+          ]
+        ]
+      },
+      {
+        "trace": "lambdoid suture"
+      }
+    ],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
+  },
+  {
+    "id": "animal-cell",
+    "title": "Animal cell",
+    "file": "animal-cell.png",
+    "kind": "colour",
+    "expected_parts": [
+      "cell membrane",
+      "cytoplasm",
+      "nucleus",
+      "nucleolus",
+      "mitochondrion",
+      "golgi body"
+    ],
+    "min_parts": 5,
+    "photo": false,
+    "description": "Irregular animal cell with nucleus, nucleolus, mitochondria, golgi body and ribosomes.",
+    "objective": "Find the parts of an animal cell.",
+    "group": "complex",
+    "review": [
+      {
+        "describe": "ribosomes",
+        "text": "Ribosomes: the many small dots scattered through the cytoplasm. Each raised dot marks one."
+      }
+    ],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
+  },
+  {
+    "id": "mixed-circuit",
+    "title": "Mixed circuit: series and parallel",
+    "file": "mixed-circuit.jpg",
+    "kind": "lineart",
+    "group": "complex",
+    "objective": "Find the battery and the three resistors, and which ones are side by side (parallel).",
+    "expected_parts": [
+      "battery",
+      "R1",
+      "R2",
+      "R3"
+    ],
+    "min_parts": 4,
+    "photo": false,
+    "credit": "OpenStax University Physics Volume 2, CC BY 4.0",
+    "description": "A 12.0 V battery with R1 in series and R2, R3 in parallel; values printed beside each resistor.",
+    "review": [
+      {
+        "title": "mixed circuit"
+      },
+      {
+        "rename": "resistor, 13.00 ohms",
+        "to": "R3, 13.00 ohms",
+        "description": "Resistor R3, 13.00 ohms. In parallel with R2: both sit side by side between the same two wires."
+      },
+      {
+        "describe": "R2, 6.00 ohms",
+        "text": "Resistor R2, 6.00 ohms. In parallel with R3: both sit side by side between the same two wires."
+      },
+      {
+        "describe": "R1, 1.00 ohms",
+        "text": "Resistor R1, 1.00 ohms. In series: all the current from the battery passes through it before splitting between R2 and R3."
+      },
+      {
+        "describe": "battery, 12.0 volts",
+        "text": "Battery, 12.0 volts. It pushes current through R1, then through R2 and R3 side by side, and back."
+      }
+    ],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
+  },
+  {
+    "id": "flowchart",
+    "title": "Plant watering robot",
+    "file": "flowchart.png",
+    "kind": "colour",
+    "group": "complex",
+    "objective": "Follow the steps from Start to Stop, and find the decision with two ways out.",
+    "expected_parts": [
+      "start",
+      "read soil sensor",
+      "soil dry",
+      "open valve",
+      "wait",
+      "close valve",
+      "log reading",
+      "stop"
+    ],
+    "min_parts": 8,
+    "photo": false,
+    "credit": "Feelable original artwork, CC0",
+    "description": "A flowchart: read the soil sensor, decide if the soil is dry, water or log, then stop. Arrows show the order.",
+    "review": [
+      {
+        "title": "plant watering robot"
+      }
+    ],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
+  },
+  {
+    "id": "transit-map",
+    "title": "Riverside bus routes",
+    "file": "transit-map.png",
+    "kind": "colour",
+    "group": "complex",
+    "objective": "Find each route and the stations where you can change buses.",
+    "expected_parts": [
+      "red route",
+      "blue route",
+      "green route",
+      "park",
+      "central",
+      "market",
+      "library",
+      "school",
+      "hospital",
+      "pool",
+      "depot",
+      "stadium",
+      "garden",
+      "river",
+      "museum"
+    ],
+    "min_parts": 15,
+    "photo": false,
+    "credit": "Feelable original artwork, CC0",
+    "description": "Three bus routes (red, dashed blue, green) through twelve stations; Park, Central and Market are interchanges.",
+    "review": [
+      {
+        "title": "riverside bus routes"
+      }
+    ],
+    "featured": true,
+    "annotation_version": "2026-10-11",
+    "reviewed": true
+  },
+  {
+    "id": "plant-cell",
+    "title": "Plant cell",
+    "file": "plant-cell.png",
+    "kind": "colour",
+    "expected_parts": [
+      "cell wall",
+      "cytoplasm",
+      "vacuole",
+      "nucleus",
+      "chloroplast",
+      "mitochondrion"
+    ],
+    "min_parts": 5,
+    "photo": false,
+    "description": "Classic textbook plant cell with five chloroplasts, three mitochondria and ribosome clutter.",
+    "objective": "Find the organelles inside a plant cell.",
+    "group": "simple",
+    "review": [
+      {
+        "describe": "ribosomes",
+        "text": "Ribosomes: the many small dots scattered through the cytoplasm. Each raised dot marks one."
+      }
+    ],
+    "featured": false,
+    "annotation_version": "2026-10-11",
+    "reviewed": false
+  },
+  {
+    "id": "heart",
+    "title": "Human heart",
+    "file": "heart.png",
+    "kind": "colour",
+    "expected_parts": [
+      "right atrium",
+      "left atrium",
+      "right ventricle",
+      "left ventricle",
+      "aorta",
+      "pulmonary artery",
+      "vena cava",
+      "septum",
+      "heart wall"
+    ],
+    "min_parts": 8,
+    "photo": false,
+    "description": "Front view of the heart with four colour-coded chambers, great vessels and septum.",
+    "objective": "Trace the four chambers and the great vessels.",
+    "group": "simple",
+    "review": [],
+    "featured": false,
+    "annotation_version": "2026-10-11",
+    "reviewed": false
   },
   {
     "id": "digestive-system",
@@ -446,31 +820,10 @@
         "describe": "jejunum",
         "text": "Jejunum: the middle part of the small intestine, in the upper loops after the duodenum. The picture does not draw where it ends and the ileum starts, so that boundary is approximate."
       }
-    ]
-  },
-  {
-    "id": "water-cycle",
-    "title": "Water cycle",
-    "file": "water-cycle.png",
-    "kind": "colour",
-    "expected_parts": [
-      "sun",
-      "cloud",
-      "mountain",
-      "sea"
     ],
-    "min_parts": 3,
-    "photo": false,
-    "description": "Landscape scene with sun, clouds, rain, mountain and sea, and curved process arrows.",
-    "arrow_labels": [
-      "evaporation",
-      "condensation",
-      "precipitation",
-      "collection"
-    ],
-    "objective": "Follow water around the cycle.",
-    "group": "simple",
-    "review": []
+    "featured": false,
+    "annotation_version": "2026-10-11",
+    "reviewed": false
   },
   {
     "id": "plant-cell-photo",
@@ -492,148 +845,13 @@
     "group": "simple",
     "review": [
       {
-        "draw": "ribosomes",
-        "polygon": [
-          [
-            281,
-            383
-          ],
-          [
-            278,
-            389
-          ],
-          [
-            272,
-            392
-          ],
-          [
-            266,
-            389
-          ],
-          [
-            263,
-            383
-          ],
-          [
-            266,
-            377
-          ],
-          [
-            272,
-            374
-          ],
-          [
-            278,
-            377
-          ]
-        ],
-        "overlap": "cut"
-      },
-      {
         "describe": "ribosomes",
-        "text": "Ribosomes: tiny dots scattered through the cytoplasm, too small to feel one by one. This spot marks where the label points."
+        "text": "Ribosomes: the many small dots scattered through the cytoplasm. Each raised dot marks one."
       }
-    ]
-  },
-  {
-    "id": "animal-cell",
-    "title": "Animal cell",
-    "file": "animal-cell.png",
-    "kind": "colour",
-    "expected_parts": [
-      "cell membrane",
-      "cytoplasm",
-      "nucleus",
-      "nucleolus",
-      "mitochondrion",
-      "golgi body"
     ],
-    "min_parts": 5,
-    "photo": false,
-    "description": "Irregular animal cell with nucleus, nucleolus, mitochondria, golgi body and ribosomes.",
-    "objective": "Find the parts of an animal cell.",
-    "group": "simple",
-    "review": [
-      {
-        "draw": "ribosomes",
-        "polygon": [
-          [
-            373,
-            478
-          ],
-          [
-            370,
-            484
-          ],
-          [
-            364,
-            487
-          ],
-          [
-            358,
-            484
-          ],
-          [
-            355,
-            478
-          ],
-          [
-            358,
-            472
-          ],
-          [
-            364,
-            469
-          ],
-          [
-            370,
-            472
-          ]
-        ],
-        "overlap": "cut"
-      },
-      {
-        "describe": "ribosomes",
-        "text": "Ribosomes: tiny dots scattered through the cytoplasm, too small to feel one by one. This spot marks where the label points."
-      }
-    ]
-  },
-  {
-    "id": "earth-layers",
-    "title": "Layers of the Earth",
-    "file": "earth-layers.png",
-    "kind": "colour",
-    "expected_parts": [
-      "crust",
-      "mantle",
-      "outer core",
-      "inner core"
-    ],
-    "min_parts": 3,
-    "photo": false,
-    "description": "Globe with a wedge cut away to show the crust, mantle, outer core and inner core.",
-    "objective": "Feel the Earth's layers from crust to core.",
-    "group": "simple",
-    "review": []
-  },
-  {
-    "id": "bar-chart",
-    "title": "Favourite fruit (bar chart)",
-    "file": "bar-chart.png",
-    "kind": "chart",
-    "expected_parts": [
-      "apple",
-      "banana",
-      "orange",
-      "grapes",
-      "kiwi"
-    ],
-    "min_parts": 4,
-    "photo": false,
-    "description": "Five coloured bars with axes, ticks, gridlines, value labels and axis titles.",
-    "objective": "Compare values by the height of bars.",
-    "group": "simple",
-    "review": []
+    "featured": false,
+    "annotation_version": "2026-10-11",
+    "reviewed": false
   },
   {
     "id": "circuit",
@@ -694,28 +912,10 @@
         "describe": "wire",
         "text": "Wire: the raised lines joining the battery, switch, bulb and resistor are wires. This spot marks one of them."
       }
-    ]
-  },
-  {
-    "id": "flower",
-    "title": "Parts of a flower",
-    "file": "flower.png",
-    "kind": "colour",
-    "expected_parts": [
-      "petal",
-      "sepal",
-      "stamen",
-      "carpel",
-      "stigma",
-      "stem",
-      "leaf"
     ],
-    "min_parts": 6,
-    "photo": false,
-    "description": "Side view of a flower with petals, sepals, stamens, carpel, stigma, stem and leaves.",
-    "objective": "Find the parts of a flower.",
-    "group": "simple",
-    "review": []
+    "featured": false,
+    "annotation_version": "2026-10-11",
+    "reviewed": false
   },
   {
     "id": "volcano",
@@ -735,7 +935,10 @@
     "description": "Cross-section of a volcano: magma chamber, vent, cone, lava flow, ash cloud and crust.",
     "objective": "Follow magma up through a volcano.",
     "group": "simple",
-    "review": []
+    "review": [],
+    "featured": false,
+    "annotation_version": "2026-10-11",
+    "reviewed": false
   },
   {
     "id": "heart-internal",
@@ -1531,7 +1734,10 @@
           ]
         ]
       }
-    ]
+    ],
+    "featured": false,
+    "annotation_version": "2026-10-11",
+    "reviewed": false
   },
   {
     "id": "human-organs-notebook",
@@ -2119,46 +2325,9 @@
         "describe": "large intestine",
         "text": "Large intestine: a frame around the small intestine, up one side, across, down the other side, then into the middle."
       }
-    ]
-  },
-  {
-    "id": "mixed-circuit",
-    "title": "Mixed circuit: series and parallel",
-    "file": "mixed-circuit.jpg",
-    "kind": "lineart",
-    "group": "complex",
-    "objective": "Find the battery and the three resistors, and which ones are side by side (parallel).",
-    "expected_parts": [
-      "battery",
-      "R1",
-      "R2",
-      "R3"
     ],
-    "min_parts": 4,
-    "photo": false,
-    "credit": "OpenStax University Physics Volume 2, CC BY 4.0",
-    "description": "A 12.0 V battery with R1 in series and R2, R3 in parallel; values printed beside each resistor.",
-    "review": [
-      {
-        "title": "mixed circuit"
-      },
-      {
-        "rename": "resistor, 13.00 ohms",
-        "to": "R3, 13.00 ohms",
-        "description": "Resistor R3, 13.00 ohms. In parallel with R2: both sit side by side between the same two wires."
-      },
-      {
-        "describe": "R2, 6.00 ohms",
-        "text": "Resistor R2, 6.00 ohms. In parallel with R3: both sit side by side between the same two wires."
-      },
-      {
-        "describe": "R1, 1.00 ohms",
-        "text": "Resistor R1, 1.00 ohms. In series: all the current from the battery passes through it before splitting between R2 and R3."
-      },
-      {
-        "describe": "battery, 12.0 volts",
-        "text": "Battery, 12.0 volts. It pushes current through R1, then through R2 and R3 side by side, and back."
-      }
-    ]
+    "featured": false,
+    "annotation_version": "2026-10-11",
+    "reviewed": false
   }
 ]

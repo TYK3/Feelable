@@ -382,6 +382,9 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
       case "retry":
         navigate("#/");
         return;
+      case "trace":
+        if (i.part_id) structuralPatch({ trace_boundary: i.part_id }, `Traced “${i.target ?? "the boundary"}” along the border. Check it on the tactile view.`);
+        return;
       case "retitle":
       case "shorten":
         setStep("fix");

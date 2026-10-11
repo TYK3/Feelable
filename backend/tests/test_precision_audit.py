@@ -115,7 +115,7 @@ def test_unresolved_extent_is_reported_not_counted_as_done():
     p = _part("m1", "coronal suture", m, target_type="boundary", extent="unresolved", match_method="landmark")
     rd = pipeline.build_readiness(_A("skull", [p]), [], False, None)
     it = [i for i in rd["issues"] if i["code"] == "extent_unresolved"]
-    assert it and "location found" in it[0]["message"] and it[0]["action"] == "outline"
+    assert it and "location found" in it[0]["message"] and it[0]["action"] == "trace"
 
 
 # ---------------------------------------------------------------- annotated end-to-end targets
@@ -148,3 +148,22 @@ def test_annotated_targets(name, min_valid, max_crit):
     if "route_membership" in g:                    # map: which stations each route serves
         ok, tot = (int(v) for v in g["route_membership"].split("/"))
         assert ok == tot, g
+
+
+def test_trace_boundary_edit_traces_an_unresolved_suture(tmp_path):
+    """The boundary tool: a suture marked as a spot becomes the shared border of its two bones."""
+    import pickle
+    from engine.types import Analysis
+    a_m = np.zeros((200, 300), np.uint8)
+    b_m = np.zeros((200, 300), np.uint8)
+    a_m[20:180, 20:150] = 255
+    b_m[20:180, 150:280] = 255
+    spot = np.zeros((200, 300), np.uint8)
+    cv2.circle(spot, (150, 60), 6, 255, -1)
+    parts = [_part("p1", "left bone", a_m), _part("p2", "right bone", b_m),
+             _part("m3", "coronal suture", spot, target_type="boundary", extent="unresolved", match_method="landmark")]
+    an = _A("skull", parts)
+    pipeline._trace_boundary_part(an, "m3")
+    s = parts[2]
+    ys, xs = np.nonzero(s.mask)
+    assert s.extent == "full" and s.target_type == "boundary" and ys.max() - ys.min() > 120

@@ -702,3 +702,4 @@ textarea.rv-title__input { display: block; resize: none; overflow: hidden; }
 .plist__search { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
 .plist__search input { flex: 1; min-height: 48px; font-size: 16px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--line-strong, #d9d2bf); }
 .plist__count { font-size: 14px; color: var(--ink-2, #4a4a55); white-space: nowrap; }
+.gallery__filter { margin: 0 0 14px; }

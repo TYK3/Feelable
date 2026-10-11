@@ -256,10 +256,11 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
             what = {"boundary": "its course is not traced yet", "path": "its course is not traced yet"}.get(
                 str(getattr(p, "target_type", "region")), "its outline is not traced yet")
             nm = str(p.name)
-            names.append({"code": "extent_unresolved", "severity": "warn", "action": "outline",
+            boundary = str(getattr(p, "target_type", "region")) == "boundary"
+            names.append({"code": "extent_unresolved", "severity": "warn", "action": "trace" if boundary else "outline",
                           "part_id": str(p.id), "target": nm, "target_bbox": [int(v) for v in p.bbox],
                           "message": f"{nm[:1].upper()}{nm[1:]}: location found, {what}. "
-                                     "Suggest an outline or draw it."})
+                                     + (" Trace the border, or draw it." if boundary else " Suggest an outline or draw it.")})
     unmatched = []
     for lb in (getattr(analysis, "unmatched_labels", None) or []):
         lb = str(lb)
@@ -707,6 +708,11 @@ def _validate_edit(edit: dict, analysis) -> tuple[str | None, list[dict], dict]:
         if bad:
             raise ValueError(f"Unknown part id: {bad[0][:20]}")
         ops["merge"] = m
+    if edit.get("trace_boundary") is not None:
+        tb = edit["trace_boundary"]
+        if not isinstance(tb, str) or tb not in part_ids:
+            raise ValueError("trace_boundary must be a part id")
+        ops["trace_boundary"] = tb
     if edit.get("add_part") is not None:
         ap = edit["add_part"]
         if not isinstance(ap, dict):
@@ -825,9 +831,37 @@ def apply_edit(analysis, edit: dict) -> bool:
     if ops.get("add_part"):
         _add_drawn_part(analysis, ops["add_part"])
         changed = True
+    if ops.get("trace_boundary"):
+        _trace_boundary_part(analysis, ops["trace_boundary"])
+        changed = True
     if analysis.parts and not any(p.include for p in analysis.parts):
         raise ValueError("Keep at least one part switched on")
     return changed
+
+
+def _trace_boundary_part(analysis, part_id: str) -> None:
+    """Boundary tool (precision audit): a suture / fissure marked only at its pointer tip is traced
+    along the border shared by the two outlined parts that meet there."""
+    import cv2
+    import numpy as np
+    from engine import grounding
+    p = next((q for q in analysis.parts if q.id == part_id), None)
+    if p is None or p.mask is None or not p.mask.any():
+        raise ValueError("That part no longer exists")
+    ys, xs = np.nonzero(p.mask > 0)
+    cx, cy = int(xs.mean()), int(ys.mean())
+    h, w = p.mask.shape[:2]
+    r = max(6, int(round(0.011 * float(np.hypot(h, w)))))
+    others = [q for q in analysis.parts if q is not p and q.include]
+    m = grounding.trace_boundary(others, cx, cy, reach=4 * r, min_len=6 * r)
+    if m is None:
+        raise ValueError(f"No two outlined parts meet near “{p.name[:40]}”. Outline the parts on either side "
+                         "first, or draw the boundary yourself.")
+    grounding._set_mask(p, m)
+    p.kind, p.target_type, p.extent = "line", "boundary", "full"
+    p.count = max(1, cv2.connectedComponents((m > 0).astype(np.uint8))[0] - 1)
+    if getattr(p, "match_method", "") == "landmark":
+        p.match_method = "teacher"
 
 
 def _add_drawn_part(analysis, spec: dict) -> None:
@@ -1082,7 +1116,7 @@ def quick_edit(job_dir: str, edit: dict) -> dict | None:
         _check_version(state, edit)
         analysis = state["analysis"]
         title, norm, ops = _validate_edit(edit, analysis)
-        if ops["split"] or ops["merge"] or ops.get("add_part"):
+        if ops["split"] or ops["merge"] or ops.get("add_part") or ops.get("trace_boundary"):
             return None
         by_id = {p.id: p for p in analysis.parts}
         if title is not None and title != analysis.title:

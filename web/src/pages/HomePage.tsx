@@ -488,7 +488,7 @@ export default function HomePage() {
 
         <section className="samples-sec" id="samples" aria-labelledby="samples-title">
           <h2 id="samples-title" className="h2">Examples</h2>
-          <p className="muted">15 diagrams to explore: start simple, then try five complex systems.</p>
+          <p className="muted">Ten reviewed lessons from different subjects: five basic, five complex.</p>
           <SampleGallery samples={samples} failed={samplesFailed} onPick={(s) => start({ kind: "sample", sample: s })} />
         </section>
 

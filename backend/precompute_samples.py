@@ -5,6 +5,7 @@ The API serves /api/jobs/from-sample/<id>?paper=a4 (and byte-identical uploads) 
 Cache entries never hold an edit token: every clone gets a fresh one from the API
 (pipeline.clone_job skips per-job files), and anything left from an older build is removed here.
 """
+import hashlib
 import json
 import os
 import shutil
@@ -75,6 +76,8 @@ def apply_review(out: Path, review: list) -> dict:
                     ap["into"] = pid(op["into"])
                     ap["mode"] = op.get("mode", "add")
                 r = pipeline.rerender_job(str(out), {"add_part": ap})
+            elif "trace" in op:
+                r = pipeline.rerender_job(str(out), {"trace_boundary": pid(op["trace"])})
             elif "title" in op:
                 r = pipeline.rerender_job(str(out), {"title": op["title"]})
             else:
@@ -102,5 +105,10 @@ for s in json.loads((ROOT / "samples" / "manifest.json").read_text()):
         r = apply_review(out, s["review"])
     for name in pipeline._NO_CLONE - {pipeline.STATE_FILE, pipeline.RESULT_FILE}:
         (out / name).unlink(missing_ok=True)
+    # the cache is valid only for this exact source image and annotation version (precision audit)
+    (out / "cache_key.json").write_text(json.dumps({
+        "source_sha256": hashlib.sha256((ROOT / "samples" / s["file"]).read_bytes()).hexdigest(),
+        "annotation_version": str(s.get("annotation_version", "")),
+        "corrections": len(s.get("review") or [])}))
     print(f"{s['id']:18s} {len(r['parts'])} parts  {r['readiness']['status']:12s} {time.time() - t:.1f}s", flush=True)
 print("cache:", cache)

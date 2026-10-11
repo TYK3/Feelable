@@ -22,9 +22,9 @@ sys.path.insert(0, HERE)
 GATE = ("dropped_label", "unmatched_label", "unnamed", "braille_unsupported", "braille_overflow", "no_parts")
 
 
-def run(sid: str, out: str) -> dict:
+def run(sid: str, out: str, strict: bool = True) -> dict:
     cache = os.path.join(out, "cache")
-    env = {**os.environ, "FEELABLE_SAMPLE_CACHE": cache, "FEELABLE_STRICT_REVIEW": "1",
+    env = {**os.environ, "FEELABLE_SAMPLE_CACHE": cache, "FEELABLE_STRICT_REVIEW": "1" if strict else "0",
            "FEELABLE_DATA": os.path.join(out, "jobs")}
     subprocess.run([sys.executable, os.path.join(BACKEND, "precompute_samples.py"), sid], env=env, check=True, cwd=BACKEND)
     jd = os.path.join(cache, "a4", sid)

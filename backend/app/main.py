@@ -615,7 +615,7 @@ def list_samples():
         {"id": str(s["id"]), "title": str(s.get("title", s["id"])),
          "thumb_url": f"/samples/{s['file']}", "kind": str(s.get("kind", "colour")),
          "group": str(s.get("group", "simple")), "objective": str(s.get("objective", "")),
-         "corrections": len(s.get("review") or []),
+         "corrections": len(s.get("review") or []), "featured": bool(s.get("featured", False)),
          **({"credit": str(s["credit"])} if s.get("credit") else {})}
         for s in _load_manifest()
     ]
@@ -729,7 +729,19 @@ def _sample_cache_dir(sample_id: str, paper: str):
     if not root or not re.match(r"^[a-z0-9-]{1,40}$", sample_id):
         return None
     d = Path(root) / paper / sample_id
-    return d if (d / "result.json").is_file() and (d / "analysis.pkl").is_file() else None
+    if not ((d / "result.json").is_file() and (d / "analysis.pkl").is_file()):
+        return None
+    # a prepared lesson is served only for the source + annotation version it was built from
+    key = d / "cache_key.json"
+    if key.is_file():
+        try:
+            k = json.loads(key.read_text())
+            entry = next((s for s in _load_manifest() if s.get("id") == sample_id), None)
+            if entry is not None and str(entry.get("annotation_version", "")) != str(k.get("annotation_version", "")):
+                return None
+        except (OSError, ValueError):
+            return None
+    return d
 
 
 def _ai_configured() -> bool:
