@@ -53,8 +53,10 @@ export function whyText(method: string | undefined, label: string | null | undef
       return l ? `Named from the chart legend entry ${l}, whose marker has the same colour. Check it.` : "Named from the chart legend by colour. Check it.";
     case "landmark":
       return l
-        ? `The pointer for ${l} ends on a spot rather than a whole shape, so Feelable marked that spot. Check it is in the right place.`
-        : "A marked spot where a pointer ends. Check it is in the right place.";
+        ? `The pointer for ${l} ends here. Location found; its full outline is not traced yet, so check it or trace it.`
+        : "Location found where a pointer ends; the full outline is not traced yet.";
+    case "arrow":
+      return l ? `The caption ${l} sits beside this arrow, so the arrow itself is the part.` : "An arrow named by the caption beside it.";
     case "teacher":
       return "Named by you.";
     default:

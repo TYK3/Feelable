@@ -74,6 +74,7 @@ const ExploreCanvas = forwardRef<ExploreCanvasHandle, ExploreCanvasProps>(functi
   const [size, setSize] = useState({ w: 0, h: 0, dpr: 1 });
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [imgFailed, setImgFailed] = useState(false);
+  const [retry, setRetry] = useState(0);
   const layoutRef = useRef<ViewLayout | null>(null);
 
   // interaction state (refs: updated at pointer rate, no re-render)
@@ -103,11 +104,14 @@ const ExploreCanvas = forwardRef<ExploreCanvasHandle, ExploreCanvasProps>(functi
     im.decoding = "async";
     im.onload = () => alive && setImg(im);
     im.onerror = () => alive && setImgFailed(true);
-    im.src = imageUrl;
+    im.src = retry ? `${imageUrl}${imageUrl.includes("?") ? "&" : "?"}r=${retry}` : imageUrl;
+    // a picture that never arrives must not leave a blank white sheet: give up after 20 s
+    const t = window.setTimeout(() => alive && !im.complete && setImgFailed(true), 20000);
     return () => {
       alive = false;
+      window.clearTimeout(t);
     };
-  }, [imageUrl]);
+  }, [imageUrl, retry]);
 
   // ------------------------------------------------------------ size (DPR aware, follows rotation)
   useLayoutEffect(() => {
@@ -175,8 +179,9 @@ const ExploreCanvas = forwardRef<ExploreCanvasHandle, ExploreCanvasProps>(functi
       if (view.y0 > 0) g.fillRect(layout.dx, layout.dy, layout.dw, fr);
       if (view.x1 < img.naturalWidth) g.fillRect(layout.dx + layout.dw - fr, layout.dy, fr, layout.dh);
       if (view.y1 < img.naturalHeight) g.fillRect(layout.dx, layout.dy + layout.dh - fr, layout.dw, fr);
-    } else if (imgFailed) {
-      // Fallback: draw the part outlines so the page is still explorable.
+    } else {
+      // Loading or failed: draw the part outlines so the page is never a blank sheet and stays
+      // explorable (hit-testing uses the same shapes).
       g.strokeStyle = "#000";
       g.lineWidth = Math.max(2, 1.5 * pxPerMm * layout.scale);
       for (const s of shapes) for (const poly of s.polys) tracePoly(g, layout, poly), g.stroke();
@@ -458,6 +463,29 @@ const ExploreCanvas = forwardRef<ExploreCanvasHandle, ExploreCanvasProps>(functi
     >
       <canvas ref={baseRef} className="ts-t-canvas" aria-hidden="true" />
       <canvas ref={overRef} className="ts-t-canvas" aria-hidden="true" />
+      {!img && (
+        <div className="ts-t-loading" role="status">
+          {imgFailed ? (
+            <>
+              <span>The picture didn't load. The outlines still work, or use the Parts list.</span>
+              <button
+                type="button"
+                className="ts-t-btn ts-t-btn-small"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setImgFailed(false);
+                  setRetry((r) => r + 1);
+                }}
+              >
+                Retry
+              </button>
+            </>
+          ) : (
+            <span>Loading the picture… The outlines already work.</span>
+          )}
+        </div>
+      )}
     </div>
   );
 });

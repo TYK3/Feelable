@@ -596,6 +596,16 @@ textarea.rv-title__input { display: block; resize: none; overflow: hidden; }
 .edlg__foot .btn { min-height: 44px; }
 @media (max-width: 480px) { .edlg__title { font-size: 18px; } .edlg__body { padding: 10px 14px 14px; } .edlg__foot .btn { flex: 1; } }
 @media (prefers-reduced-motion: reduce) { .edlg { animation: none; } }
+@media (max-width: 520px) {
+  .edlg--full { padding: 0; }
+  .edlg--full .edlg__box { width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; }
+  .edlg--full .edlg__intro { display: none; }
+  .edlg--full .draw__canvas { max-height: calc(100dvh - 300px); min-height: 220px; }
+}
+.draw__view { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 6px; }
+.draw__view .btn, .draw__view .seg__btn { min-height: 44px; min-width: 44px; }
+.draw__canvas.is-pan { cursor: grab; }
+.draw__pieces { margin: 6px 0 0; font-size: 15px; }
 
 /* ---------------------------------------------------------------- "How it read" (vision inspector) */
 .vision { display: grid; gap: 12px; }
@@ -673,3 +683,22 @@ textarea.rv-title__input { display: block; resize: none; overflow: hidden; }
 .gallery__more { margin-top: 16px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--line-strong, #17171c); background: var(--surface, #fff); font: inherit; font-weight: 700; cursor: pointer; }
 .gallery__more:focus-visible { outline: 3px solid var(--banana, #FFD43B); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .sample, .sample__go { transition: none; } button.sample:hover { transform: none; } }
+
+/* ---------------------------------------------------------------- precision audit: phone touch targets
+   Principal controls get a 48 px hit area on touch screens and narrow windows (children explore with a
+   blind learner / teacher); the tab strip wraps instead of hiding the 3D tab off-screen. */
+@media (pointer: coarse), (max-width: 600px) {
+  .segmented__opt, .tabs__tab, .glance__chip, .zoom__fit, .viewer__side, .issue__act, .issues__more,
+  .ready__more, .btn--sm, .md__chip, .seg__btn { min-height: 48px; }
+  .zoom__btn { width: 48px; height: 48px; }
+  .viewer__grip { width: 48px; height: 48px; }
+  .glance__list { gap: 8px; }
+  .tabs { flex-wrap: wrap; width: auto; border-radius: 18px; overflow: visible; }
+}
+.issue__detail { display: block; margin-top: 4px; font-size: 13px; color: var(--ink-2, #4a4a55); }
+.issue__detail summary { cursor: pointer; min-height: 32px; display: inline-flex; align-items: center; }
+.issue__detail code { display: block; white-space: pre-wrap; word-break: break-word; }
+
+.plist__search { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+.plist__search input { flex: 1; min-height: 48px; font-size: 16px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--line-strong, #d9d2bf); }
+.plist__count { font-size: 14px; color: var(--ink-2, #4a4a55); white-space: nowrap; }

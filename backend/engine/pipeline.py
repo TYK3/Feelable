@@ -733,7 +733,16 @@ def _validate_edit(edit: dict, analysis) -> tuple[str | None, list[dict], dict]:
             raise ValueError("overlap must be cut, keep or replace")
         if mode not in ("add", "remove"):
             raise ValueError("mode must be add or remove")
+        more = ap.get("more_polygons") or []
+        # several pieces of one part (both kidneys, a cell's many mitochondria): every piece kept
+        if (not isinstance(more, list) or len(more) > 12
+                or not all(isinstance(pg, list) and 3 <= len(pg) <= 400
+                           and all(isinstance(q, (list, tuple)) and len(q) == 2
+                                   and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in q)
+                                   for q in pg) for pg in more)):
+            raise ValueError("more_polygons must be up to 12 outlines of 3-400 points")
         ops["add_part"] = {"name": name, "polygon": [[float(q[0]), float(q[1])] for q in poly],
+                           "more_polygons": [[[float(q[0]), float(q[1])] for q in pg] for pg in more],
                            "overlap": overlap, "into": into, "mode": mode, "within": within}
     if edit.get("approved") is not None:
         if not isinstance(edit["approved"], bool):
@@ -835,9 +844,10 @@ def _add_drawn_part(analysis, spec: dict) -> None:
     from engine.types import Part
     from engine.vision_utils import mask_bbox, mask_polygons
     h, w = int(analysis.height), int(analysis.width)
-    pts = np.array([[min(w - 1, max(0, round(x))), min(h - 1, max(0, round(y)))] for x, y in spec["polygon"]], np.int32)
     mask = np.zeros((h, w), np.uint8)
-    cv2.fillPoly(mask, [pts], 255)
+    for poly in [spec["polygon"]] + list(spec.get("more_polygons") or []):
+        pts = np.array([[min(w - 1, max(0, round(x))), min(h - 1, max(0, round(y)))] for x, y in poly], np.int32)
+        cv2.fillPoly(mask, [pts], 255)
     area = int((mask > 0).sum())
     if area < 30:
         raise ValueError("That shape is too small; draw around the whole part")

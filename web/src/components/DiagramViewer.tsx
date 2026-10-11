@@ -143,7 +143,7 @@ export function DiagramViewer({
           onChange={setView}
           tabs={[
             { id: "diagram", label: "Diagram" },
-            { id: "vision", label: "How it read", icon: <IconEye size={16} /> },
+            { id: "vision", label: "Scan details", icon: <IconEye size={16} /> },
             { id: "legend", label: "Braille key" },
             { id: "3d", label: "3D", icon: <IconCube size={16} /> },
           ]}

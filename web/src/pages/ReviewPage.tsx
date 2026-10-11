@@ -282,7 +282,9 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
     if (!job) return null;
     setStructural(true);
     try {
-      const edit: JobEdit = { add_part: { name, polygon, overlap: o.overlap, into: o.into, mode: o.mode } };
+      const edit: JobEdit = {
+        add_part: { name, polygon, overlap: o.overlap, into: o.into, mode: o.mode, ...(o.more?.length ? { more_polygons: o.more } : {}) },
+      };
       const res = await updateJob(job.id, { ...edit, ...(job.version !== undefined ? { base_version: job.version } : {}) }, token);
       const intoName = o.into ? job.parts.find((p) => p.id === o.into)?.name : null;
       accept(
@@ -370,6 +372,17 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
           window.setTimeout(() => document.getElementById(i.action === "rename" ? `name-${i.part_id}` : `pbody-${i.part_id}`)?.focus(), 120);
         }
         return;
+      case "outline":
+        setStep("fix");
+        if (i.part_id) {
+          setSelectedId(i.part_id);
+          setDrawing({ into: i.part_id });
+        }
+        return;
+      case "retry":
+        navigate("#/");
+        return;
+      case "retitle":
       case "shorten":
         setStep("fix");
         window.setTimeout(() => titleRef.current?.focus(), 120);
@@ -520,13 +533,22 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
               </span>
             </div>
           ) : (
-            <h1 className="rv-title__text">{sentenceCase(job.title) || "Untitled diagram"}</h1>
+            <h1 className="rv-title__text">{job.title && job.title.trim().toLowerCase() !== "diagram" ? sentenceCase(job.title) : "Untitled diagram"}</h1>
           )}
           <ul className="rv-meta" aria-label="About this lesson">
-            <li>{job.parts.length} {job.parts.length === 1 ? "part" : "parts"}</li>
+            {(() => {
+              const inc = job.parts.filter((p) => p.include).length;
+              const off = job.parts.length - inc;
+              return (
+                <li>
+                  {inc} included {inc === 1 ? "part" : "parts"}
+                  {off > 0 ? ` · ${off} omitted ${off === 1 ? "candidate" : "candidates"} (see Fix parts)` : ""}
+                </li>
+              );
+            })()}
             {job.ai_used && (
               <li className="rv-meta__ai">
-                <IconSparkle size={14} /> AI descriptions
+                <IconSparkle size={14} /> Descriptions added
               </li>
             )}
             {job.page_flattened && <li>Page straightened</li>}
@@ -634,7 +656,7 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
                 <section className="glance" aria-labelledby="glance-title">
                   <h2 id="glance-title" className="glance__title">What the student can explore</h2>
                   <ul className="glance__list">
-                    {job.parts.map((p) => (
+                    {job.parts.filter((p) => p.include).map((p) => (
                       <li key={p.id}>
                         <button
                           type="button"

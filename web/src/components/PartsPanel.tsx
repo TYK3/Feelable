@@ -58,6 +58,10 @@ export function PartsPanel({
   setMergeMode: (v: boolean) => void;
 }) {
   const [picked, setPicked] = useState<string[]>([]);
+  // precision audit: a 27-target skull needs Search parts
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const shownParts = q ? parts.filter((p) => (p.name + " " + (p.label_text ?? "")).toLowerCase().includes(q) || p.id === selectedId) : parts;
   const draftOf = (p: Part): PartDraft => drafts[p.id] ?? { name: p.name, description: p.description, include: p.include };
   const included = parts.filter((p) => draftOf(p).include).length;
   const flagged = new Set(readiness.issues.filter((i) => i.part_id).map((i) => i.part_id!));
@@ -99,7 +103,7 @@ export function PartsPanel({
               disabled={ai.available !== true || ai.running || busy || !!lock}
               title={lock ?? (ai.available === false ? "AI is not set up on this server" : undefined)}
             >
-              {ai.running ? "Describing…" : "Describe with AI"}
+              {ai.running ? "Adding descriptions…" : "Add descriptions"}
             </Button>
             <Button variant="secondary" size="sm" icon={<IconMerge size={16} />} onClick={() => { setPicked([]); setMergeMode(true); }} disabled={busy || !!lock || parts.length < 2} title={lock ?? undefined}>
               Merge
@@ -142,8 +146,20 @@ export function PartsPanel({
         </datalist>
       )}
 
+      {parts.length > 8 && (
+        <label className="plist__search">
+          <span className="sr-only">Search parts</span>
+          <input
+            type="search"
+            placeholder={`Search ${parts.length} parts`}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {q && <span className="plist__count" role="status">{shownParts.length} shown</span>}
+        </label>
+      )}
       <ul className="plist">
-        {parts.map((p) => (
+        {shownParts.map((p) => (
           <PartRow
             key={p.id}
             part={p}

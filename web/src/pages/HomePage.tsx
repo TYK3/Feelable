@@ -64,7 +64,7 @@ const READ_STEPS = [
     text: "Feelable's server finds the text (OCR); blurry words are re-read up close and checked against 880 science terms.",
     alt: "The skull figure with every label highlighted in yellow." },
   { img: "2-follow", title: "Follow each pointer.",
-    text: "Every pointer line is traced from its label to the spot it names.",
+    text: "Follows visible pointer lines from each label and flags uncertain matches for review.",
     alt: "Pointer lines traced in black from each label to a yellow dot on the bone it names." },
   { img: "3-trace", title: "Trace the shapes.",
     text: "Where neighbours share a colour, it zooms in to separate them. With automatic descriptions on, Gemini helps interpret lost pointers. You review every result.",
@@ -412,7 +412,7 @@ export default function HomePage() {
                 />
                 <div className="field">
                   <Switch
-                    label="AI names & descriptions"
+                    label="Add spoken descriptions"
                     checked={aiOn}
                     disabled={aiOk !== true}
                     onChange={setUseAi}
@@ -479,7 +479,7 @@ export default function HomePage() {
           <div className="reads__foot">
             {skull && (
               <Button variant="secondary" onClick={() => start({ kind: "sample", sample: skull })}>
-                Open the skull and see “How it read”
+                Open the skull and see “Scan details”
               </Button>
             )}
             <p className="reads__credit">Figure: OpenStax Anatomy &amp; Physiology, CC BY 4.0.</p>

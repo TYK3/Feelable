@@ -575,6 +575,11 @@ export default function TouchMode(props: { jobId: string; onExit?: () => void })
     <div className="ts-touch ts-t-explore-shell">
       <header className="ts-t-top">
         <h1 className="ts-t-title">{title}</h1>
+        {preview && isTeacher && onExit && (
+          <button className="ts-t-btn ts-t-top-btn" onClick={() => onExit()}>
+            Back to editor
+          </button>
+        )}
         <button className="ts-t-btn ts-t-top-btn" onClick={() => setOverlay("list")}>
           Parts
         </button>

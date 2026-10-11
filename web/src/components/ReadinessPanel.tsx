@@ -14,6 +14,9 @@ const ACTION_LABEL: Record<string, string> = {
   reduce: "Choose parts",
   draw: "Add it",
   shorten: "Edit title",
+  retitle: "Edit title",
+  outline: "Suggest outline",
+  retry: "Try again",
 };
 
 /** UX07: say what actually needs looking at, e.g. "Review 2 names and the missing pancreas." */
@@ -115,6 +118,12 @@ export function ReadinessPanel({
               <span className="issue__msg">
                 <span className="sr-only">{i.severity === "block" ? "Problem: " : "Check: "}</span>
                 {i.message}
+                {i.detail && (
+                  <details className="issue__detail">
+                    <summary>Diagnostics</summary>
+                    <code>{i.detail}</code>
+                  </details>
+                )}
               </span>
               {i.action && (canEdit || i.action === "retake") && (
                 <button type="button" className="issue__act" onClick={() => onAction(i)}>
@@ -162,7 +171,7 @@ export function ReadinessPanel({
       <div className="geo">
         <button type="button" className="geo__toggle" aria-expanded={showChecks} onClick={() => setShowChecks((v) => !v)}>
           <span>
-            Tactile layout checks{" "}
+            Print layout checks{" "}
             {geometry.total === 0 ? (
               <strong className="geo__n is-warn">No diagram to check</strong>
             ) : (
@@ -175,7 +184,10 @@ export function ReadinessPanel({
         </button>
         {showChecks && (
           <div className="geo__body">
-            <p className="geo__note">Line widths, spacing and textures. These don't check that the names are right.</p>
+            <p className="geo__note">
+              Line widths, spacing and textures on the print. These are not a source-match review: they don't check that a
+              name sits on the right structure or that every labelled feature was found.
+            </p>
             <ul className="checks">
               {job.checks.map((c, i) => (
                 <li key={i} className={c.passed ? "check is-pass" : "check is-fail"}>

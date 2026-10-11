@@ -17,6 +17,7 @@ export function EditorDialog({
   footer,
   onClose,
   initialFocus,
+  fullOnPhone,
 }: {
   title: string;
   intro?: ReactNode;
@@ -25,6 +26,8 @@ export function EditorDialog({
   onClose: () => void;
   /** CSS selector inside the dialog to focus first (defaults to the first focusable control). */
   initialFocus?: string;
+  /** small phones: use the whole screen (drawing needs every pixel) */
+  fullOnPhone?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -76,7 +79,7 @@ export function EditorDialog({
   }, []);
 
   return createPortal(
-    <div className="edlg" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className={`edlg${fullOnPhone ? " edlg--full" : ""}`} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
         className="edlg__box"

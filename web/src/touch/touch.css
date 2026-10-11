@@ -677,3 +677,11 @@
     -webkit-line-clamp: 8;
   }
 }
+
+/* precision audit: never a silent blank sheet while the picture loads */
+.ts-t-loading {
+  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px; max-width: calc(100% - 24px);
+  padding: 10px 14px; border-radius: 14px; background: #17171c; color: #fff;
+  font-size: 15px; line-height: 1.35; z-index: 2;
+}

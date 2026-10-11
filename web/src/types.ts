@@ -21,6 +21,10 @@ export interface Part {
   label_text?: string | null;    // v2: source label this part matched
   match_method?: string;         // v2: "leader" | "inside" | "nearest" | "carved" | "ai" | "teacher" | "none"
   description_source?: "auto" | "ai" | "teacher";  // v2
+  /** precision audit: region | boundary (suture) | path (process arrow, route) | landmark (point) | group */
+  target_type?: "region" | "boundary" | "path" | "landmark" | "group";
+  /** "unresolved": only the location is known (pointer tip), its outline / course is not traced */
+  extent?: "full" | "unresolved";
 }
 
 export type InputKind = "diagram" | "chart" | "photo_object" | "photo_scene" | "text_page" | "blank";
@@ -30,7 +34,9 @@ export interface ReadinessIssue {
   severity: "block" | "warn" | "info";
   message: string;
   part_id?: string;
-  action?: "rename" | "include" | "split" | "merge" | "retake" | "reduce" | "draw" | "shorten";
+  action?: "rename" | "include" | "split" | "merge" | "retake" | "reduce" | "draw" | "shorten" | "retitle" | "outline" | "retry";
+  /** provider / engine diagnostics, shown collapsed (never the main message) */
+  detail?: string;
   /** UX07: the label text of a possibly-missing part (action "draw"). */
   target?: string;
   /** UX07: source-image bbox [x0,y0,x1,y1] of that label, for a detail view. */
@@ -118,6 +124,8 @@ export interface JobEdit {
   add_part?: {
     name: string;
     polygon: [number, number][];
+    /** further pieces of the same part (both kidneys) */
+    more_polygons?: [number, number][][];
     /** cut (default): cut it out of what it covers; keep: overlap (nested detail); replace: also switch fully covered parts off */
     overlap?: "cut" | "keep" | "replace";
     /** add the area to (or with mode "remove", take it from) an existing part instead of making a new one */
