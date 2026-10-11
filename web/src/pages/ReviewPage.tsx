@@ -19,7 +19,7 @@ import { sentenceCase } from "../components/text";
 import { loadDraft, saveDraft, type PartDraft } from "../lib/drafts";
 import { aiAvailable, limitsOf, useHealth } from "../lib/health";
 import { readinessOf, STATUS_COPY, whyText } from "../lib/readiness";
-import { DrawPartDialog } from "../components/DrawPartDialog";
+import { DrawPartDialog, type DrawOptions } from "../components/DrawPartDialog";
 import { CloseupDialog } from "../components/CloseupDialog";
 import { namesFromParent, parentOf, setPendingUpload, takeCloseup } from "../lib/pending";
 
@@ -250,7 +250,7 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
     }
   };
 
-  const approve = () => structuralPatch({ approved: true }, "Approved. It's ready to teach.", setApproving);
+  const approve = () => structuralPatch({ approved: true }, "Approved. Students now get this version.", setApproving);
   const split = async (pid: string) => {
     const res = await structuralPatch({ split: pid }, "Split into separate parts. Give each one a name.");
     if (res) setSelectedId(pid);
@@ -263,8 +263,8 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
     }
   };
   // UX07: a "Possible missing part" warning opens these prefilled with its label / area.
-  const [drawing, setDrawing] = useState<false | { name?: string }>(false);
-  const [closeup, setCloseup] = useState<false | { box?: [number, number, number, number] }>(false);
+  const [drawing, setDrawing] = useState<false | { name?: string; into?: string }>(false);
+  const [closeup, setCloseup] = useState<false | { box?: [number, number, number, number]; hint?: string; target?: [number, number, number, number] }>(false);
   const closeupBox = useRef<[number, number, number, number] | null>(null);
   // A close-up lesson just created from another lesson: carry that lesson's names over once.
   const closeupDone = useRef<string | null>(null);
@@ -277,12 +277,34 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
     if (renames.length) structuralPatch({ title: `${ctx.parent.title} (close-up)`.slice(0, 80), parts: renames }, `Named ${renames.length} parts from the full diagram. Check them.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job?.id, canEdit]);
-  const addDrawn = async (name: string, polygon: [number, number][]) => {
-    const res = await structuralPatch({ add_part: { name, polygon } } as JobEdit, `Added “${name}”. Check it on the tactile view.`);
-    if (res) {
+  // Returns an error message for the dialog (which keeps the teacher's outline), or null when saved.
+  const addDrawn = async (name: string, polygon: [number, number][], o: DrawOptions): Promise<string | null> => {
+    if (!job) return null;
+    setStructural(true);
+    try {
+      const edit: JobEdit = { add_part: { name, polygon, overlap: o.overlap, into: o.into, mode: o.mode } };
+      const res = await updateJob(job.id, { ...edit, ...(job.version !== undefined ? { base_version: job.version } : {}) }, token);
+      const intoName = o.into ? job.parts.find((p) => p.id === o.into)?.name : null;
+      accept(
+        res,
+        o.into
+          ? o.mode === "remove"
+            ? `Removed that area from “${intoName}”. Check it on the tactile view.`
+            : `Added that area to “${intoName}”. Check it on the tactile view.`
+          : `Added “${name}”. Check it on the tactile view.`,
+      );
       setDrawing(false);
-      const p = res.parts.find((x) => x.name === name);
+      const p = o.into ? res.parts.find((x) => x.id === o.into) : res.parts.find((x) => x.name === name);
       if (p) setSelectedId(p.id);
+      return null;
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        await handlePatchError(err);
+        return "This lesson was changed somewhere else. Your outline is kept here: check the updated lesson, then save again.";
+      }
+      return err instanceof ApiError ? err.message : "Couldn't save the part. Your outline is kept; try again.";
+    } finally {
+      setStructural(false);
     }
   };
   const runAi = async () => {
@@ -314,8 +336,11 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
   const parentLink = job ? parentOf(job.id) : null;
   // UX07: "Make detail view" — open the close-up tool around a crowded label (3× its box, clamped).
   const onDetail = (i: ReadinessIssue) => {
-    if (!job || !i.bbox) return;
-    const [x0, y0, x1, y1] = i.bbox;
+    // F08: open on the structure the pointer reaches; only fall back to the label when unknown
+    const tb = i.target_bbox ?? null;
+    const base = tb ?? i.bbox;
+    if (!job || !base) return;
+    const [x0, y0, x1, y1] = base;
     const W = job.source.width;
     const H = job.source.height;
     const side = Math.max(x1 - x0, y1 - y0, 0.18 * Math.max(W, H)) * 1.6;
@@ -324,7 +349,13 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
     const bx0 = Math.max(0, Math.min(W - side, cx - side / 2));
     const by0 = Math.max(0, Math.min(H - side, cy - side / 2));
     setStep("fix");
-    setCloseup({ box: [bx0, by0, Math.min(W, bx0 + side), Math.min(H, by0 + side)] });
+    setCloseup({
+      box: [bx0, by0, Math.min(W, bx0 + side), Math.min(H, by0 + side)],
+      target: tb ?? undefined,
+      hint: tb
+        ? `The box starts where the pointer for “${i.target ?? "this label"}” ends (dashed). Check it covers the structure, then make the close-up.`
+        : `Choose the structure “${i.target ?? "this label"}” refers to. The box starts on the label because its pointer wasn't traced.`,
+    });
   };
   const onIssue = (i: ReadinessIssue) => {
     switch (i.action) {
@@ -338,6 +369,10 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
           setSelectedId(i.part_id);
           window.setTimeout(() => document.getElementById(i.action === "rename" ? `name-${i.part_id}` : `pbody-${i.part_id}`)?.focus(), 120);
         }
+        return;
+      case "shorten":
+        setStep("fix");
+        window.setTimeout(() => titleRef.current?.focus(), 120);
         return;
       case "split":
         if (i.part_id) split(i.part_id);
@@ -569,16 +604,27 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
                       <div className="peek__top">
                         {selected.key && <BrailleWord word={selected.key.replace(/[^a-z]/gi, "").slice(0, 2)} className="peek__braille" />}
                         <h2 className="peek__name">{sentenceCase(names[selected.id])}</h2>
-                        {!selected.include && <span className="tag tag--off">Left out</span>}
+                        {!(draft.parts[selected.id]?.include ?? selected.include) && <span className="tag tag--off">Removed</span>}
                       </div>
                       <p className="peek__desc">
                         {selected.description_source === "ai" && <AiBadge />} {selected.description || "No description yet."}
                       </p>
                       <p className="peek__why">{whyText(selected.match_method, selected.label_text)}</p>
                       {canEdit && (
-                        <Button variant="secondary" size="sm" onClick={() => setStep("fix")}>
-                          Edit this part
-                        </Button>
+                        <div className="peek__actions">
+                          <Button variant="secondary" size="sm" onClick={() => setStep("fix")}>
+                            Edit this part
+                          </Button>
+                          {(draft.parts[selected.id]?.include ?? selected.include) ? (
+                            <Button variant="ghost" size="sm" onClick={() => onPartChange(selected.id, { include: false })}>
+                              Remove part
+                            </Button>
+                          ) : (
+                            <Button variant="ghost" size="sm" onClick={() => onPartChange(selected.id, { include: true })}>
+                              {selected.include ? "Undo remove" : "Restore part"}
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </>
                   ) : (
@@ -634,6 +680,7 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
                   onSplit={split}
                   onMerge={merge}
                   onDraw={canEdit ? () => setDrawing({}) : undefined}
+                  onFixOutline={canEdit ? (pid) => setDrawing({ into: pid }) : undefined}
                   onCloseup={canEdit ? () => setCloseup({}) : undefined}
                   onAiDescribe={runAi}
                   onNewPhoto={() => navigate("#/")}
@@ -646,6 +693,8 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
                     size={[job.source.width, job.source.height]}
                     title={job.title}
                     initialBox={closeup.box}
+                    hint={closeup.hint}
+                    target={closeup.target}
                     onMake={(file, box) => {
                       closeupBox.current = box;
                       setPendingUpload(file, { parent: job, box: closeupBox.current! });
@@ -657,6 +706,9 @@ export default function ReviewPage({ id, urlToken }: { id: string; urlToken: str
                 )}
                 {drawing && job && (
                   <DrawPartDialog
+                    jobId={job.id}
+                    parts={job.parts}
+                    initialInto={drawing.into ?? null}
                     sourceUrl={job.source.url}
                     size={[job.source.width, job.source.height]}
                     nameLimit={limits.name}

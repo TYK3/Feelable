@@ -1,6 +1,6 @@
 // Interactive diagram: Original ↔ Tactile compare slider, zoom, hover/tap regions (F17/F18),
 // plus the braille key page and a 3D preview guarded by an error boundary (F03).
-import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JobResult, Part, Polygon } from "../types";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { BrailleWord } from "./BrailleWord";
@@ -111,6 +111,18 @@ export function DiagramViewer({
     [job, T],
   );
   const sel = shapes.find((x) => x.part.id === selectedId) ?? null;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Handover (mobile): zoom centres on the selected part instead of the empty top-left corner.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || zoom <= 1 || !sel?.box) return;
+    const sw = el.clientWidth * zoom;
+    const sh = (sw * H) / W;
+    const cx = ((sel.box.x0 + sel.box.x1) / 2 / W) * sw;
+    const cy = ((sel.box.y0 + sel.box.y1) / 2 / H) * sh;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({ left: Math.max(0, cx - el.clientWidth / 2), top: Math.max(0, cy - el.clientHeight / 2), behavior: reduce ? "auto" : "smooth" });
+  }, [zoom, sel?.part.id, W, H]); // eslint-disable-line react-hooks/exhaustive-deps
   const hov = shapes.find((x) => x.part.id === hoverId && x.part.id !== selectedId) ?? null;
 
   const dragFrom = useCallback((clientX: number) => {
@@ -148,6 +160,9 @@ export function DiagramViewer({
             <button type="button" className="zoom__fit" onClick={() => setZoom(1)} disabled={zoom <= 1} aria-label="Fit diagram to view">
               Fit
             </button>
+            <button type="button" className="zoom__fit" onClick={() => setZoom((z) => Math.max(2, z))} disabled={!sel} aria-label="Zoom in on the selected part">
+              Focus
+            </button>
           </div>
         )}
       </div>
@@ -155,7 +170,7 @@ export function DiagramViewer({
       <div id="dv-panel" role="tabpanel" aria-labelledby={`dv-tab-${view}`} className="viewer__panel">
         {view === "diagram" && (
           <>
-            <div className="viewer__scroll">
+            <div className="viewer__scroll" ref={scrollRef}>
               <div className="viewer__stage" ref={stageRef} style={{ width: `${zoom * 100}%`, aspectRatio: `${W} / ${H}` }}>
                 <svg viewBox={`0 0 ${W} ${H}`} className="viewer__svg" role="img" aria-label={`${title}: original photo on the left of the slider, tactile version on the right.`}>
                   <defs>

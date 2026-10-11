@@ -10,6 +10,7 @@ def test_non_structures_are_rejected(text):
 
 
 @pytest.mark.parametrize("text", ["pancreas", "left atrium", "endoplasmic reticulum", "T cell",
-                                  "lacrimal fossa"])
+                                  "lacrimal fossa", "coronal suture", "sagittal sinus",
+                                  "greater wing of sphenoid bone", "mental protuberance of mandible"])
 def test_real_structures_still_pass(text):
     assert looks_like_structure(text)

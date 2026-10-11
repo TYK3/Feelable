@@ -151,3 +151,27 @@ export async function aiDescribe(id: string, opts: { overwriteTeacher?: boolean 
     }),
   );
 }
+
+// ---------------------------------------------------------------- assisted outline (draw tool)
+export type OutlineRequest = {
+  rev: number;
+  inside?: [number, number][];
+  outside?: [number, number][];
+  box?: [number, number, number, number] | null;
+  lasso?: [number, number][] | null;
+  polygon?: [number, number][] | null;
+};
+export type OutlineOverlap = { part_id: string; name: string; covered: number };
+export type OutlineResult = { rev: number; found: boolean; polygons: [number, number][][]; overlaps: OutlineOverlap[]; message?: string; area?: number };
+
+/** Propose an outline from rough marks, or (with `polygon`) report overlaps. Never saves anything. */
+export async function findOutline(id: string, req: OutlineRequest, signal?: AbortSignal): Promise<OutlineResult> {
+  return handle(
+    await fetch(`/api/jobs/${encodeURIComponent(id)}/outline`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...tokenHeaders(getEditToken(id)) },
+      body: JSON.stringify(req),
+      signal,
+    }),
+  );
+}

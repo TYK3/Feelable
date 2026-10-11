@@ -14,7 +14,53 @@
     ],
     "min_parts": 5,
     "photo": false,
-    "description": "Classic textbook plant cell with five chloroplasts, three mitochondria and ribosome clutter."
+    "description": "Classic textbook plant cell with five chloroplasts, three mitochondria and ribosome clutter.",
+    "objective": "Find the organelles inside a plant cell.",
+    "group": "simple",
+    "review": [
+      {
+        "draw": "ribosomes",
+        "polygon": [
+          [
+            342,
+            342
+          ],
+          [
+            339,
+            348
+          ],
+          [
+            333,
+            351
+          ],
+          [
+            327,
+            348
+          ],
+          [
+            324,
+            342
+          ],
+          [
+            327,
+            336
+          ],
+          [
+            333,
+            333
+          ],
+          [
+            339,
+            336
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "describe": "ribosomes",
+        "text": "Ribosomes: tiny dots scattered through the cytoplasm, too small to feel one by one. This spot marks where the label points."
+      }
+    ]
   },
   {
     "id": "heart",
@@ -34,11 +80,14 @@
     ],
     "min_parts": 8,
     "photo": false,
-    "description": "Front view of the heart with four colour-coded chambers, great vessels and septum."
+    "description": "Front view of the heart with four colour-coded chambers, great vessels and septum.",
+    "objective": "Trace the four chambers and the great vessels.",
+    "group": "simple",
+    "review": []
   },
   {
     "id": "skull-lateral",
-    "title": "Skull, side view",
+    "title": "Skull: bones and sutures",
     "file": "skull-lateral.jpg",
     "kind": "anatomy",
     "expected_parts": [
@@ -56,11 +105,14 @@
     "min_parts": 10,
     "photo": false,
     "credit": "OpenStax Anatomy & Physiology, CC BY 4.0",
-    "description": "Dense textbook figure: 24 labels in small print, pointer lines crossing coloured bones."
+    "description": "Dense textbook figure: 24 labels in small print, pointer lines crossing coloured bones.",
+    "objective": "Tell the skull's bones apart and find the sutures and landmarks between them.",
+    "group": "complex",
+    "review": []
   },
   {
     "id": "digestive-system",
-    "title": "Digestive system",
+    "title": "Digestive system: organs and pathway",
     "file": "digestive-system.jpg",
     "kind": "anatomy",
     "expected_parts": [
@@ -82,7 +134,319 @@
     "min_parts": 12,
     "photo": false,
     "credit": "OpenStax Anatomy & Physiology, CC BY 4.0",
-    "description": "Dense textbook figure: 24 organs of the digestive tract with headings and long pointer lines."
+    "description": "Dense textbook figure: 24 organs of the digestive tract with headings and long pointer lines.",
+    "objective": "Follow food from the mouth to the anus and find the organs that help.",
+    "group": "complex",
+    "review": [
+      {
+        "rename": "pharynx",
+        "to": "body outline",
+        "description": "Outline of the head and body, so you can tell where each organ sits."
+      },
+      {
+        "draw": "pharynx",
+        "within": "body outline",
+        "polygon": [
+          [
+            456,
+            268
+          ],
+          [
+            485,
+            268
+          ],
+          [
+            485,
+            418
+          ],
+          [
+            456,
+            418
+          ]
+        ]
+      },
+      {
+        "merge": [
+          "transverse colon",
+          "ileum",
+          "jejunum",
+          "part 8",
+          "cecum",
+          "sigmoid colon",
+          "descending colon"
+        ],
+        "name": "intestines"
+      },
+      {
+        "draw": "transverse colon",
+        "within": "intestines",
+        "polygon": [
+          [
+            300,
+            778
+          ],
+          [
+            598,
+            778
+          ],
+          [
+            598,
+            866
+          ],
+          [
+            480,
+            874
+          ],
+          [
+            300,
+            874
+          ]
+        ]
+      },
+      {
+        "draw": "ascending colon",
+        "within": "intestines",
+        "polygon": [
+          [
+            258,
+            820
+          ],
+          [
+            300,
+            820
+          ],
+          [
+            300,
+            874
+          ],
+          [
+            346,
+            880
+          ],
+          [
+            348,
+            1030
+          ],
+          [
+            258,
+            1030
+          ]
+        ]
+      },
+      {
+        "draw": "cecum",
+        "within": "intestines",
+        "polygon": [
+          [
+            258,
+            1030
+          ],
+          [
+            350,
+            1030
+          ],
+          [
+            354,
+            1068
+          ],
+          [
+            258,
+            1080
+          ]
+        ]
+      },
+      {
+        "draw": "appendix",
+        "within": "intestines",
+        "polygon": [
+          [
+            338,
+            1066
+          ],
+          [
+            376,
+            1066
+          ],
+          [
+            376,
+            1094
+          ],
+          [
+            338,
+            1094
+          ]
+        ]
+      },
+      {
+        "draw": "descending colon",
+        "within": "intestines",
+        "polygon": [
+          [
+            598,
+            778
+          ],
+          [
+            640,
+            778
+          ],
+          [
+            640,
+            1060
+          ],
+          [
+            582,
+            1060
+          ],
+          [
+            582,
+            866
+          ]
+        ]
+      },
+      {
+        "draw": "sigmoid colon",
+        "within": "intestines",
+        "polygon": [
+          [
+            560,
+            1060
+          ],
+          [
+            640,
+            1060
+          ],
+          [
+            612,
+            1122
+          ],
+          [
+            520,
+            1134
+          ],
+          [
+            470,
+            1130
+          ],
+          [
+            470,
+            1112
+          ],
+          [
+            520,
+            1102
+          ],
+          [
+            560,
+            1092
+          ]
+        ]
+      },
+      {
+        "draw": "rectum",
+        "within": "intestines",
+        "polygon": [
+          [
+            420,
+            1124
+          ],
+          [
+            480,
+            1124
+          ],
+          [
+            480,
+            1160
+          ],
+          [
+            420,
+            1160
+          ]
+        ]
+      },
+      {
+        "draw": "anal canal",
+        "within": "intestines",
+        "polygon": [
+          [
+            420,
+            1160
+          ],
+          [
+            480,
+            1160
+          ],
+          [
+            480,
+            1177
+          ],
+          [
+            420,
+            1177
+          ]
+        ]
+      },
+      {
+        "draw": "anus",
+        "within": "intestines",
+        "polygon": [
+          [
+            420,
+            1177
+          ],
+          [
+            480,
+            1177
+          ],
+          [
+            480,
+            1200
+          ],
+          [
+            420,
+            1200
+          ]
+        ]
+      },
+      {
+        "draw": "jejunum",
+        "within": "intestines",
+        "polygon": [
+          [
+            300,
+            850
+          ],
+          [
+            640,
+            850
+          ],
+          [
+            640,
+            1053
+          ],
+          [
+            600,
+            1050
+          ],
+          [
+            330,
+            962
+          ],
+          [
+            300,
+            958
+          ]
+        ]
+      },
+      {
+        "rename": "intestines",
+        "to": "ileum",
+        "description": "Ileum: the last and longest part of the small intestine, in the lower loops. It ends at the cecum. The picture does not draw where the jejunum stops and the ileum starts, so that boundary is approximate."
+      },
+      {
+        "describe": "jejunum",
+        "text": "Jejunum: the middle part of the small intestine, in the upper loops after the duodenum. The picture does not draw where it ends and the ileum starts, so that boundary is approximate."
+      }
+    ]
   },
   {
     "id": "water-cycle",
@@ -103,7 +467,10 @@
       "condensation",
       "precipitation",
       "collection"
-    ]
+    ],
+    "objective": "Follow water around the cycle.",
+    "group": "simple",
+    "review": []
   },
   {
     "id": "plant-cell-photo",
@@ -120,7 +487,53 @@
     ],
     "min_parts": 5,
     "photo": true,
-    "description": "The plant cell printed in a textbook, photographed at an angle on a wooden table."
+    "description": "The plant cell printed in a textbook, photographed at an angle on a wooden table.",
+    "objective": "Explore a plant cell from a phone photo.",
+    "group": "simple",
+    "review": [
+      {
+        "draw": "ribosomes",
+        "polygon": [
+          [
+            281,
+            383
+          ],
+          [
+            278,
+            389
+          ],
+          [
+            272,
+            392
+          ],
+          [
+            266,
+            389
+          ],
+          [
+            263,
+            383
+          ],
+          [
+            266,
+            377
+          ],
+          [
+            272,
+            374
+          ],
+          [
+            278,
+            377
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "describe": "ribosomes",
+        "text": "Ribosomes: tiny dots scattered through the cytoplasm, too small to feel one by one. This spot marks where the label points."
+      }
+    ]
   },
   {
     "id": "animal-cell",
@@ -137,7 +550,53 @@
     ],
     "min_parts": 5,
     "photo": false,
-    "description": "Irregular animal cell with nucleus, nucleolus, mitochondria, golgi body and ribosomes."
+    "description": "Irregular animal cell with nucleus, nucleolus, mitochondria, golgi body and ribosomes.",
+    "objective": "Find the parts of an animal cell.",
+    "group": "simple",
+    "review": [
+      {
+        "draw": "ribosomes",
+        "polygon": [
+          [
+            373,
+            478
+          ],
+          [
+            370,
+            484
+          ],
+          [
+            364,
+            487
+          ],
+          [
+            358,
+            484
+          ],
+          [
+            355,
+            478
+          ],
+          [
+            358,
+            472
+          ],
+          [
+            364,
+            469
+          ],
+          [
+            370,
+            472
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "describe": "ribosomes",
+        "text": "Ribosomes: tiny dots scattered through the cytoplasm, too small to feel one by one. This spot marks where the label points."
+      }
+    ]
   },
   {
     "id": "earth-layers",
@@ -152,7 +611,10 @@
     ],
     "min_parts": 3,
     "photo": false,
-    "description": "Globe with a wedge cut away to show the crust, mantle, outer core and inner core."
+    "description": "Globe with a wedge cut away to show the crust, mantle, outer core and inner core.",
+    "objective": "Feel the Earth's layers from crust to core.",
+    "group": "simple",
+    "review": []
   },
   {
     "id": "bar-chart",
@@ -168,7 +630,10 @@
     ],
     "min_parts": 4,
     "photo": false,
-    "description": "Five coloured bars with axes, ticks, gridlines, value labels and axis titles."
+    "description": "Five coloured bars with axes, ticks, gridlines, value labels and axis titles.",
+    "objective": "Compare values by the height of bars.",
+    "group": "simple",
+    "review": []
   },
   {
     "id": "circuit",
@@ -183,7 +648,53 @@
     ],
     "min_parts": 2,
     "photo": false,
-    "description": "Black line-art series circuit: cell, closed switch, bulb and resistor in one loop."
+    "description": "Black line-art series circuit: cell, closed switch, bulb and resistor in one loop.",
+    "objective": "Follow a simple series circuit.",
+    "group": "simple",
+    "review": [
+      {
+        "draw": "wire",
+        "polygon": [
+          [
+            923,
+            548
+          ],
+          [
+            921,
+            554
+          ],
+          [
+            915,
+            556
+          ],
+          [
+            909,
+            554
+          ],
+          [
+            907,
+            548
+          ],
+          [
+            909,
+            542
+          ],
+          [
+            915,
+            540
+          ],
+          [
+            921,
+            542
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "describe": "wire",
+        "text": "Wire: the raised lines joining the battery, switch, bulb and resistor are wires. This spot marks one of them."
+      }
+    ]
   },
   {
     "id": "flower",
@@ -201,7 +712,10 @@
     ],
     "min_parts": 6,
     "photo": false,
-    "description": "Side view of a flower with petals, sepals, stamens, carpel, stigma, stem and leaves."
+    "description": "Side view of a flower with petals, sepals, stamens, carpel, stigma, stem and leaves.",
+    "objective": "Find the parts of a flower.",
+    "group": "simple",
+    "review": []
   },
   {
     "id": "volcano",
@@ -218,6 +732,1433 @@
     ],
     "min_parts": 5,
     "photo": false,
-    "description": "Cross-section of a volcano: magma chamber, vent, cone, lava flow, ash cloud and crust."
+    "description": "Cross-section of a volcano: magma chamber, vent, cone, lava flow, ash cloud and crust.",
+    "objective": "Follow magma up through a volcano.",
+    "group": "simple",
+    "review": []
+  },
+  {
+    "id": "heart-internal",
+    "title": "Heart: chambers, valves and vessels",
+    "file": "heart-internal.jpg",
+    "kind": "anatomy",
+    "group": "complex",
+    "objective": "Find each chamber, valve and vessel inside the heart and how blood moves between them.",
+    "expected_parts": [
+      "aorta",
+      "left atrium",
+      "left ventricle",
+      "right atrium",
+      "right ventricle",
+      "superior vena cava",
+      "inferior vena cava",
+      "pulmonary trunk",
+      "tricuspid valve",
+      "aortic valve",
+      "pulmonary valve",
+      "interventricular septum"
+    ],
+    "min_parts": 12,
+    "photo": false,
+    "credit": "OpenStax Anatomy & Physiology, CC BY 4.0",
+    "description": "Dense textbook section of the heart: same-coloured chambers, narrow valves, crossing pointers.",
+    "review": [
+      {
+        "merge": [
+          "endocardium",
+          "interventricular septum",
+          "part 5",
+          "myocardium",
+          "part 9",
+          "aortic valve",
+          "left ventricle",
+          "fossa ovalis",
+          "mitral bicuspid valve",
+          "part 16",
+          "part 18",
+          "pulmonary valve",
+          "part 21",
+          "tricuspid valve",
+          "epicardium",
+          "chordae tendineae",
+          "left atrium",
+          "superior vena cava",
+          "inferior vena cava"
+        ],
+        "name": "unused shapes"
+      },
+      {
+        "remove": "unused shapes"
+      },
+      {
+        "draw": "superior vena cava",
+        "polygon": [
+          [
+            394,
+            92
+          ],
+          [
+            452,
+            92
+          ],
+          [
+            452,
+            286
+          ],
+          [
+            394,
+            286
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "inferior vena cava",
+        "polygon": [
+          [
+            398,
+            578
+          ],
+          [
+            447,
+            578
+          ],
+          [
+            447,
+            706
+          ],
+          [
+            398,
+            706
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "left pulmonary artery",
+        "within": "pulmonary trunk",
+        "polygon": [
+          [
+            640,
+            135
+          ],
+          [
+            770,
+            135
+          ],
+          [
+            770,
+            215
+          ],
+          [
+            640,
+            215
+          ]
+        ]
+      },
+      {
+        "draw": "right atrium",
+        "polygon": [
+          [
+            352,
+            330
+          ],
+          [
+            380,
+            275
+          ],
+          [
+            440,
+            262
+          ],
+          [
+            490,
+            280
+          ],
+          [
+            505,
+            330
+          ],
+          [
+            500,
+            420
+          ],
+          [
+            470,
+            445
+          ],
+          [
+            420,
+            455
+          ],
+          [
+            370,
+            440
+          ],
+          [
+            352,
+            400
+          ]
+        ],
+        "overlap": "keep"
+      },
+      {
+        "draw": "left atrium",
+        "polygon": [
+          [
+            620,
+            300
+          ],
+          [
+            640,
+            240
+          ],
+          [
+            690,
+            222
+          ],
+          [
+            760,
+            228
+          ],
+          [
+            780,
+            265
+          ],
+          [
+            770,
+            310
+          ],
+          [
+            700,
+            330
+          ],
+          [
+            650,
+            330
+          ]
+        ],
+        "overlap": "keep"
+      },
+      {
+        "draw": "right ventricle",
+        "polygon": [
+          [
+            505,
+            330
+          ],
+          [
+            560,
+            315
+          ],
+          [
+            598,
+            330
+          ],
+          [
+            603,
+            420
+          ],
+          [
+            612,
+            520
+          ],
+          [
+            622,
+            640
+          ],
+          [
+            560,
+            650
+          ],
+          [
+            480,
+            640
+          ],
+          [
+            420,
+            610
+          ],
+          [
+            400,
+            540
+          ],
+          [
+            420,
+            470
+          ],
+          [
+            470,
+            452
+          ],
+          [
+            500,
+            425
+          ]
+        ],
+        "overlap": "keep"
+      },
+      {
+        "draw": "interventricular septum",
+        "polygon": [
+          [
+            600,
+            335
+          ],
+          [
+            625,
+            330
+          ],
+          [
+            642,
+            400
+          ],
+          [
+            662,
+            470
+          ],
+          [
+            686,
+            560
+          ],
+          [
+            690,
+            640
+          ],
+          [
+            640,
+            650
+          ],
+          [
+            622,
+            560
+          ],
+          [
+            606,
+            450
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "left ventricle",
+        "polygon": [
+          [
+            652,
+            385
+          ],
+          [
+            760,
+            385
+          ],
+          [
+            800,
+            430
+          ],
+          [
+            808,
+            520
+          ],
+          [
+            798,
+            598
+          ],
+          [
+            760,
+            628
+          ],
+          [
+            700,
+            640
+          ],
+          [
+            690,
+            560
+          ],
+          [
+            666,
+            470
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "myocardium",
+        "polygon": [
+          [
+            810,
+            450
+          ],
+          [
+            856,
+            520
+          ],
+          [
+            852,
+            640
+          ],
+          [
+            820,
+            690
+          ],
+          [
+            740,
+            702
+          ],
+          [
+            702,
+            650
+          ],
+          [
+            760,
+            632
+          ],
+          [
+            800,
+            602
+          ],
+          [
+            810,
+            522
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "tricuspid valve",
+        "polygon": [
+          [
+            464,
+            461
+          ],
+          [
+            461,
+            467
+          ],
+          [
+            455,
+            470
+          ],
+          [
+            449,
+            467
+          ],
+          [
+            446,
+            461
+          ],
+          [
+            449,
+            455
+          ],
+          [
+            455,
+            452
+          ],
+          [
+            461,
+            455
+          ]
+        ]
+      },
+      {
+        "draw": "mitral valve",
+        "polygon": [
+          [
+            734,
+            340
+          ],
+          [
+            731,
+            346
+          ],
+          [
+            725,
+            349
+          ],
+          [
+            719,
+            346
+          ],
+          [
+            716,
+            340
+          ],
+          [
+            719,
+            334
+          ],
+          [
+            725,
+            331
+          ],
+          [
+            731,
+            334
+          ]
+        ]
+      },
+      {
+        "draw": "aortic valve",
+        "polygon": [
+          [
+            630,
+            370
+          ],
+          [
+            627,
+            376
+          ],
+          [
+            621,
+            379
+          ],
+          [
+            615,
+            376
+          ],
+          [
+            612,
+            370
+          ],
+          [
+            615,
+            364
+          ],
+          [
+            621,
+            361
+          ],
+          [
+            627,
+            364
+          ]
+        ]
+      },
+      {
+        "draw": "pulmonary valve",
+        "polygon": [
+          [
+            580,
+            360
+          ],
+          [
+            577,
+            366
+          ],
+          [
+            571,
+            369
+          ],
+          [
+            565,
+            366
+          ],
+          [
+            562,
+            360
+          ],
+          [
+            565,
+            354
+          ],
+          [
+            571,
+            351
+          ],
+          [
+            577,
+            354
+          ]
+        ]
+      },
+      {
+        "draw": "fossa ovalis",
+        "polygon": [
+          [
+            451,
+            400
+          ],
+          [
+            448,
+            408
+          ],
+          [
+            440,
+            411
+          ],
+          [
+            432,
+            408
+          ],
+          [
+            429,
+            400
+          ],
+          [
+            432,
+            392
+          ],
+          [
+            440,
+            389
+          ],
+          [
+            448,
+            392
+          ]
+        ]
+      },
+      {
+        "draw": "chordae tendineae",
+        "polygon": [
+          [
+            550,
+            533
+          ],
+          [
+            547,
+            539
+          ],
+          [
+            541,
+            542
+          ],
+          [
+            535,
+            539
+          ],
+          [
+            532,
+            533
+          ],
+          [
+            535,
+            527
+          ],
+          [
+            541,
+            524
+          ],
+          [
+            547,
+            527
+          ]
+        ]
+      },
+      {
+        "draw": "trabeculae carneae",
+        "polygon": [
+          [
+            500,
+            574
+          ],
+          [
+            497,
+            580
+          ],
+          [
+            491,
+            583
+          ],
+          [
+            485,
+            580
+          ],
+          [
+            482,
+            574
+          ],
+          [
+            485,
+            568
+          ],
+          [
+            491,
+            565
+          ],
+          [
+            497,
+            568
+          ]
+        ]
+      },
+      {
+        "draw": "moderator band",
+        "polygon": [
+          [
+            604,
+            594
+          ],
+          [
+            601,
+            600
+          ],
+          [
+            595,
+            603
+          ],
+          [
+            589,
+            600
+          ],
+          [
+            586,
+            594
+          ],
+          [
+            589,
+            588
+          ],
+          [
+            595,
+            585
+          ],
+          [
+            601,
+            588
+          ]
+        ]
+      },
+      {
+        "draw": "papillary muscle",
+        "polygon": [
+          [
+            718,
+            520
+          ],
+          [
+            715,
+            526
+          ],
+          [
+            709,
+            529
+          ],
+          [
+            703,
+            526
+          ],
+          [
+            700,
+            520
+          ],
+          [
+            703,
+            514
+          ],
+          [
+            709,
+            511
+          ],
+          [
+            715,
+            514
+          ]
+        ]
+      },
+      {
+        "draw": "endocardium",
+        "polygon": [
+          [
+            697,
+            565
+          ],
+          [
+            695,
+            570
+          ],
+          [
+            690,
+            572
+          ],
+          [
+            685,
+            570
+          ],
+          [
+            683,
+            565
+          ],
+          [
+            685,
+            560
+          ],
+          [
+            690,
+            558
+          ],
+          [
+            695,
+            560
+          ]
+        ]
+      },
+      {
+        "draw": "epicardium",
+        "polygon": [
+          [
+            847,
+            608
+          ],
+          [
+            845,
+            613
+          ],
+          [
+            840,
+            615
+          ],
+          [
+            835,
+            613
+          ],
+          [
+            833,
+            608
+          ],
+          [
+            835,
+            603
+          ],
+          [
+            840,
+            601
+          ],
+          [
+            845,
+            603
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "human-organs-notebook",
+    "title": "Human organs: handwritten notebook",
+    "file": "human-organs-notebook.png",
+    "kind": "photo",
+    "group": "complex",
+    "objective": "Find the main organs of the body and where they sit.",
+    "expected_parts": [
+      "brain",
+      "lungs",
+      "heart",
+      "liver",
+      "stomach",
+      "pancreas",
+      "kidneys",
+      "small intestine",
+      "large intestine",
+      "urinary bladder"
+    ],
+    "min_parts": 8,
+    "photo": true,
+    "credit": "Supplied by the Feelable team (classroom notebook drawing)",
+    "description": "Hand-drawn notebook page: ruled lines, arrows pointing at the labels, tightly packed organs.",
+    "review": [
+      {
+        "merge": [
+          "large intestine",
+          "liver",
+          "part 4",
+          "part 5",
+          "part 7",
+          "heart",
+          "stomach",
+          "part 10",
+          "kidneys",
+          "small intestine"
+        ],
+        "name": "unused shapes"
+      },
+      {
+        "remove": "unused shapes"
+      },
+      {
+        "title": "human internal organs"
+      },
+      {
+        "draw": "lungs",
+        "polygon": [
+          [
+            300,
+            470
+          ],
+          [
+            320,
+            430
+          ],
+          [
+            355,
+            423
+          ],
+          [
+            385,
+            440
+          ],
+          [
+            392,
+            470
+          ],
+          [
+            390,
+            560
+          ],
+          [
+            380,
+            600
+          ],
+          [
+            340,
+            610
+          ],
+          [
+            300,
+            605
+          ],
+          [
+            292,
+            560
+          ]
+        ],
+        "overlap": "keep"
+      },
+      {
+        "draw": "right lung piece",
+        "polygon": [
+          [
+            450,
+            440
+          ],
+          [
+            480,
+            423
+          ],
+          [
+            520,
+            430
+          ],
+          [
+            545,
+            470
+          ],
+          [
+            550,
+            560
+          ],
+          [
+            545,
+            605
+          ],
+          [
+            500,
+            610
+          ],
+          [
+            485,
+            600
+          ],
+          [
+            485,
+            500
+          ],
+          [
+            452,
+            470
+          ]
+        ],
+        "overlap": "keep"
+      },
+      {
+        "merge": [
+          "lungs",
+          "right lung piece"
+        ],
+        "name": "lungs"
+      },
+      {
+        "draw": "heart",
+        "polygon": [
+          [
+            392,
+            485
+          ],
+          [
+            420,
+            470
+          ],
+          [
+            462,
+            470
+          ],
+          [
+            483,
+            490
+          ],
+          [
+            483,
+            560
+          ],
+          [
+            460,
+            600
+          ],
+          [
+            420,
+            605
+          ],
+          [
+            395,
+            575
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "liver",
+        "polygon": [
+          [
+            300,
+            650
+          ],
+          [
+            310,
+            630
+          ],
+          [
+            400,
+            627
+          ],
+          [
+            480,
+            630
+          ],
+          [
+            485,
+            650
+          ],
+          [
+            470,
+            672
+          ],
+          [
+            440,
+            690
+          ],
+          [
+            410,
+            705
+          ],
+          [
+            400,
+            720
+          ],
+          [
+            360,
+            740
+          ],
+          [
+            310,
+            748
+          ],
+          [
+            300,
+            730
+          ]
+        ],
+        "overlap": "keep"
+      },
+      {
+        "draw": "stomach",
+        "polygon": [
+          [
+            478,
+            640
+          ],
+          [
+            500,
+            630
+          ],
+          [
+            530,
+            640
+          ],
+          [
+            545,
+            670
+          ],
+          [
+            545,
+            705
+          ],
+          [
+            530,
+            728
+          ],
+          [
+            500,
+            738
+          ],
+          [
+            470,
+            728
+          ],
+          [
+            440,
+            726
+          ],
+          [
+            400,
+            728
+          ],
+          [
+            385,
+            722
+          ],
+          [
+            390,
+            708
+          ],
+          [
+            420,
+            703
+          ],
+          [
+            455,
+            698
+          ],
+          [
+            476,
+            688
+          ],
+          [
+            470,
+            665
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "pancreas",
+        "polygon": [
+          [
+            405,
+            736
+          ],
+          [
+            425,
+            730
+          ],
+          [
+            470,
+            731
+          ],
+          [
+            500,
+            740
+          ],
+          [
+            495,
+            754
+          ],
+          [
+            470,
+            770
+          ],
+          [
+            430,
+            772
+          ],
+          [
+            408,
+            762
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "kidneys",
+        "polygon": [
+          [
+            342,
+            745
+          ],
+          [
+            362,
+            740
+          ],
+          [
+            375,
+            752
+          ],
+          [
+            376,
+            795
+          ],
+          [
+            366,
+            812
+          ],
+          [
+            348,
+            810
+          ],
+          [
+            338,
+            790
+          ],
+          [
+            338,
+            760
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "right kidney piece",
+        "polygon": [
+          [
+            474,
+            745
+          ],
+          [
+            495,
+            740
+          ],
+          [
+            510,
+            752
+          ],
+          [
+            514,
+            795
+          ],
+          [
+            503,
+            812
+          ],
+          [
+            484,
+            810
+          ],
+          [
+            472,
+            790
+          ],
+          [
+            470,
+            760
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "merge": [
+          "kidneys",
+          "right kidney piece"
+        ],
+        "name": "kidneys"
+      },
+      {
+        "draw": "large intestine",
+        "polygon": [
+          [
+            300,
+            760
+          ],
+          [
+            338,
+            756
+          ],
+          [
+            345,
+            800
+          ],
+          [
+            345,
+            925
+          ],
+          [
+            325,
+            930
+          ],
+          [
+            302,
+            925
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "transverse piece",
+        "polygon": [
+          [
+            378,
+            768
+          ],
+          [
+            470,
+            768
+          ],
+          [
+            470,
+            802
+          ],
+          [
+            378,
+            802
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "descending piece",
+        "polygon": [
+          [
+            515,
+            745
+          ],
+          [
+            550,
+            745
+          ],
+          [
+            552,
+            950
+          ],
+          [
+            530,
+            958
+          ],
+          [
+            512,
+            950
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "draw": "sigmoid piece",
+        "polygon": [
+          [
+            405,
+            915
+          ],
+          [
+            512,
+            915
+          ],
+          [
+            512,
+            960
+          ],
+          [
+            470,
+            963
+          ],
+          [
+            405,
+            958
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "merge": [
+          "large intestine",
+          "transverse piece",
+          "descending piece",
+          "sigmoid piece"
+        ],
+        "name": "large intestine"
+      },
+      {
+        "draw": "small intestine",
+        "polygon": [
+          [
+            350,
+            806
+          ],
+          [
+            505,
+            806
+          ],
+          [
+            508,
+            880
+          ],
+          [
+            495,
+            912
+          ],
+          [
+            440,
+            914
+          ],
+          [
+            380,
+            912
+          ],
+          [
+            350,
+            895
+          ]
+        ],
+        "overlap": "cut"
+      },
+      {
+        "describe": "lungs",
+        "text": "Lungs: two of them, one on each side of the heart, filling most of the chest."
+      },
+      {
+        "describe": "kidneys",
+        "text": "Kidneys: two bean shapes, one on each side, behind the intestines."
+      },
+      {
+        "describe": "large intestine",
+        "text": "Large intestine: a frame around the small intestine, up one side, across, down the other side, then into the middle."
+      }
+    ]
+  },
+  {
+    "id": "mixed-circuit",
+    "title": "Mixed circuit: series and parallel",
+    "file": "mixed-circuit.jpg",
+    "kind": "lineart",
+    "group": "complex",
+    "objective": "Find the battery and the three resistors, and which ones are side by side (parallel).",
+    "expected_parts": [
+      "battery",
+      "R1",
+      "R2",
+      "R3"
+    ],
+    "min_parts": 4,
+    "photo": false,
+    "credit": "OpenStax University Physics Volume 2, CC BY 4.0",
+    "description": "A 12.0 V battery with R1 in series and R2, R3 in parallel; values printed beside each resistor.",
+    "review": [
+      {
+        "title": "mixed circuit"
+      },
+      {
+        "rename": "resistor, 13.00 ohms",
+        "to": "R3, 13.00 ohms",
+        "description": "Resistor R3, 13.00 ohms. In parallel with R2: both sit side by side between the same two wires."
+      },
+      {
+        "describe": "R2, 6.00 ohms",
+        "text": "Resistor R2, 6.00 ohms. In parallel with R3: both sit side by side between the same two wires."
+      },
+      {
+        "describe": "R1, 1.00 ohms",
+        "text": "Resistor R1, 1.00 ohms. In series: all the current from the battery passes through it before splitting between R2 and R3."
+      },
+      {
+        "describe": "battery, 12.0 volts",
+        "text": "Battery, 12.0 volts. It pushes current through R1, then through R2 and R3 side by side, and back."
+      }
+    ]
   }
 ]

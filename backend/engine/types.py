@@ -141,4 +141,5 @@ class TactileResult:
     legend: list[dict]                                       # [{"part_id","key","name"}] in legend order
     checks: list[Check]
     transform: tuple[float, float, float]                    # (scale, offset_x, offset_y): tactile = source*scale + offset
+    legend_pages: list = field(default_factory=list)         # F03: further key pages (H, W) when one is not enough
                                                              # (before per-part enlargement)

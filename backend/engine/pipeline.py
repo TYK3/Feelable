@@ -168,6 +168,10 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
         issues.append({"code": "no_diagram", "severity": "block", "action": "retake",
                        "message": f"This looks like {what}, not a diagram. Take a photo of the diagram itself "
                                   "and try again."})
+    for it in ((getattr(analysis, "trace", None) or {}).get("issues") or []):   # F06 / F13 reading checks
+        if isinstance(it, dict) and it.get("code") and it.get("message"):
+            issues.append({"code": str(it["code"]), "severity": str(it.get("severity", "warn")),
+                           "action": str(it.get("action", "retake")), "message": str(it["message"])})
     if not inc and not (kind in _NO_DIAGRAM_KINDS and not parts):
         issues.append({"code": "no_parts", "severity": "block",
                        "action": "include" if parts else "retake",
@@ -186,6 +190,46 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
                 continue
         return None
 
+    def target_box(name: str):
+        """F08: where the label's pointer ends (the structure), not where the text is."""
+        lb_box = label_box(name)
+        W_, H_ = int(getattr(analysis, "width", 0) or 0), int(getattr(analysis, "height", 0) or 0)
+        if not W_ or not H_:
+            return None
+        norm = lambda t: " ".join(re.sub(r"[^a-z0-9 ]+", " ", str(t).lower()).split())
+        nm = norm(name)
+        for L in ((getattr(analysis, "trace", None) or {}).get("leaders") or []):
+            ll = norm(L.get("label", ""))
+            pts = L.get("points") or []
+            if not ll or len(pts) < 2 or not (nm == ll or nm.startswith(ll + " ")):
+                continue
+            a, b = pts[0], pts[-1]
+            if ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5 < 0.03 * (W_ ** 2 + H_ ** 2) ** 0.5:
+                return None          # a stub (e.g. stopped at a bracket): its end is not the structure
+            if lb_box:
+                cx, cy = (lb_box[0] + lb_box[2]) / 2, (lb_box[1] + lb_box[3]) / 2
+                end = a if (a[0] - cx) ** 2 + (a[1] - cy) ** 2 > (b[0] - cx) ** 2 + (b[1] - cy) ** 2 else b
+            else:
+                end = b
+            r = max(30, int(0.06 * max(W_, H_)))
+            return [max(0, int(end[0]) - r), max(0, int(end[1]) - r), min(W_, int(end[0]) + r), min(H_, int(end[1]) + r)]
+        return None
+
+    from engine.vision_utils import group_members_present
+    inc_name_list = [str(p.name) for p in inc]
+    groups_seen: set[str] = set()
+
+    def group_info(nm: str) -> bool:
+        """A group heading whose members are parts: say so (info), don't ask to draw it."""
+        members = group_members_present(nm, inc_name_list)
+        if len(members) < 2 or nm.lower() in groups_seen:
+            return False
+        groups_seen.add(nm.lower())
+        issues.append({"code": "group_label", "severity": "info",
+                       "message": f"“{nm[:1].upper()}{nm[1:]}” is a group heading for "
+                                  f"{', '.join(members[:6])}{' …' if len(members) > 6 else ''}."})
+        return True
+
     # 1. required targets the engine left out (UX07: most important first, one specific repair)
     missing: list[dict] = []
     for d in (getattr(analysis, "dropped", None) or []):
@@ -193,10 +237,10 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
         if not m or re.match(r"^(\d+ |lots of )", m.group(1)):
             continue                          # "285 small dots", "lots of tiny specks": clutter, fine
         nm = m.group(1)
-        if nm.lower() in inc_names or not looks_like_structure(nm):
-            continue                          # already added by the teacher / a caption fragment
+        if nm.lower() in inc_names or not looks_like_structure(nm) or group_info(nm):
+            continue                          # already added by the teacher / a caption fragment / a group
         missing.append({"code": "dropped_label", "severity": "warn", "action": "draw", "target": nm,
-                        "bbox": label_box(nm),
+                        "bbox": label_box(nm), "target_bbox": target_box(nm),
                         "message": f"Possible missing part: {nm[:1].upper()}{nm[1:]}. It's labelled in the "
                                    "picture but drawn too small to feel."})
     # 2. uncertain names
@@ -208,11 +252,11 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
     unmatched = []
     for lb in (getattr(analysis, "unmatched_labels", None) or []):
         lb = str(lb)
-        if lb.lower() in inc_names or not looks_like_structure(lb) or lb in unmatched:
-            continue                          # explanatory text, duplicates, or already a part
+        if lb.lower() in inc_names or not looks_like_structure(lb) or lb in unmatched or group_info(lb):
+            continue                          # explanatory text, duplicates, already a part, or a group
         unmatched.append(lb)
         names.append({"code": "unmatched_label", "severity": "warn", "action": "draw", "target": lb,
-                      "bbox": label_box(lb),
+                      "bbox": label_box(lb), "target_bbox": target_box(lb),
                       "message": f"Possible missing part: {lb[:1].upper()}{lb[1:]}. Its label isn't matched to "
                                  "any shape."})
     # 3. layout suggestions (crowding reported once, not twice)
@@ -648,7 +692,10 @@ def _validate_edit(edit: dict, analysis) -> tuple[str | None, list[dict], dict]:
         if not isinstance(ap, dict):
             raise ValueError("add_part must be an object with a name and a polygon")
         name = " ".join(str(ap.get("name") or "").split())
-        if not name:
+        into = ap.get("into")
+        if into is not None and not isinstance(into, str):
+            raise ValueError("into must be a part id")
+        if not name and not into:
             raise ValueError("Give the new part a name")
         if len(name) > NAME_MAX:
             raise ValueError(f"A name is too long ({len(name)} characters; the limit is {NAME_MAX}). Please shorten it.")
@@ -657,7 +704,17 @@ def _validate_edit(edit: dict, analysis) -> tuple[str | None, list[dict], dict]:
                 or not all(isinstance(q, (list, tuple)) and len(q) == 2
                            and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in q) for q in poly)):
             raise ValueError("Draw at least 3 points around the missing part")
-        ops["add_part"] = {"name": name, "polygon": [[float(q[0]), float(q[1])] for q in poly]}
+        overlap = ap.get("overlap", "cut")
+        mode = ap.get("mode", "add")
+        within = ap.get("within")
+        if within is not None and (not isinstance(within, str) or into):
+            raise ValueError("within must be a part id (and can't be combined with into)")
+        if overlap not in ("cut", "keep", "replace"):
+            raise ValueError("overlap must be cut, keep or replace")
+        if mode not in ("add", "remove"):
+            raise ValueError("mode must be add or remove")
+        ops["add_part"] = {"name": name, "polygon": [[float(q[0]), float(q[1])] for q in poly],
+                           "overlap": overlap, "into": into, "mode": mode, "within": within}
     if edit.get("approved") is not None:
         if not isinstance(edit["approved"], bool):
             raise ValueError("approved must be true or false")
@@ -745,8 +802,14 @@ def apply_edit(analysis, edit: dict) -> bool:
 
 
 def _add_drawn_part(analysis, spec: dict) -> None:
-    """TS-09: the teacher outlines a missing structure on the original photo. It becomes a part
-    (and is cut out of whatever region it was drawn over, so it can be felt on its own)."""
+    """TS-09: the teacher outlines a missing structure on the original photo.
+
+    spec: {"name", "polygon"[, "overlap": "cut"|"keep"|"replace"][, "into": part id, "mode": "add"|"remove"]}
+    * new part (no "into"): "cut" (default) cuts it out of the regions it was drawn over so it can
+      be felt on its own, but refuses to make an existing part vanish; "replace" does the same and
+      switches fully covered parts off (an explicit teacher choice); "keep" leaves other parts as
+      they are (nested detail).
+    * "into": add the area to an existing part (incomplete lungs) or remove it ("mode": "remove")."""
     import cv2
     import numpy as np
     from engine.types import Part
@@ -758,18 +821,73 @@ def _add_drawn_part(analysis, spec: dict) -> None:
     area = int((mask > 0).sum())
     if area < 30:
         raise ValueError("That shape is too small; draw around the whole part")
-    for p in analysis.parts:
-        if p.mask is None:
-            continue
-        rest = ((p.mask > 0) & ~(mask > 0))
-        if int(rest.sum()) < int((p.mask > 0).sum()):
-            if int(rest.sum()) < 30:
-                p.include = False                  # fully covered by the new drawing
+    mb = mask > 0
+    overlap = spec.get("overlap") or "cut"
+    into = spec.get("into")
+    within = spec.get("within")
+    if within:
+        # cut a piece out of an existing part along the drawn outline: the piece keeps that
+        # part's own edges; the drawing only says where to cut (the bends of one long colon)
+        host = next((p for p in analysis.parts if p.id == within), None)
+        if host is None or host.mask is None:
+            raise ValueError("That part no longer exists")
+        hm = host.mask > 0
+        piece = hm & mb
+        if int(piece.sum()) < 30:
+            raise ValueError(f"The outline doesn't overlap “{host.name[:40]}”.")
+        rest = hm & ~piece
+        if int(rest.sum()) < 30:
+            raise ValueError(f"That takes all of “{host.name[:40]}”. Rename it instead.")
+        hmm = rest.astype(np.uint8) * 255
+        host.mask, host.polygons, host.bbox, host.area = hmm, mask_polygons(hmm, 1.5), mask_bbox(hmm), int(rest.sum())
+        host.count = max(1, cv2.connectedComponents(rest.astype(np.uint8), connectivity=8)[0] - 1)
+        mask = piece.astype(np.uint8) * 255
+        mb, area, overlap = piece, int(piece.sum()), "keep"
+
+    def set_mask(p, m):
+        mm = m.astype(np.uint8) * 255
+        p.mask, p.polygons, p.bbox, p.area = mm, mask_polygons(mm, 1.5), mask_bbox(mm), int(m.sum())
+        p.count = max(1, cv2.connectedComponents(m.astype(np.uint8), connectivity=8)[0] - 1)
+
+    def cut_others(exclude_id):
+        if overlap == "keep":
+            return
+        for p in analysis.parts:
+            if p.mask is None or p.id == exclude_id or not p.include:
                 continue
-            rm = rest.astype(np.uint8) * 255
-            p.mask, p.polygons, p.bbox, p.area = rm, mask_polygons(rm, 1.5), mask_bbox(rm), int(rest.sum())
+            pm = p.mask > 0
+            rest = pm & ~mb
+            if int(rest.sum()) == int(pm.sum()):
+                continue
+            if int(rest.sum()) < 30:
+                if overlap != "replace":
+                    raise ValueError(f"It covers all of “{p.name[:40]}”. Choose Replace it or Keep both.")
+                p.include = False                  # an explicit teacher choice
+                continue
+            set_mask(p, rest)
+
+    if into:
+        tgt = next((p for p in analysis.parts if p.id == into), None)
+        if tgt is None or tgt.mask is None:
+            raise ValueError("That part no longer exists")
+        tm = tgt.mask > 0
+        if spec.get("mode") == "remove":
+            rest = tm & ~mb
+            if int(rest.sum()) < 30:
+                raise ValueError(f"That removes all of “{tgt.name[:40]}”. Use Remove part instead.")
+            set_mask(tgt, rest)
+        else:
+            cut_others(tgt.id)
+            set_mask(tgt, tm | mb)
+        try:
+            tgt.match_method = "teacher"
+        except Exception:  # pragma: no cover
+            pass
+        return
+
+    cut_others(None)
     img = getattr(analysis, "image", None)
-    col = (np.median(img[mask > 0], axis=0) if img is not None and img.ndim == 3 else np.array([128, 128, 128]))
+    col = (np.median(img[mb], axis=0) if img is not None and img.ndim == 3 else np.array([128, 128, 128]))
     ids = {p.id for p in analysis.parts}
     n = len(analysis.parts) + 1
     while f"p{n}" in ids:
@@ -785,6 +903,71 @@ def _add_drawn_part(analysis, spec: dict) -> None:
         except Exception:  # pragma: no cover
             pass
     analysis.parts.append(part)
+
+
+def outline_overlaps(analysis, mask) -> list[dict]:
+    """Which included parts a proposed outline would cover, and how much of each."""
+    out = []
+    mb = mask > 0
+    for p in analysis.parts:
+        if p.mask is None or not p.include:
+            continue
+        pm = p.mask > 0
+        ov = int((pm & mb).sum())
+        if ov:
+            out.append({"part_id": str(p.id), "name": str(p.name), "covered": round(ov / max(1, int(pm.sum())), 3)})
+    return sorted(out, key=lambda d: -d["covered"])
+
+
+def find_outline(job_dir: str, req: dict) -> dict:
+    """Assisted outline for the teacher's draw tool. req: {"rev": int, "inside": [[x,y]],
+    "outside": [[x,y]], "box": [x0,y0,x1,y1] | None, "lasso": [[x,y]] | None, "polygon": [[x,y]] | None}.
+    With "polygon" only the overlaps are reported. Coordinates are source (original image) px.
+    Never changes the lesson."""
+    import cv2
+    import numpy as np
+    from engine import grounding
+    from engine.vision_utils import mask_polygons
+    with open(os.path.join(job_dir, STATE_FILE), "rb") as f:
+        state = pickle.load(f)
+    a = state["analysis"]
+    h, w = int(a.height), int(a.width)
+
+    def pts(key, lim=400):
+        v = req.get(key) or []
+        if not isinstance(v, list) or len(v) > lim:
+            raise ValueError(f"{key} must be a list of at most {lim} points")
+        out = []
+        for q in v:
+            if not (isinstance(q, (list, tuple)) and len(q) == 2):
+                raise ValueError(f"{key} must contain [x, y] points")
+            out.append((min(w - 1, max(0.0, float(q[0]))), min(h - 1, max(0.0, float(q[1])))))
+        return out
+
+    rev = int(req.get("rev") or 0)
+    poly = pts("polygon")
+    if poly:
+        if len(poly) < 3:
+            raise ValueError("Draw at least 3 points")
+        m = np.zeros((h, w), np.uint8)
+        cv2.fillPoly(m, [np.array([[round(x), round(y)] for x, y in poly], np.int32)], 255)
+        return {"rev": rev, "found": True, "polygons": [], "overlaps": outline_overlaps(a, m)}
+    inside, outside, lasso = pts("inside", 50), pts("outside", 50), pts("lasso")
+    box = req.get("box")
+    if box is not None:
+        if not (isinstance(box, (list, tuple)) and len(box) == 4):
+            raise ValueError("box must be [x0, y0, x1, y1]")
+        box = tuple(float(v) for v in box)
+    if not inside and not lasso and box is None:
+        raise ValueError("Tap inside the part, or draw roughly around it")
+    m = grounding.propose_outline(a.image, inside, outside, box, lasso or None)
+    if m is None:
+        return {"rev": rev, "found": False, "polygons": [], "overlaps": [],
+                "message": "We couldn't find a clear outline. Keep drawing or try another selection."}
+    polys = [[[int(x), int(y)] for x, y in poly] for poly in mask_polygons(m, max(1.5, 0.002 * max(h, w)))]
+    polys = sorted(polys, key=len, reverse=True)
+    return {"rev": rev, "found": True, "polygons": polys, "area": int((m > 0).sum()),
+            "overlaps": outline_overlaps(a, m)}
 
 
 def _finish_edit(state: dict, edit: dict, changed: bool) -> None:

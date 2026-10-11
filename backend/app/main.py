@@ -612,6 +612,8 @@ def list_samples():
     return [
         {"id": str(s["id"]), "title": str(s.get("title", s["id"])),
          "thumb_url": f"/samples/{s['file']}", "kind": str(s.get("kind", "colour")),
+         "group": str(s.get("group", "simple")), "objective": str(s.get("objective", "")),
+         "corrections": len(s.get("review") or []),
          **({"credit": str(s["credit"])} if s.get("credit") else {})}
         for s in _load_manifest()
     ]
@@ -854,6 +856,25 @@ def ai_describe(job_id: str, body: dict | None = Body(None),
             raise ApiError(status, msg, code)
     _log_job(job_id, "ai-describe", result)
     return result
+
+
+@app.post("/api/jobs/{job_id}/outline")
+def job_outline(job_id: str, body: dict = Body(...),
+                x_edit_token: str | None = Header(None, alias="X-Edit-Token")):
+    """Assisted outline for the draw tool: propose the outline of a structure the teacher roughly
+    marked, or report which parts a drawn outline would overlap. Read-only: nothing is saved
+    until the teacher saves the part. The request's "rev" comes back so the app can ignore
+    answers to older drafts."""
+    jdir = _require_job(job_id)
+    _require_token(job_id, x_edit_token)
+    if not isinstance(body, dict):
+        raise ApiError(400, "Expected a JSON object", "invalid")
+    try:
+        return pipeline.find_outline(str(jdir), body)
+    except ValueError as e:
+        raise ApiError(400, str(e), "invalid")
+    except (OSError, KeyError, EOFError) as e:
+        raise ApiError(404, "Nothing to outline for this lesson", "not_found") from e
 
 
 # ---------------------------------------------------------------- files

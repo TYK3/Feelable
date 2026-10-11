@@ -1,6 +1,7 @@
 """Unified English Braille, grade 1 (uncontracted), English + raster drawing of braille cells.
 
-Supported: a-z with capital indicators, digits (numeric indicator), . , ? ! ' - : ; ( ) / % + = & " – — °.
+Supported: a-z with capital indicators, digits (numeric indicator), . , ? ! ' - : ; ( ) / % + = & " “ ” – — °.
+Double quotes are directional in prose ("cell" -> ⠦...⠴) and non-specific (⠠⠶) otherwise.
 Anything else (accents, other scripts, maths beyond + = /, emoji) is left out and reported by
 unsupported_chars(); the tactile renderer turns that into a warning.
 
@@ -64,7 +65,12 @@ PUNCT: dict[str, list[int]] = {
     "–": [_cell("6"), _cell("36")],     # en dash
     "—": [_cell("6"), _cell("36")],     # em dash
     "°": [_cell("45"), _cell("245")],
+    "“": [_cell("236")],                # F09: curly quotes are directional
+    "”": [_cell("356")],
 }
+OPEN_QUOTE = [_cell("236")]          # ⠦ ordinary opening double quote (UEB 7.6.1)
+CLOSE_QUOTE = [_cell("356")]         # ⠴ ordinary closing double quote
+
 CAPITAL_INDICATOR = _cell("6")      # ⠠ (doubled: the whole word is in capitals)
 # dot index (0..5) -> (column, row)
 _DOT_POS = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
@@ -123,6 +129,24 @@ def to_cells(text: str) -> list[int]:
             caps_word = False
             if cells and cells[-1] != 0:          # collapse runs of spaces
                 cells.append(0)
+        elif ch == "." and nxt.isdigit() and not numeric and (i == 0 or not s[i - 1].isalnum()):
+            # F09: a number that starts with its decimal point (".5"): numeric indicator first
+            cells.append(NUMERIC_INDICATOR)
+            cells.extend(PUNCT["."])
+            numeric = True
+        elif ch == '"':
+            # F09: ordinary prose quotes are directional; a lone mark between characters (5")
+            # keeps the non-specific sign
+            prev = s[i - 1] if i else ""
+            opening = (not prev or prev.isspace() or prev in "([{") and nxt and not nxt.isspace()
+            closing = prev and not prev.isspace() and (not nxt or nxt.isspace() or nxt in ".,;:!?)]}")
+            numeric = False
+            if opening:
+                cells.extend(OPEN_QUOTE)
+            elif closing and not prev.isdigit():
+                cells.extend(CLOSE_QUOTE)
+            else:
+                cells.extend(PUNCT['"'])
         elif ch in PUNCT:
             # decimal point / thousands comma inside a number keep numeric mode
             if not (numeric and ch in ".," and nxt.isdigit()):

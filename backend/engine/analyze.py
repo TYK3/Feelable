@@ -1162,6 +1162,10 @@ def _auto_orient(img: np.ndarray, labels_all: list[Label], feats: dict) -> tuple
         cands = [180]
     elif _looks_drawn(feats) and not _is_blank(feats):
         cands = [90, 270, 180]
+    elif not labels_all and not _is_blank(feats):
+        # F06: no text found at all - a sideways diagram's vertical text is invisible to the
+        # detector, so try the two quarter turns before treating the picture as a photo
+        cands = [90, 270]
     else:
         return 0, None
     best_deg, best_labels, best_score = 0, None, _ocr_score(labels_all)
@@ -1673,6 +1677,22 @@ def analyze(image_rgb: np.ndarray, *, use_ai: bool = True,
     t0 = time.perf_counter()
     try:
         analysis, _ = _analyze_impl(image_rgb, use_ai=use_ai, progress=progress)
+        try:
+            _circuit_components(analysis)
+        except Exception:  # pragma: no cover
+            pass
+        try:
+            _declutter_linework(analysis)
+        except Exception:  # pragma: no cover
+            pass
+        try:
+            _legend_names(analysis)
+        except Exception:  # pragma: no cover
+            pass
+        try:
+            _reading_issues(analysis)
+        except Exception:  # pragma: no cover - a check must never lose the analysis
+            pass
         return analysis
     except Exception as exc:  # never raise for an ordinary image
         img = image_rgb if (isinstance(image_rgb, np.ndarray) and image_rgb.ndim == 3) else np.full((10, 10, 3), 255, np.uint8)
@@ -1680,7 +1700,340 @@ def analyze(image_rgb: np.ndarray, *, use_ai: bool = True,
             img = _to_working(np.ascontiguousarray(img[:, :, :3]).astype(np.uint8))
         except Exception:
             pass
-        return _empty_analysis(img, t0, f"No parts found — try a clearer, flatter photo ({type(exc).__name__})")
+        # F10: no exception names in user-facing text; keep the type for diagnostics only
+        a = _empty_analysis(img, t0, "No parts found — try a clearer, flatter photo")
+        a.trace = {**(a.trace or {}), "error": type(exc).__name__}
+        return a
+
+
+_DESIGNATOR_RE = re.compile(
+    r"^\s*([RVCL])\s*[_,.]?\s*([0-9]|[a-zA-Z])?\s*[=:]\s*([0-9]+(?:[.,][0-9]+)?)\s*(k|K|M|m|u|µ)?", re.I)
+_UNIT_WORDS = {"R": "ohms", "V": "volts", "C": "farads", "L": "henries"}
+_KIND_WORDS = {"R": "resistor", "V": "battery", "C": "capacitor", "L": "inductor"}
+_PREFIX_WORDS = {"k": "kilo", "K": "kilo", "M": "mega", "m": "milli", "u": "micro", "µ": "micro"}
+
+
+def _circuit_components(analysis: Analysis) -> None:
+    """F07 / handover "mixed circuit": a circuit's labels are component designators with values
+    ("R1 = 1.00 Ω", "V = 12.0 V"), not names of filled regions. When at least two such labels
+    are read, find each component symbol (the drawing minus long straight wires, grouped) next to
+    its label and make it the part, named with its value in words braille can carry. The filled
+    interior of a wire loop is not a structure: it is switched off. Wires stay raised lines.
+    Unknowns like "I1 = ?" are never parts or missing-part suggestions."""
+    img = analysis.image
+    if img is None:
+        return
+    found = []
+    for lb in analysis.labels or []:
+        t = (lb.text or "").replace("Ω", " ohm").strip()
+        mm = _DESIGNATOR_RE.match(t)
+        if not mm:
+            continue
+        kind = mm.group(1).upper()
+        idx = mm.group(2) if (mm.group(2) or "").isdigit() else ("?" if mm.group(2) else "")
+        found.append({"kind": kind, "idx": idx, "value": mm.group(3).replace(",", "."),
+                      "prefix": _PREFIX_WORDS.get(mm.group(4) or "", ""), "label": lb})
+    # designator and value on separate lines ("R2" above "6.00 Ω"): pair each value with the
+    # nearest bare designator; a lone voltage ("12.0 V") is the battery
+    taken = {id(f["label"]) for f in found}
+    bare = [lb for lb in analysis.labels or [] if id(lb) not in taken
+            and re.fullmatch(r"\s*[RCL]\s*[_,.]?\s*[0-9a-zA-Z]?\s*", lb.text or "")]
+    vals = [lb for lb in analysis.labels or [] if id(lb) not in taken
+            and re.fullmatch(r"\s*([0-9]+(?:[.,][0-9]+)?)\s*(k|K|M|m|u|µ)?\s*(\S{0,3})\s*", lb.text or "")]
+    used_b = set()
+    for vl in vals:
+        mv = re.fullmatch(r"\s*([0-9]+(?:[.,][0-9]+)?)\s*(k|K|M|m|u|µ)?\s*(\S{0,3})\s*", vl.text)
+        vx0, vy0, vx1, vy1 = vl.bbox
+        th = max(10, vy1 - vy0)
+        best, bd = None, 1e9
+        for b in bare:
+            if id(b) in used_b:
+                continue
+            bx0, by0, bx1, by1 = b.bbox
+            d = float(np.hypot(max(0, max(vx0, bx0) - min(vx1, bx1)), max(0, max(vy0, by0) - min(vy1, by1))))
+            if d < bd and d <= 2.5 * th:
+                best, bd = b, d
+        unit = (mv.group(3) or "").upper()
+        if best is not None:
+            used_b.add(id(best))
+            mb = re.fullmatch(r"\s*([RCL])\s*[_,.]?\s*([0-9a-zA-Z])?\s*", best.text)
+            kind = mb.group(1).upper()
+            idx = mb.group(2) if (mb.group(2) or "").isdigit() else ("?" if mb.group(2) else "")
+            found.append({"kind": kind, "idx": idx, "value": mv.group(1).replace(",", "."),
+                          "prefix": _PREFIX_WORDS.get(mv.group(2) or "", ""), "label": best})
+        elif unit == "V":
+            found.append({"kind": "V", "idx": "", "value": mv.group(1).replace(",", "."),
+                          "prefix": _PREFIX_WORDS.get(mv.group(2) or "", ""), "label": vl})
+    if len(found) < 2:
+        return
+    keys = [(f["kind"], f["idx"]) for f in found if f["idx"] != "?"]
+    if len(keys) != len(set(keys)):
+        return                    # the same designator twice: several circuits / steps in one figure
+    # an unreadable index ("Rg" for R3) is not guessed: the part is named by kind and value
+    # ("resistor, 13.00 ohms") and flagged for the teacher to check
+    unsure = {id(f) for f in found if f["idx"] == "?"}
+    H, W = img.shape[:2]
+    grey = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB).astype(np.float32)
+    chroma = np.hypot(lab[:, :, 1] - 128, lab[:, :, 2] - 128)
+    ink = ((grey < 150) | (chroma > 35)).astype(np.uint8) * 255
+    for lb in analysis.labels or []:                         # text is not a symbol
+        x0, y0, x1, y1 = (int(v) for v in lb.bbox)
+        ink[max(0, y0 - 2):y1 + 2, max(0, x0 - 2):x1 + 2] = 0
+    L = max(25, int(0.06 * max(H, W)))
+    wires = cv2.morphologyEx(ink, cv2.MORPH_OPEN, np.ones((1, L), np.uint8)) | \
+        cv2.morphologyEx(ink, cv2.MORPH_OPEN, np.ones((L, 1), np.uint8))
+    sym = cv2.subtract(ink, cv2.dilate(wires, np.ones((3, 3), np.uint8)))
+    sym = cv2.morphologyEx(sym, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
+    g = max(5, int(0.012 * max(H, W)))
+    grouped = cv2.dilate(sym, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * g + 1, 2 * g + 1)))
+    n, cc, st, cent = cv2.connectedComponentsWithStats((grouped > 0).astype(np.uint8), connectivity=8)
+    comps = []
+    for i in range(1, n):
+        bw, bh, area = st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT], st[i, cv2.CC_STAT_AREA]
+        if area < 0.0008 * H * W or max(bw, bh) > 0.4 * max(H, W):
+            continue
+        comps.append((i, cent[i], (st[i, 0], st[i, 1], st[i, 0] + bw, st[i, 1] + bh)))
+    if not comps:
+        return
+    pairs = []
+    for fi, f in enumerate(found):
+        x0, y0, x1, y1 = f["label"].bbox
+        th = max(10, y1 - y0)
+        for ci, (i, c, b) in enumerate(comps):
+            dx = max(0, max(x0, b[0]) - min(x1, b[2]))
+            dy = max(0, max(y0, b[1]) - min(y1, b[3]))
+            d = float(np.hypot(dx, dy))
+            if d <= 4 * th:
+                pairs.append((d, fi, ci))
+    pairs.sort()
+    used_f, used_c, made = set(), set(), []
+    for d, fi, ci in pairs:
+        if fi in used_f or ci in used_c:
+            continue
+        used_f.add(fi)
+        used_c.add(ci)
+        made.append((found[fi], comps[ci]))
+    if len(made) < 2:
+        return
+    from engine.vision_utils import mask_bbox, mask_polygons
+    # the filled inside of a wire loop is paper, not a structure
+    loops = []
+    for p in analysis.parts:
+        if p.mask is not None and p.include and p.mask.any() and (not p.name or p.name.startswith("part ")):
+            med = np.median(img[p.mask > 0], axis=0)
+            if float(med.min()) >= 225 and p.area > 0.05 * H * W:
+                loops.append(p)
+    for p in loops:
+        analysis.parts.remove(p)
+        # the wires along the loop were inside that "region": give them back to the raised lines
+        if analysis.linework is not None and analysis.linework.shape[:2] == (H, W):
+            near = cv2.dilate((p.mask > 0).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+            analysis.linework = (((analysis.linework > 0) | ((ink > 0) & near)) * 255).astype(np.uint8)
+    new_parts = []
+    for f, (i, c, b) in made:
+        strokes = (cc == i) & (sym > 0)
+        hull = cv2.convexHull(np.column_stack(np.nonzero(strokes))[:, ::-1].astype(np.int32))
+        m = np.zeros((H, W), np.uint8)
+        cv2.fillPoly(m, [hull], 255)
+        m = cv2.dilate(m, np.ones((3, 3), np.uint8))
+        kind = f["kind"]
+        des = f"{kind}{f['idx']}" if f["idx"] else ""
+        unit = f"{f['prefix']}{_UNIT_WORDS[kind]}"
+        if kind == "V" and not f["idx"]:
+            name = f"battery, {f['value']} {unit}"
+            desc = f"Battery (voltage source), {f['value']} {unit}."
+        elif f["idx"] == "?":
+            name = f"{_KIND_WORDS[kind]}, {f['value']} {unit}"
+            desc = f"{_KIND_WORDS[kind].capitalize()}, {f['value']} {unit}. Check its number on the picture."
+        else:
+            name = f"{des}, {f['value']} {unit}"
+            desc = f"{_KIND_WORDS[kind].capitalize()} {des}, {f['value']} {unit}."
+        # reuse a part already found on this symbol (keeps its id), otherwise make one
+        host = None
+        for p in analysis.parts:
+            if p.mask is not None and p.include and ((p.mask > 0) & (m > 0)).sum() >= 0.3 * min(p.area, int((m > 0).sum())) \
+                    and p.area < 0.05 * H * W:
+                host = p
+                break
+        if host is None:
+            col = np.median(img[m > 0], axis=0)
+            host = Part(id=f"c{len(analysis.parts) + len(new_parts) + 1}", name="", description="", key="",
+                        color=(int(col[0]), int(col[1]), int(col[2])), mask=m, polygons=mask_polygons(m, 1.5),
+                        bbox=mask_bbox(m), area=int((m > 0).sum()), count=1, include=True, kind="region")
+            new_parts.append(host)
+        else:
+            u = (host.mask > 0) | (m > 0)
+            um = u.astype(np.uint8) * 255
+            host.mask, host.polygons, host.bbox, host.area = um, mask_polygons(um, 1.5), mask_bbox(um), int(u.sum())
+        host.name, host.description = name, desc
+        host.label_text = f["label"].text
+        host.match_method = "nearest" if id(f) in unsure else "circuit"
+        f["label"].part_id = host.id
+    analysis.parts.extend(new_parts)
+    # renumber so ids stay p1..pN in area order (keys are assigned later)
+    order = sorted(analysis.parts, key=lambda q: -q.area)
+    remap = {}
+    for k, q in enumerate(order):
+        remap[q.id] = f"p{k + 1}"
+    for q in analysis.parts:
+        q.id = remap[q.id]
+    analysis.parts = order
+    for lb in analysis.labels or []:
+        if lb.part_id is not None:
+            lb.part_id = remap.get(lb.part_id)
+    analysis.diagram_type = "circuit"
+    from engine.vision_utils import title_problem
+    words = (analysis.title or "").split()
+    if not words or title_problem(analysis.title) or "=" in analysis.title or analysis.title == "diagram" \
+            or all(len(wd) <= 2 for wd in words):
+        analysis.title = "circuit"
+    # designators were read as components: they are not "print only" arrow captions
+    analysis.notes = [nt for nt in (analysis.notes or []) if not nt.startswith("Labels on arrows/lines")]
+    analysis.unmatched_labels = [u for u in (analysis.unmatched_labels or []) if not _DESIGNATOR_RE.match(u)]
+    analysis.warnings = [w for w in analysis.warnings if "no label" not in w]
+    n_un = sum(1 for q in analysis.parts if q.include and q.name.startswith("part "))
+    if n_un:
+        analysis.warnings.append("1 part has no label — rename it in review" if n_un == 1
+                                 else f"{n_un} parts have no label — rename them in review")
+    analysis.notes = list(analysis.notes or []) + [
+        "Read as a circuit: each component is named with its value; wires are raised lines. "
+        "Unknowns such as “I1 = ?” are kept as print only."]
+
+
+def _declutter_linework(analysis: Analysis) -> None:
+    """Handover (handwritten notebook): ruled-paper remnants and a box drawn round the title are
+    not part of the diagram. Drop raised-line pieces that touch no part and are either a short
+    straight axis-aligned dash, or hug the title text. Arrows and outlines that touch the drawing
+    stay; so do long lines (wires, axes)."""
+    lw = analysis.linework
+    if lw is None or not lw.any() or not analysis.parts:
+        return
+    H, W = lw.shape[:2]
+    big = max(H, W)
+    near = np.zeros((H, W), np.uint8)
+    for p in analysis.parts:
+        if p.mask is not None and p.include and p.mask.shape[:2] == (H, W):
+            near |= (p.mask > 0).astype(np.uint8)
+    near = cv2.dilate(near, np.ones((9, 9), np.uint8)) > 0
+    title_boxes = []
+    for lb in analysis.labels or []:
+        if lb.role == "title":
+            x0, y0, x1, y1 = (int(v) for v in lb.bbox)
+            m = int(0.04 * big)
+            title_boxes.append((x0 - m, y0 - m, x1 + m, y1 + m))
+    n, cc, st, _ = cv2.connectedComponentsWithStats((lw > 0).astype(np.uint8), connectivity=8)
+    drop = np.zeros(n, bool)
+    thin = 0.006 * big + 3
+    for i in range(1, n):
+        x, y, w_, h_, a_ = (int(v) for v in st[i])
+        comp = cc[y:y + h_, x:x + w_] == i
+        if (near[y:y + h_, x:x + w_] & comp).any():
+            continue
+        dash = min(w_, h_) <= thin and max(w_, h_) <= 0.12 * big
+        in_title = any(x >= bx0 and y >= by0 and x + w_ <= bx1 and y + h_ <= by1 for bx0, by0, bx1, by1 in title_boxes)
+        if dash or in_title:
+            drop[i] = True
+    if drop.any():
+        keep = (~drop[cc]) & (lw > 0)
+        analysis.linework = (keep * 255).astype(np.uint8)
+
+
+def _legend_names(analysis: Analysis) -> None:
+    """F12: a chart legend says which series is which ("y=1" beside a blue dot). For each unnamed
+    part, look for a short label with a small coloured marker just left of it whose colour matches
+    the part, and name the part after that legend entry (match_method "legend")."""
+    img = analysis.image
+    if img is None or not analysis.parts:
+        return
+    unnamed = [p for p in analysis.parts if p.include and (not p.name or p.name.startswith("part "))]
+    if not unnamed:
+        return
+    H, W = img.shape[:2]
+    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB).astype(np.float32)
+    entries = []
+    for lb in analysis.labels or []:
+        t = (lb.text or "").strip()
+        if not t or len(t) > 30 or lb.part_id is not None:
+            continue
+        x0, y0, x1, y1 = (int(v) for v in lb.bbox)
+        th = max(8, y1 - y0)
+        bx0, bx1 = max(0, x0 - 3 * th), max(0, x0 - 2)
+        by0, by1 = max(0, y0 - th // 4), min(H, y1 + th // 4)
+        if bx1 - bx0 < 4 or by1 - by0 < 4:
+            continue
+        win = lab[by0:by1, bx0:bx1]
+        chroma = np.hypot(win[:, :, 1] - 128, win[:, :, 2] - 128)
+        m = chroma > 25                                   # a coloured marker, not grey text or paper
+        if m.sum() < 0.02 * m.size or m.sum() < 12:
+            continue
+        entries.append((t, np.median(win[m], axis=0)))
+    if len(entries) < 1:
+        return
+    used = set()
+    for p in sorted(unnamed, key=lambda q: -q.area):
+        pm = p.mask > 0
+        if not pm.any():
+            continue
+        pc = np.median(lab[pm], axis=0)
+        best, bd = None, 1e9
+        for k, (t, c) in enumerate(entries):
+            if k in used:
+                continue
+            d = float(np.linalg.norm(pc - c))
+            if d < bd:
+                best, bd = k, d
+        if best is not None and bd <= 22:
+            used.add(best)
+            p.name = entries[best][0]
+            p.label_text = entries[best][0]
+            p.match_method = "legend"
+            if p.description.lower().startswith("part "):
+                p.description = f"{p.name}."
+    if used:
+        n_un = sum(1 for p in analysis.parts if p.include and p.name.startswith("part "))
+        analysis.warnings = [w for w in analysis.warnings if "no label" not in w]
+        if n_un:
+            analysis.warnings.append("1 part has no label — rename it in review" if n_un == 1
+                                     else f"{n_un} parts have no label — rename them in review")
+
+
+_SCRIPTS = [("Chinese or Japanese", "\u4e00-\u9fff\u3040-\u30ff"), ("Korean", "\uac00-\ud7af"),
+            ("Hebrew", "\u0590-\u05ff"), ("Arabic", "\u0600-\u06ff"), ("Cyrillic", "\u0400-\u04ff"),
+            ("Greek", "\u0370-\u03ff"), ("Devanagari", "\u0900-\u097f"), ("Thai", "\u0e00-\u0e7f")]
+
+
+def _reading_issues(analysis: Analysis) -> None:
+    """F06 / F13: say plainly when labels exist but could not be used, instead of quietly turning a
+    diagram into a generic photo outline. Stored in analysis.trace["issues"] for readiness."""
+    from engine.lexicon import is_term
+    from engine.vision_utils import looks_like_structure
+    issues = []
+    texts = [lb.text for lb in (analysis.labels or []) if lb.text]
+    found = []
+    for name, rng in _SCRIPTS:
+        # two letters of the script together (a word), so unit signs like Ω or µ don't count
+        if any(re.search(f"[{rng}]{{2,}}", t.replace("Ω", "").replace("µ", "").replace("μ", "")) for t in texts):
+            found.append(name)
+    named = [p for p in analysis.parts if p.include and p.name and not p.name.startswith("part ")
+             and getattr(p, "match_method", "none") not in ("none", None)]
+    photo = analysis.input_kind in ("photo_object", "photo_scene")
+    if found:
+        issues.append({
+            "code": "unsupported_script", "severity": "block" if (photo or not named) else "warn",
+            "action": "retake",
+            "message": f"This picture has {' and '.join(found)} text. Feelable reads English labels and makes "
+                       "English (UEB) braille, so this text can't become part names or braille yet. "
+                       "Use a diagram with English labels, or name the parts yourself."})
+    termish = [t for t in texts if is_term(t) or looks_like_structure(t)]
+    if photo and len(termish) >= 3:
+        issues.append({
+            "code": "labels_unreadable", "severity": "warn", "action": "retake",
+            "message": "This looks like a labelled diagram, but its labels couldn't be read reliably, so only a "
+                       "simple outline was made. For the full lesson, retake the photo sharper and straight on, "
+                       "or use a screenshot. Approve only if a simple outline is what you want."})
+    if issues:
+        analysis.trace = {**(analysis.trace or {}), "issues": issues}
 
 
 def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
@@ -2134,6 +2487,8 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
     if mode == "colour" and parts:
         _ground(work, parts, labels, part_label_idx, taken_l, leaders_by_label, clutter_labels,
                 dropped, plural, use_ai=use_ai, title=title, progress=progress)
+    if parts:
+        _refine_grounding(work, parts, labels, part_label_idx, taken_l, leaders_by_label, dropped, plural)
 
     # unlabelled parts: copies of a named shape, page background, or the whole object -----
     ink_clean = to_mask(ink & ~(tmask > 0) & ~(lmask > 0))
@@ -2280,8 +2635,7 @@ def _ground(work: np.ndarray, parts: list[Part], labels: list[Label], part_label
         lds = leaders_by_label.get(i) or []
         if not lds:
             return None
-        e = lds[0].end
-        return int(min(w - 1, max(0, round(e[0])))), int(min(h - 1, max(0, round(e[1]))))
+        return _nudge_tip(lds[0], parts, w, h)
 
     seeds: list[grounding.Seed] = []
     seen: set[str] = set()
@@ -2316,7 +2670,8 @@ def _ground(work: np.ndarray, parts: list[Part], labels: list[Label], part_label
         taken_l.add(s.label_idx)
         dropped[:] = [d for d in dropped if d != f"{s.name} (too small to feel)"]
 
-    grounding.ground_labels(work, parts, seeds, owners, on_named)
+    grounding.ground_labels(work, parts, seeds, owners, on_named,
+                            minor=lambda nm: bool(_LANDMARK_RE.search(nm)))
 
     # still unplaced (pointer lines lost in a painting): ask the image model where each one is
     rest = [sd for sd in seeds if sd.label_idx not in taken_l]
@@ -2351,6 +2706,190 @@ def _ground(work: np.ndarray, parts: list[Part], labels: list[Label], part_label
         parts.append(np_)
         blocked |= mb
         on_named(pt, np_)
+
+
+def _nudge_tip(Ld, parts: list[Part], w: int, h: int, reach: int = 15) -> tuple[int, int]:
+    """F01: pointer lines often stop on a structure's drawn outline, a few pixels short of its
+    coloured region. Step forward along the pointer's own direction until the tip is inside a
+    region (at most `reach` px); otherwise keep the drawn end."""
+    ex, ey = float(Ld.end[0]), float(Ld.end[1])
+    clamp = lambda x, y: (int(min(w - 1, max(0, round(x)))), int(min(h - 1, max(0, round(y)))))
+    hd = getattr(Ld, "heading", None)
+    if hd is None or getattr(Ld, "dot_end", False):
+        return clamp(ex, ey)
+    for step in range(0, reach + 1):
+        x, y = clamp(ex + hd[0] * step, ey + hd[1] * step)
+        if any(p.mask is not None and p.mask[y, x] for p in parts):
+            return x, y
+    return clamp(ex, ey)
+
+
+_LANDMARK_RE = re.compile(r"\b(suture|fossa|foramen|meatus|notch|tubercle|tuberosity|protuberance|pterion|"
+                          r"apex|sulcus|groove|crest|condyle|fissure|junction|node|point|hilum|hilus)\b")
+MAX_LANDMARKS = 8
+LANDMARK_MAX_FRAC = 0.015    # a region named like a landmark but bigger than this is a mismatch
+LANDMARK_EXTRA_PARTS = 8     # landmark spots may exceed the region cap by this many
+
+
+def _refine_grounding(work: np.ndarray, parts: list[Part], labels: list[Label], part_label_idx,
+                      taken_l: set, leaders_by_label: dict, dropped: list, plural) -> None:
+    """F01: after naming and carving, (1) take unexplained distant pieces out of named parts, and
+    (2) mark landmark labels (sutures, fossae, tubercles ...) whose pointer lands on the drawing
+    but on no traceable region with a small spot at the pointer tip, instead of leaving the target
+    silently missing. Markers are tagged match_method="landmark" so review can ask for a check."""
+    from engine import grounding
+    grounding.ORIGIN.clear()
+    h, w = work.shape[:2]
+    N = h * w
+    tips: dict[str, list[tuple[int, int]]] = {}
+    for i, lb in enumerate(labels):
+        if lb.part_id is None:
+            continue
+        for Ld in leaders_by_label.get(i, []):
+            tips.setdefault(lb.part_id, []).append(
+                (int(min(w - 1, max(0, round(Ld.end[0])))), int(min(h - 1, max(0, round(Ld.end[1]))))))
+    # a "part" lying along a traced pointer line is the line itself, not a structure: drop it and
+    # release its label (the digestive "ascending colon" and heart "septum" were pointer lines)
+    lines = np.zeros((h, w), np.uint8)
+    for lds in leaders_by_label.values():
+        for Ld in lds:
+            pts = np.asarray(Ld.points, np.int32).reshape(-1, 1, 2)
+            if len(pts) >= 2:
+                cv2.polylines(lines, [pts], False, 255, 7)
+    if lines.any():
+        on_line = lines > 0
+        for p in list(parts):
+            if p.mask is None or p.match_method in ("teacher", "ai"):
+                continue
+            pm = p.mask > 0
+            a_ = int(pm.sum())
+            if a_ == 0:
+                continue
+            if (pm & on_line).sum() >= 0.7 * a_:
+                parts.remove(p)
+                for i, lb in enumerate(labels):
+                    if lb.part_id == p.id:
+                        lb.part_id = None
+                        taken_l.discard(i)
+                tips.pop(p.id, None)
+
+    def release(ids):
+        for i, lb in enumerate(labels):      # names released because their pointer lands elsewhere
+            if lb.part_id in ids:
+                lb.part_id = None
+                taken_l.discard(i)
+        for pid in ids:
+            tips.pop(pid, None)
+
+    def name_by_tips() -> bool:
+        """A leftover pointer that lands on an unnamed piece names it (the jaw freed from
+        "nasal bone"). Tips often stop on the drawn outline, so a small tolerance is used."""
+        taken_names = {p.name for p in parts if p.name and not p.name.startswith("part ")}
+        cands = []                                   # (fraction of the tip window on the piece, ...)
+        for i in part_label_idx:
+            if i in taken_l or labels[i].part_id is not None:
+                continue
+            nm = clean_name(labels[i].text)
+            lds = leaders_by_label.get(i) or []
+            if not nm or nm in taken_names or not lds or name_problem(nm) or _LANDMARK_RE.search(nm):
+                continue
+            x = int(min(w - 1, max(0, round(lds[0].end[0]))))
+            y = int(min(h - 1, max(0, round(lds[0].end[1]))))
+            for qi, q in enumerate(parts):
+                if q.mask is None or (q.name and not q.name.startswith("part ")):
+                    continue
+                win = q.mask[max(0, y - 5):y + 6, max(0, x - 5):x + 6]
+                f = float((win > 0).mean()) if win.size else 0.0
+                if f >= 0.2:
+                    cands.append((f, i, qi, nm, x, y))
+        renamed = False
+        used_q: set[int] = set()
+        for f, i, qi, nm, x, y in sorted(cands, key=lambda c: -c[0]):   # best-placed tips first
+            if qi in used_q or i in taken_l or nm in taken_names:
+                continue
+            q = parts[qi]
+            q.name, q.label_text, q.match_method = nm, clean_text(labels[i].text) or labels[i].text, "leader"
+            labels[i].part_id = q.id
+            taken_l.add(i)
+            taken_names.add(nm)
+            used_q.add(qi)
+            tips[q.id] = [(x, y)]
+            renamed = True
+        return renamed
+
+    for round_ in range(3):
+        try:
+            added, ungrounded = grounding.prune_far_fragments(parts, tips, plural, N)
+        except Exception:  # pragma: no cover - never lose the analysis over a refinement
+            added, ungrounded = [], []
+        if round_ == 0:
+            # a suture / fossa / notch is a line or a spot: a big filled region under that name is
+            # a leftover that inherited the label, not the structure (the "coronal suture" region)
+            for p in parts:
+                if not (p.id in tips and p.name and _LANDMARK_RE.search(p.name)
+                        and p.match_method not in ("teacher", "ai", "landmark")):
+                    continue
+                at_tip = any(p.mask[max(0, y - 4):y + 5, max(0, x - 4):x + 5].any() for x, y in tips[p.id])
+                if p.area > LANDMARK_MAX_FRAC * N or not at_tip:
+                    # a landmark must be where its pointer ends; otherwise mark that spot instead
+                    p.name, p.label_text, p.match_method = "", None, "none"
+                    ungrounded.append(p.id)
+        release(ungrounded)
+        try:
+            grounding.split_unnamed_pieces(parts, N)
+        except Exception:  # pragma: no cover
+            pass
+        if not name_by_tips() and not added and not ungrounded:
+            break
+    try:
+        left_out = grounding.regroup_unclaimed(parts)
+    except Exception:  # pragma: no cover
+        grounding.ORIGIN.clear()
+        left_out = 0
+    if left_out:
+        dropped.append(f"{left_out} unlabelled {'piece' if left_out == 1 else 'pieces'} separated from named parts "
+                       "(switched off; switch on in Fix parts if needed)")
+    # landmarks
+    names = {p.name for p in parts if p.name}
+    occupied = np.zeros((h, w), bool)
+    for p in parts:
+        if p.mask is not None:
+            occupied |= p.mask > 0
+    r = max(6, int(round(0.011 * float(np.hypot(h, w)))))
+    made = 0
+    for i in part_label_idx:
+        if made >= MAX_LANDMARKS or len(parts) >= grounding.MAX_TOTAL_PARTS + LANDMARK_EXTRA_PARTS:
+            break
+        if i in taken_l or labels[i].part_id is not None:
+            continue
+        nm = clean_name(labels[i].text)
+        lds = leaders_by_label.get(i) or []
+        if not nm or nm in names or not lds or name_problem(nm) or not _LANDMARK_RE.search(nm):
+            continue
+        x = int(min(w - 1, max(0, round(lds[0].end[0]))))
+        y = int(min(h - 1, max(0, round(lds[0].end[1]))))
+        disk = np.zeros((h, w), np.uint8)
+        cv2.circle(disk, (x, y), r, 255, -1)
+        db = disk > 0
+        if occupied[db].mean() < 0.3:
+            continue                                  # the pointer ends on paper, not on the drawing
+        for q in parts:                               # the spot is cut out of what it sits on
+            if q.mask is not None and ((q.mask > 0) & db).any():
+                rest = (q.mask > 0) & ~db
+                if rest.sum() >= 40:
+                    grounding._set_mask(q, (rest * 255).astype(np.uint8))
+        col = np.median(work[db], axis=0)
+        mp = Part(id=f"m{len(parts) + 1}", name=nm, description="", key="",
+                  color=(int(col[0]), int(col[1]), int(col[2])), mask=disk,
+                  polygons=mask_polygons(disk, 1.5), bbox=mask_bbox(disk), area=int(db.sum()), count=1,
+                  include=True, kind="region", label_text=clean_text(labels[i].text) or labels[i].text,
+                  match_method="landmark")
+        parts.append(mp)
+        labels[i].part_id = mp.id
+        taken_l.add(i)
+        names.add(nm)
+        dropped[:] = [d for d in dropped if d != f"{nm} (too small to feel)"]
+        made += 1
 
 
 def _outline_blob(img: np.ndarray, x: int, y: int, N: int, R: int = 130):
@@ -2459,6 +2998,12 @@ def _split_colon_headings(labels: list[Label]) -> None:
                 lb.colon_heading = True          # the lines under it are its definition, not more name
 
 
+def _ends_with_connector(text: str) -> bool:
+    """F01: "Greater wing of" / "sphenoid bone" - a line ending in a connector continues below."""
+    words = text.strip().split()
+    return bool(words) and words[-1].lower() in {"of", "and", "the", "to", "for", "with"}
+
+
 def _join_label_lines(labels: list[Label], leaders_by_label: dict) -> None:
     """TS-02: a label printed on two lines ("Small" / "Intestine") is one name.
 
@@ -2487,7 +3032,8 @@ def _join_label_lines(labels: list[Label], leaders_by_label: dict) -> None:
             if not (-0.5 * h <= gap <= 0.6 * h) or ov < 0.3 * min(ax1 - ax0, bx1 - bx0):
                 continue
             if a.text.rstrip().endswith(":") or getattr(a, "colon_heading", False) \
-                    or getattr(b, "colon_heading", False) or len((a.text + " " + b.text).split()) > 4:
+                    or getattr(b, "colon_heading", False) \
+                    or len((a.text + " " + b.text).split()) > (6 if _ends_with_connector(a.text) else 4):
                 continue
             if is_term(a.text) and is_term(b.text) and not is_term(f"{a.text} {b.text}") \
                     and not (b.text.strip()[:1].islower() and a.text.strip()[:1].isupper()):
@@ -2595,8 +3141,9 @@ def _resolve_unnamed(parts: list[Part], ink_clean: np.ndarray, title: str, dropp
     named = [p for p in parts if p.name]
     alive = list(parts)
 
-    # (a1) small unnamed components hugging a named part are its shading (cloud shadow)
-    for u in [p for p in alive if not p.name]:
+    # (a1) small unnamed components hugging a named part are its shading (cloud shadow).
+    # Pieces already cut away from a named part (switched off by _refine_grounding) stay apart.
+    for u in [p for p in alive if not p.name and p.include]:
         n, cc, st, _ = cv2.connectedComponentsWithStats((u.mask > 0).astype(np.uint8), connectivity=8)
         keep = np.zeros(n, bool)
         moved = False
@@ -2623,7 +3170,7 @@ def _resolve_unnamed(parts: list[Part], ink_clean: np.ndarray, title: str, dropp
             u.area, u.count = int((m > 0).sum()), int(keep.sum())
 
     # (a2) an unnamed shape that looks like a named one is another one of those
-    for u in [p for p in alive if not p.name]:
+    for u in [p for p in alive if not p.name and p.include]:
         cu = _main_contour(u.mask)
         if cu is None:
             continue

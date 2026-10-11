@@ -29,6 +29,7 @@ export function PartRow({
   onHover,
   onChange,
   onSplit,
+  onFixOutline,
 }: {
   part: Part;
   draft: PartDraft;
@@ -47,6 +48,7 @@ export function PartRow({
   onHover: (id: string | null) => void;
   onChange: (patch: Partial<PartDraft>) => void;
   onSplit: () => void;
+  onFixOutline?: () => void;
 }) {
   const rowRef = useRef<HTMLLIElement>(null);
   useEffect(() => {
@@ -106,7 +108,7 @@ export function PartRow({
                 <span className="tex__label">{textureName(part.texture)}</span>
               </span>
             ) : (
-              <span className="tag tag--off">Left out</span>
+              <span className="tag tag--off">Removed</span>
             )}
             {part.count > 1 && <span className="tag" title={`${part.count} separate shapes`}>×{part.count}</span>}
             {changed && <span className="tag tag--edit">Edited</span>}
@@ -166,6 +168,30 @@ export function PartRow({
                   onChange={(e) => onChange({ description: e.target.value })}
                 />
               </Field>
+              <div className="prow__remove">
+                {draft.include ? (
+                  <>
+                    {onFixOutline && (
+                      <button type="button" className="btn btn--secondary btn--sm" onClick={onFixOutline} disabled={busy}>
+                        Fix outline
+                      </button>
+                    )}
+                    <button type="button" className="btn btn--ghost btn--sm btn--danger" onClick={() => onChange({ include: false })} disabled={busy}>
+                      Remove part
+                    </button>
+                    <span className="prow__hint">Wrong shape or not needed? It leaves the student view, Braille key, audio and downloads. You can restore it.</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="prow__hint" role="status">
+                      Removed{part.include ? " (not saved yet)" : ""}. The student won't find this part.
+                    </span>
+                    <button type="button" className="btn btn--secondary btn--sm" onClick={() => onChange({ include: true })} disabled={busy}>
+                      {part.include ? "Undo" : "Restore part"}
+                    </button>
+                  </>
+                )}
+              </div>
               {part.count > 1 && (
                 <div className="prow__split">
                   <p>

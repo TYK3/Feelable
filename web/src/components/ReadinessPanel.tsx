@@ -12,7 +12,8 @@ const ACTION_LABEL: Record<string, string> = {
   merge: "Merge parts",
   retake: "New photo",
   reduce: "Choose parts",
-  draw: "Draw it",
+  draw: "Add it",
+  shorten: "Edit title",
 };
 
 /** UX07: say what actually needs looking at, e.g. "Review 2 names and the missing pancreas." */
@@ -58,13 +59,20 @@ export function ReadinessPanel({
   const { status, issues, geometry } = readiness;
   const actionable = issues.filter((i) => i.severity !== "info");
   const info = issues.filter((i) => i.severity === "info");
-  const copy = STATUS_COPY[status];
+  // F04: "teacher approved" and "all checks passed" are different things; say which applies
+  const openChecks = actionable.filter((i) => i.severity === "warn").length;
+  const approvedOpen = readiness.approved && status === "needs_review";
+  const copy = approvedOpen
+    ? { label: `Approved — ${openChecks} ${openChecks === 1 ? "check" : "checks"} still open`, short: "Approved, open checks" }
+    : STATUS_COPY[status];
 
   const lead =
     status === "blocked"
       ? "Fix the problems below before you print or share."
       : status === "ready"
-        ? "You checked this version. Print it or share it with your student."
+        ? "You approved this version and nothing is flagged. Print it or share it with your student."
+        : approvedOpen
+          ? "You approved this version, so students can use it, but these checks are still open. Fix them and approve again, or keep them as known limitations."
         : actionable.length
           ? reviewLead(actionable)
           : "Draft — nothing flagged. Feelable can't judge meaning, so look over the names before you publish.";
@@ -114,10 +122,10 @@ export function ReadinessPanel({
                   <IconArrowRight size={16} />
                 </button>
               )}
-              {i.action === "draw" && i.bbox && canEdit && onDetail && (
+              {i.action === "draw" && (i.target_bbox || i.bbox) && canEdit && onDetail && (
                 <button type="button" className="issue__act issue__act--alt" onClick={() => onDetail(i)}>
                   <IconZoom size={16} />
-                  Detail view
+                  Make a close-up
                 </button>
               )}
             </li>
@@ -140,6 +148,7 @@ export function ReadinessPanel({
           {readiness.approved ? (
             <p className="ready__approved">
               <IconCheck size={18} strokeWidth={3} /> Approved for teaching (version {job.version ?? 1})
+              {openChecks > 0 && <span> · {openChecks} {openChecks === 1 ? "check" : "checks"} still open</span>}
             </p>
           ) : (
             <Button variant="ink" size="lg" className="btn--block" onClick={onApprove} busy={approving} disabled={dirty || approving}>

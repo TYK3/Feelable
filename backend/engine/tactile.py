@@ -504,7 +504,7 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
                                            margin, ppm)
 
     # ---------------------------------------------------------------- legend page
-    legend_ink, legend = _legend(included, W, H, margin, ppm)
+    legend_ink, legend, legend_more = _legend(included, W, H, margin, ppm)
     cut = [e for e in legend if e.get("cut")]
     if cut:
         analysis.warnings = list(analysis.warnings or []) + [
@@ -518,7 +518,7 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
     return TactileResult(
         width=W, height=H, px_per_mm=ppm, ink=ink, legend_ink=legend_ink, print_layer=print_layer,
         part_polygons=part_polygons, key_positions=key_positions, textures=textures, legend=legend,
-        checks=checks, transform=(float(scale), float(ox), float(oy)),
+        checks=checks, transform=(float(scale), float(ox), float(oy)), legend_pages=legend_more,
     )
 
 
@@ -853,17 +853,16 @@ def _legend(included, W, H, margin, ppm):
         if sum(widths) + gutter * (ncols - 1) <= avail:
             layout = (per, cols, widths, True)
             break
-    if layout is None:   # no room for print beside braille: braille only, truncate if needed
+    if layout is None:   # no room for print beside braille: braille only, in columns
         ncols = max(1, math.ceil(n / rows_fit))
         per = math.ceil(n / ncols) if n else 0
         cols = [rows[c * per:(c + 1) * per] for c in range(ncols)]
         colw = (avail - gutter * (ncols - 1)) / ncols
         maxc = max(3, int((colw - mm(4.0)) // mm(braille.BRAILLE_CELL_SPACING_MM)) + 1)
-        for col in cols:
-            for r in col:
-                if len(r["cells"]) > maxc:
-                    r["cut"] = True
-                    r["cells"] = r["cells"][:maxc]
+        if any(len(r["cells"]) > maxc for col in cols for r in col):
+            # F03: a name would have to be cut. Never cut braille: wrap long names onto
+            # continuation lines under the name column and add key pages as needed.
+            return _legend_paged(included, W, H, margin, ppm, kmax)
         layout = (per, cols, [colw] * ncols, False)
     per, cols, widths, with_print = layout
     legend = []
@@ -883,7 +882,73 @@ def _legend(included, W, H, margin, ppm):
                 entry["print"] = r["print"]
             legend.append(entry)
         x += w + gutter
-    return ink, legend
+    return ink, legend, []
+
+
+def _wrap_words(text: str, font, max_w: float) -> list[str]:
+    lines, cur = [], ""
+    for word in text.split():
+        trial = f"{cur} {word}".strip()
+        if cur and text_box(trial, font)[0] > max_w:
+            lines.append(cur)
+            cur = word
+        else:
+            cur = trial
+    if cur:
+        lines.append(cur)
+    return lines or [""]
+
+
+def _legend_paged(included, W, H, margin, ppm, kmax):
+    """F03: single-column key over as many pages as needed. Each row: key cells, two blank cells,
+    the name in braille wrapped at word boundaries onto continuation lines that stay indented
+    under the name (so every line still belongs to its key); grey print for the teacher beside it."""
+    mm = lambda v: v * ppm
+    pitch = mm(LEGEND_PITCH_MM)
+    cell = mm(braille.BRAILLE_CELL_SPACING_MM)
+    cell_h = mm(braille.cell_height_mm())
+    y_start = margin + 2 * pitch
+    lines_fit = max(1, int((H - margin - cell_h - y_start) // pitch) + 1)
+    font = print_font(ppm)
+    avail = W - 2 * margin
+    braille_w = 0.62 * avail
+    maxc = max(kmax + 6, int((braille_w - mm(braille.BRAILLE_DOT_SPACING_MM + braille.BRAILLE_DOT_DIAMETER_MM))
+                             // cell) + 1)
+    indent = kmax + 2
+    name_c = maxc - indent
+    print_x_off = mm(braille.cells_width_mm(maxc)) + mm(5)
+    print_w = max(mm(30), avail - print_x_off)
+    pages: list[np.ndarray] = []
+    legend: list[dict] = []
+    ink = None
+    line = lines_fit                      # force a new page for the first row
+    for p in included:
+        kc = braille.to_cells(p.key)
+        name_lines = _wrap_cells(p.name, name_c) or [braille.to_cells(p.key)]
+        b_lines = [kc + [0] * (indent - len(kc)) + name_lines[0]] + [[0] * indent + nl for nl in name_lines[1:]]
+        pr = f"{p.key} = {p.name}"
+        p_lines = _wrap_words(pr, font, print_w)
+        need = max(len(b_lines), len(p_lines))
+        if line + need > lines_fit:
+            ink = np.zeros((H, W), np.uint8)
+            braille.draw_braille(ink, "key", margin, margin, ppm)
+            pages.append(ink)
+            line = 0
+        y0 = y_start + line * pitch
+        th = text_box("Ag", font)[1]
+        for j, cells in enumerate(b_lines):
+            braille.draw_cells(ink, cells, int(margin), int(round(y0 + j * pitch)), ppm)
+        entry = {"part_id": p.id, "key": p.key, "name": p.name, "x": int(margin), "y": int(round(y0)),
+                 "page": len(pages) - 1, "lines": len(b_lines), "print": pr,
+                 "print_x": int(margin + print_x_off), "print_y": int(round(y0 + (cell_h - th) / 2)),
+                 "print_lines": [[int(margin + print_x_off), int(round(y0 + j * pitch + (cell_h - th) / 2)), t]
+                                 for j, t in enumerate(p_lines)]}
+        legend.append(entry)
+        line += need
+    if not pages:
+        pages = [np.zeros((H, W), np.uint8)]
+        braille.draw_braille(pages[0], "key", margin, margin, ppm)
+    return pages[0], legend, pages[1:]
 
 
 def _thinnest_line_mm(ink, ppm):

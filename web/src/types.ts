@@ -30,11 +30,13 @@ export interface ReadinessIssue {
   severity: "block" | "warn" | "info";
   message: string;
   part_id?: string;
-  action?: "rename" | "include" | "split" | "merge" | "retake" | "reduce" | "draw";
+  action?: "rename" | "include" | "split" | "merge" | "retake" | "reduce" | "draw" | "shorten";
   /** UX07: the label text of a possibly-missing part (action "draw"). */
   target?: string;
   /** UX07: source-image bbox [x0,y0,x1,y1] of that label, for a detail view. */
   bbox?: [number, number, number, number];
+  /** F08: source-image box around where the label's pointer ends (the structure itself). */
+  target_bbox?: [number, number, number, number] | null;
 }
 
 export interface Readiness {
@@ -113,7 +115,15 @@ export interface JobEdit {
   merge?: string[];              // v2: merge parts (first id kept)
   approved?: boolean;            // v2: teacher approval
   base_version?: number;         // v2: 409 on conflict
-  add_part?: { name: string; polygon: [number, number][] };   // TS-09: teacher-drawn part (source coords)
+  add_part?: {
+    name: string;
+    polygon: [number, number][];
+    /** cut (default): cut it out of what it covers; keep: overlap (nested detail); replace: also switch fully covered parts off */
+    overlap?: "cut" | "keep" | "replace";
+    /** add the area to (or with mode "remove", take it from) an existing part instead of making a new one */
+    into?: string | null;
+    mode?: "add" | "remove";
+  };   // TS-09: teacher-drawn part (source coords)
 }
 
 export interface Sample {
@@ -122,6 +132,10 @@ export interface Sample {
   thumb_url: string;
   kind: string;
   credit?: string;   // e.g. "OpenStax Anatomy & Physiology, CC BY 4.0"
+  group?: "simple" | "complex";
+  objective?: string;
+  /** reviewed corrections replayed when the example was prepared (0 = automatic result as is) */
+  corrections?: number;
 }
 
 export interface Health {

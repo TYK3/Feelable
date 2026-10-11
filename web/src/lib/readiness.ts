@@ -49,6 +49,12 @@ export function whyText(method: string | undefined, label: string | null | undef
       return l ? `Its pointer line for ${l} ends here: Feelable zoomed in and traced the shape around it.` : "Traced around where a pointer line ends.";
     case "ai":
       return l ? `The image AI found ${l} in the picture and Feelable traced it. Check the outline.` : "Named by AI from the picture. Check the name is right.";
+    case "legend":
+      return l ? `Named from the chart legend entry ${l}, whose marker has the same colour. Check it.` : "Named from the chart legend by colour. Check it.";
+    case "landmark":
+      return l
+        ? `The pointer for ${l} ends on a spot rather than a whole shape, so Feelable marked that spot. Check it is in the right place.`
+        : "A marked spot where a pointer ends. Check it is in the right place.";
     case "teacher":
       return "Named by you.";
     default:
@@ -57,5 +63,5 @@ export function whyText(method: string | undefined, label: string | null | undef
 }
 
 export function isUncertain(method: string | undefined) {
-  return method === "nearest" || method === "ai" || method === "none" || !method;
+  return method === "nearest" || method === "ai" || method === "landmark" || method === "legend" || method === "none" || !method;
 }

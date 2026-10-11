@@ -488,6 +488,11 @@ textarea.rv-title__input { display: block; resize: none; overflow: hidden; }
 .pfield__count.is-near { color: var(--warn-ink); font-weight: 700; }
 .prow__split { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--cream-2); font-size: 14px; }
 .prow__split p { flex: 1 1 220px; }
+.prow__remove { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 10px; }
+.prow__remove .btn { min-height: 44px; }
+.prow__hint { flex: 1 1 220px; font-size: 14px; color: var(--ink-2, #4a4a55); }
+.peek__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.peek__actions .btn { min-height: 44px; }
 .prow__lock { font-size: 13px; color: var(--muted); }
 .prow__read { font-size: 15px; }
 .empty-parts { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; margin-top: 12px; font-size: 15px; color: var(--ink-2); }
@@ -586,6 +591,7 @@ textarea.rv-title__input { display: block; resize: none; overflow: hidden; }
 .edlg__tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
 .edlg__count { margin-right: auto; font-size: 14px; color: var(--ink-2, #4a4a55); }
 .edlg__err { margin: 8px 0 0; color: #b42318; }
+.edlg__hint { margin: 0 0 10px; padding: 8px 12px; border-left: 4px solid #FFD43B; background: rgba(255, 212, 59, 0.14); font-size: 15px; line-height: 1.4; }
 .edlg__foot { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 16px; border-top: 1.5px solid var(--line, #e8e2d2); background: var(--surface, #fff); }
 .edlg__foot .btn { min-height: 44px; }
 @media (max-width: 480px) { .edlg__title { font-size: 18px; } .edlg__body { padding: 10px 14px 14px; } .edlg__foot .btn { flex: 1; } }
@@ -641,3 +647,29 @@ textarea.rv-title__input { display: block; resize: none; overflow: hidden; }
 .reads__n { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--banana); color: var(--banana-ink); font-family: var(--display); font-weight: 800; font-size: 15px; border: 2px solid var(--ink); }
 .reads__foot { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
 .reads__credit { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+/* assisted draw tool */
+.draw__row { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.draw__row .edlg__field { flex: 1 1 220px; }
+.draw__row select { min-height: 44px; width: 100%; font: inherit; border-radius: 10px; border: 2px solid var(--line, #d6d3c9); padding: 0 10px; background: #fff; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; margin: 10px 0; padding: 4px; border-radius: 12px; background: var(--cream-2, #f3efe3); }
+.seg__btn { min-height: 44px; padding: 0 14px; border: 0; border-radius: 9px; background: transparent; font: inherit; font-weight: 600; cursor: pointer; color: var(--ink, #17171c); }
+.seg__btn.is-on { background: var(--ink, #17171c); color: #fff; }
+.seg__btn:focus-visible { outline: 3px solid #FFD43B; outline-offset: 2px; }
+.draw__canvas { touch-action: none; }
+.draw__status { margin: 8px 0 0; min-height: 1.4em; font-size: 15px; }
+.draw__choice { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.draw__choice p { margin: 0; font-weight: 600; }
+.draw__choice-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (prefers-reduced-motion: reduce) { .seg__btn { transition: none; } }
+
+/* gallery: simple start, five complex systems, show all */
+.gallery__note { margin: 0 0 6px; font-size: 14px; color: var(--muted); }
+.gallery__h { margin: 22px 0 10px; font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+.sample__obj { grid-column: 1 / -1; font-size: 13.5px; line-height: 1.35; margin-top: 6px; color: var(--ink, #17171c); }
+.sample__prep { grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 6px; }
+.sample--complex { border-color: var(--line-strong, #17171c); }
+.samples--complex { grid-auto-rows: auto; }
+.gallery__more { margin-top: 16px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--line-strong, #17171c); background: var(--surface, #fff); font: inherit; font-weight: 700; cursor: pointer; }
+.gallery__more:focus-visible { outline: 3px solid var(--banana, #FFD43B); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .sample, .sample__go { transition: none; } button.sample:hover { transform: none; } }

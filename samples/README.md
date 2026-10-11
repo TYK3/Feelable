@@ -36,3 +36,21 @@ Images are drawn at 2× and downsampled, which gives anti-aliased edges like a r
 ## OCR check
 
 `rapidocr_onnxruntime` reads 100 % of `expected_parts` (plus the arrow labels) on every sample, including the photo.
+
+## Gallery of 15 (October 2026)
+
+`manifest.json` now also has `group` (`simple` / `complex`), `objective` (what a student learns) and
+`review`: reviewed corrections replayed by `backend/precompute_samples.py` when the gallery cache is
+built (rename, describe, remove, merge, tap-to-outline, draw, cut a piece out of a part — the same
+operations a teacher has in Feelable). **`make_samples.py` rewrites `manifest.json`: re-apply the
+`group`, `objective` and `review` fields afterwards**, and run the release gate:
+
+```bash
+cd backend && python ../qa/check_gallery.py /tmp/gallery-check   # exactly 15, five complex, zero unresolved targets
+```
+
+| id | file | source |
+|---|---|---|
+| `heart-internal` | heart-internal.jpg | OpenStax *Anatomy and Physiology* 2e, Figure 19.9 "Internal Anatomy of the Heart", CC BY 4.0 |
+| `human-organs-notebook` | human-organs-notebook.png | hand-drawn classroom notebook page supplied by the Feelable team |
+| `mixed-circuit` | mixed-circuit.jpg | OpenStax *University Physics Volume 2*, Figure 10.14 (resistors in series and parallel), CC BY 4.0 |

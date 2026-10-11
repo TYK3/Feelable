@@ -24,6 +24,7 @@ export function PartsPanel({
   onSplit,
   onMerge,
   onDraw,
+  onFixOutline,
   onCloseup,
   onAiDescribe,
   onNewPhoto,
@@ -48,6 +49,8 @@ export function PartsPanel({
   onSplit: (id: string) => void;
   onMerge: (ids: string[]) => void;
   onDraw?: () => void;
+  /** open the draw tool on an existing part to add or trim area */
+  onFixOutline?: (id: string) => void;
   onCloseup?: () => void;
   onAiDescribe: () => void;
   onNewPhoto: () => void;
@@ -103,7 +106,7 @@ export function PartsPanel({
             </Button>
             {onDraw && (
               <Button variant="secondary" size="sm" icon={<IconPencil size={16} />} onClick={onDraw} disabled={busy || !!lock} title={lock ?? "Outline a part the scan missed"}>
-                Draw a missing part
+                Add missing part
               </Button>
             )}
             {onCloseup && (
@@ -160,6 +163,7 @@ export function PartsPanel({
             onHover={onHover}
             onChange={(patch) => onChange(p.id, patch)}
             onSplit={() => onSplit(p.id)}
+            onFixOutline={onFixOutline && !lock ? () => onFixOutline(p.id) : undefined}
           />
         ))}
       </ul>

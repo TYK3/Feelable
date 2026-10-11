@@ -53,7 +53,7 @@ def test_samples_with_manifest_and_from_sample(client, samples_dir):
          "expected_parts": ["nucleus"], "min_parts": 1, "photo": False}]))
     r = client.get("/api/samples")
     assert r.json() == [{"id": "plant-cell", "title": "Plant cell", "thumb_url": "/samples/plant-cell.png",
-                         "kind": "colour"}]
+                         "kind": "colour", "group": "simple", "objective": "", "corrections": 0}]
     img = client.get("/samples/plant-cell.png")
     assert img.status_code == 200 and img.headers["content-type"] == "image/png"
     assert client.get("/samples/manifest.json").status_code == 404

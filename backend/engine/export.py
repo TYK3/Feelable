@@ -38,13 +38,18 @@ def _ink_rgb(ink: np.ndarray) -> np.ndarray:
     return out
 
 
-def _legend_print(tactile: TactileResult, img: Image.Image, scale: float) -> None:
+def _legend_print(tactile: TactileResult, img: Image.Image, scale: float, page: int = 0) -> None:
     """Grey print beside each braille legend row (scale = output px per tactile px)."""
     d = ImageDraw.Draw(img)
     ppm = tactile.px_per_mm * scale
     font = print_font(ppm)
     for e in tactile.legend:
-        if "print_x" in e:
+        if int(e.get("page", 0)) != page:
+            continue
+        if e.get("print_lines"):                     # F03: wrapped print on a paged key
+            for x, y, t in e["print_lines"]:
+                d.text((x * scale, y * scale), t, font=font, fill=PRINT_GREY, anchor="lt")
+        elif "print_x" in e:
             d.text((e["print_x"] * scale, e["print_y"] * scale), e["print"], font=font, fill=PRINT_GREY, anchor="lt")
     # heading print beside the braille word "key"
     margin_px = 12.0 * tactile.px_per_mm
@@ -54,15 +59,35 @@ def _legend_print(tactile: TactileResult, img: Image.Image, scale: float) -> Non
            font=small, fill=PRINT_GREY, anchor="lt")
 
 
-def legend_rgb(tactile: TactileResult, scale: float = 1.0) -> np.ndarray:
-    H, W = tactile.legend_ink.shape
+def legend_pages(tactile: TactileResult) -> list[np.ndarray]:
+    """All braille key pages (raised ink), first page first."""
+    return [tactile.legend_ink] + list(getattr(tactile, "legend_pages", None) or [])
+
+
+def legend_rgb(tactile: TactileResult, scale: float = 1.0, page: int = 0) -> np.ndarray:
+    pages = legend_pages(tactile)
+    H, W = pages[page].shape
     size = (int(round(W * scale)), int(round(H * scale)))
     img = Image.new("RGB", size, "white")
-    _legend_print(tactile, img, scale)
+    _legend_print(tactile, img, scale, page)
     arr = np.array(img)
-    ink = _hires(tactile.legend_ink, size)
+    ink = _hires(pages[page], size)
     arr[ink > 0] = 0
     return arr
+
+
+def legend_rgb_all(tactile: TactileResult, scale: float = 1.0) -> np.ndarray:
+    """Every key page stacked top to bottom with a thin grey rule between pages (legend.png)."""
+    imgs = [legend_rgb(tactile, scale, i) for i in range(len(legend_pages(tactile)))]
+    if len(imgs) == 1:
+        return imgs[0]
+    rule = np.full((6, imgs[0].shape[1], 3), 200, np.uint8)
+    out = []
+    for i, im in enumerate(imgs):
+        if i:
+            out.append(rule)
+        out.append(im)
+    return np.concatenate(out, 0)
 
 
 def _hires(ink: np.ndarray, size: tuple[int, int]) -> np.ndarray:
@@ -317,16 +342,19 @@ def export_all(analysis: Analysis, tactile: TactileResult, outdir: str) -> dict[
         cv2.imwrite(files["original"], np.full((10, 10), 255, np.uint8))
     cv2.imwrite(files["png"], 255 - ((tactile.ink > 0).astype(np.uint8) * 255))
     cv2.imwrite(files["print_png"], cv2.cvtColor(tactile.print_layer, cv2.COLOR_RGB2BGR))
-    cv2.imwrite(files["legend_png"], cv2.cvtColor(legend_rgb(tactile, 1.0), cv2.COLOR_RGB2BGR))
+    cv2.imwrite(files["legend_png"], cv2.cvtColor(legend_rgb_all(tactile, 1.0), cv2.COLOR_RGB2BGR))
 
     # PDF: paper size (landscape) at 300 dpi
     page_mm = (tactile.width / tactile.px_per_mm, tactile.height / tactile.px_per_mm)
     size = (int(round(page_mm[0] / 25.4 * DPI)), int(round(page_mm[1] / 25.4 * DPI)))
     page1 = _page_hires(tactile.print_layer, tactile.ink, size)
-    page2 = cv2.cvtColor(legend_rgb(tactile, size[0] / tactile.width), cv2.COLOR_RGB2GRAY)
-    if (page2.shape[1], page2.shape[0]) != size:
-        page2 = cv2.resize(page2, size, interpolation=cv2.INTER_NEAREST)
-    _write_pdf(files["pdf"], [page1, page2], page_mm)
+    key_pages = []
+    for i in range(len(legend_pages(tactile))):
+        pg = cv2.cvtColor(legend_rgb(tactile, size[0] / tactile.width, i), cv2.COLOR_RGB2GRAY)
+        if (pg.shape[1], pg.shape[0]) != size:
+            pg = cv2.resize(pg, size, interpolation=cv2.INTER_NEAREST)
+        key_pages.append(pg)
+    _write_pdf(files["pdf"], [page1] + key_pages, page_mm)
 
     if os.environ.get("FEELABLE_LAZY_STL") == "1":
         # built on first download instead (ensure_stl) — saves seconds on slow servers

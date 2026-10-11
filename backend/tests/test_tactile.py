@@ -176,7 +176,7 @@ def test_legend_wraps_into_columns():
     assign_keys(parts)
     W, H = int(297 * PX_PER_MM), int(210 * PX_PER_MM)
     m = int(PAGE_MARGIN_MM * PX_PER_MM)
-    ink, legend = _legend(parts, W, H, m, PX_PER_MM)
+    ink, legend, _more = _legend(parts, W, H, m, PX_PER_MM)
     assert [e["part_id"] for e in legend] == [p.id for p in parts]
     assert len({e["x"] for e in legend}) >= 2                      # second column used
     for e in legend:

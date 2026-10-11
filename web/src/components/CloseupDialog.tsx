@@ -13,6 +13,8 @@ export function CloseupDialog({
   size,
   title,
   initialBox,
+  hint,
+  target,
   onMake,
   onClose,
 }: {
@@ -20,6 +22,10 @@ export function CloseupDialog({
   size: [number, number];
   title: string;
   initialBox?: Box | null;
+  /** F08: why the box starts where it does. */
+  hint?: string;
+  /** F08: where the label's pointer ends, drawn dashed for reference. */
+  target?: Box;
   onMake: (file: File, box: Box) => void;
   onClose: () => void;
 }) {
@@ -107,6 +113,7 @@ export function CloseupDialog({
         </>
       }
     >
+      {hint && <p className="edlg__hint" role="status">{hint}</p>}
       <svg
         ref={svgRef}
         className="edlg__canvas"
@@ -135,6 +142,10 @@ export function CloseupDialog({
         onPointerUp={() => setStart(null)}
       >
         <image href={sourceUrl} x={0} y={0} width={w} height={h} />
+        {target && (
+          <rect x={target[0]} y={target[1]} width={target[2] - target[0]} height={target[3] - target[1]}
+            fill="none" stroke="#17171C" strokeWidth={sw} strokeDasharray={`${sw * 3} ${sw * 2}`} pointerEvents="none" />
+        )}
         {box && (
           <>
             <path

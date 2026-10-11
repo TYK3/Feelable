@@ -542,6 +542,13 @@ _BRAND_RE = re.compile(r"(basics\b|\binc\b|\bltd\b|\bcorp\b|\.com|www\.|®|©|�
 _PART_N_RE = re.compile(r"^part \d+$")
 
 
+def _long_anatomical(toks: list[str]) -> bool:
+    """F01: "greater wing of sphenoid bone", "mental protuberance of mandible" are single names:
+    up to six words joined by "of", with no verb and no trailing function word."""
+    return (len(toks) <= 6 and "of" in toks[1:-1] and sum(t in _FUNCTION_WORDS for t in toks) == 1
+            and toks[0] not in _FUNCTION_WORDS and not any(t in _VERBISH for t in toks))
+
+
 def name_problem(name: str) -> str | None:
     """Why an OCR-derived name must not be shown to a student (None = fine).
 
@@ -559,7 +566,7 @@ def name_problem(name: str) -> str | None:
         return "no letters"
     if any(re.search(r"[a-z]\d|\d[a-z]", t) for t in toks) and not re.fullmatch(r"[a-z]{1,3}\d{1,2}", toks[0]):
         return "noise"
-    if len(toks) >= 5:
+    if len(toks) >= 5 and not _long_anatomical(toks):
         return "sentence"
     if len(toks) >= 2 and (toks[-1] in _FUNCTION_WORDS or toks[0] in {"and", "or", "of", "to", "the", "that"}):
         return "fragment"
@@ -597,7 +604,7 @@ _CAPTION_WORDS = {"contains", "contain", "maintains", "maintain", "connect", "co
                   "allows", "allow", "filled", "made", "used", "called", "where", "which", "that", "this", "these",
                   "site", "stores", "store", "forms", "form", "keeps", "helps", "gives", "carries", "holds", "is", "are",
                   # F07: view captions and figure references are not structures to draw
-                  "view", "section", "plane", "projection", "figure", "fig", "diagram", "sagittal", "coronal"}
+                  "view", "section", "plane", "projection", "figure", "fig", "diagram"}
 
 
 def looks_like_structure(text: str) -> bool:
@@ -621,4 +628,36 @@ def looks_like_structure(text: str) -> bool:
         return False                                   # the tail of a caption: "an animal cell"
     if toks[0].endswith("ed") and len(toks) > 1:
         return False
-    return len(toks) <= 4
+    return len(toks) <= 4 or _long_anatomical(toks)
+
+
+# F07 / handover "parent and child lesson layers": common group headings and their members. A
+# heading such as "Small intestine:" over Duodenum / Jejunum / Ileum names a group of parts that
+# exist, not a missing structure. Member names match by containment ("ascending colon" ~ colon).
+GROUP_MEMBERS: dict[str, tuple[str, ...]] = {
+    "small intestine": ("duodenum", "jejunum", "ileum"),
+    "large intestine": ("cecum", "caecum", "colon", "rectum", "appendix", "anal canal"),
+    "colon": ("ascending colon", "transverse colon", "descending colon", "sigmoid colon"),
+    "salivary glands": ("parotid", "submandibular", "sublingual"),
+    "heart valves": ("tricuspid", "mitral", "bicuspid", "aortic valve", "pulmonary valve"),
+    "atria": ("left atrium", "right atrium"),
+    "ventricles": ("left ventricle", "right ventricle"),
+    "pulmonary veins": ("left pulmonary vein", "right pulmonary vein"),
+    "cranial bones": ("frontal", "parietal", "temporal", "occipital", "sphenoid", "ethmoid"),
+    "facial bones": ("nasal", "maxilla", "zygomatic", "mandible", "lacrimal", "vomer", "palatine"),
+    "ossicles": ("malleus", "incus", "stapes"),
+}
+
+
+def group_members_present(label: str, part_names) -> list[str]:
+    """Part names that belong to the group `label` names (empty if `label` is not a group)."""
+    key = " ".join(re.findall(r"[a-z]+", (label or "").lower()))
+    members = GROUP_MEMBERS.get(key)
+    if not members:
+        return []
+    out = []
+    for nm in part_names:
+        n = (nm or "").lower()
+        if any(m in n for m in members) and n != key:
+            out.append(nm)
+    return out
