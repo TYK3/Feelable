@@ -1,0 +1,137 @@
+[
+ {
+  "check": "gallery: 10 featured (5 basic + 5 complex), extended library separate",
+  "ok": true,
+  "detail": "10/5/5/8"
+ },
+ {
+  "check": "complex lessons span subjects (skull, cell, circuit, flowchart, map)",
+  "ok": true,
+  "detail": "Skull: bones and sutures; Animal cell; Mixed circuit: series and parallel; Plant watering robot; Riverside bus routes"
+ },
+ {
+  "check": "extended library says it was not re-checked",
+  "ok": true,
+  "detail": "Earlier example \u00b7 outlines not re-checked"
+ },
+ {
+  "check": "skull header counts included parts (not candidates)",
+  "ok": true,
+  "detail": "27 included parts \u00b7 4 omitted candidates (see Fix parts)"
+ },
+ {
+  "check": "student chips list only included parts",
+  "ok": true,
+  "detail": "27 chips / 27 included"
+ },
+ {
+  "check": "skull sutures are boundary targets traced along their course",
+  "ok": true,
+  "detail": "squamous suture:boundary/full, lambdoid suture:boundary/full, coronal suture:boundary/full"
+ },
+ {
+  "check": "skull: no unresolved missing / unnamed targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "spots with unknown extent are reported as 'location found'",
+  "ok": true,
+  "detail": "2 reported"
+ },
+ {
+  "check": "Undo after Find outline says the outline was removed (no stale 'Suggested')",
+  "ok": true,
+  "detail": "'Suggested outline removed.'"
+ },
+ {
+  "check": "Redo says the outline was restored",
+  "ok": true,
+  "detail": "Suggested outline restored."
+ },
+ {
+  "check": "draw tool zooms in and fits back",
+  "ok": true,
+  "detail": "0 0 1200 823 -> 384.99997848119494 0 750 514.375 -> 0 0 1200 823"
+ },
+ {
+  "check": "unsupported title characters block publication",
+  "ok": true,
+  "detail": "extent_unresolved, extent_unresolved, too_many, geometry, geometry, braille_unsupported_title"
+ },
+ {
+  "check": "flowchart decision describes both branches",
+  "ok": true,
+  "detail": "Soil dry? A decision. Yes: open valve. No: log reading."
+ },
+ {
+  "check": "map station knows its interchange",
+  "ok": true,
+  "detail": "Central station, interchange for the red route and blue route."
+ },
+ {
+  "check": "no page errors (desktop)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "390px: tabs, chips and zoom buttons are at least 44 px tall",
+  "ok": true,
+  "detail": "min 48"
+ },
+ {
+  "check": "390px: no sideways scroll on review",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "390px: every view tab is on screen",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "390px: drawing opens full screen",
+  "ok": true,
+  "detail": "{'x': 0, 'y': 0, 'width': 390, 'height': 780}"
+ },
+ {
+  "check": "390px: no page errors",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "320px: tabs, chips and zoom buttons are at least 44 px tall",
+  "ok": true,
+  "detail": "min 48"
+ },
+ {
+  "check": "320px: no sideways scroll on review",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "320px: every view tab is on screen",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "320px: drawing opens full screen",
+  "ok": true,
+  "detail": "{'x': 0, 'y': 0, 'width': 320, 'height': 780}"
+ },
+ {
+  "check": "320px: no page errors",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "student canvas is painted (not a blank sheet)",
+  "ok": true,
+  "detail": "9081 dark samples"
+ },
+ {
+  "check": "loading notice gone once the picture is in",
+  "ok": true,
+  "detail": ""
+ }
+]

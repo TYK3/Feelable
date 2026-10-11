@@ -1,6 +1,6 @@
 """Browser checks for the handover fixes (local or live). Usage:
     python qa/e2e_fixes.py BASE_URL SHOTS_DIR [ORGANS_IMAGE]
-Covers: 15-example gallery (simple / complex / show all), phone widths without sideways scroll,
+Covers: featured gallery (ten lessons + extended library), phone widths without sideways scroll,
 curated skull and mixed circuit, Remove part + Undo, Add missing part (tap -> Find outline ->
 Save part), approval with open checks, close-up opening on the pointer target, student touch."""
 import json
@@ -51,13 +51,11 @@ with sync_playwright() as p:
     # gallery
     pg.goto(B)
     pg.wait_for_selector(".gallery", timeout=60000)
-    n_simple = pg.locator("ul[aria-labelledby=g-simple] .sample").count()
-    n_complex = pg.locator("ul[aria-labelledby=g-complex] .sample").count()
+    n_feat = pg.locator("ul[aria-label='Featured lessons'] .sample").count()
     pg.locator(".gallery__more").click()
     n_all = pg.locator(".gallery .sample").count()
-    check("gallery: 4 simple to start, 5 complex, 15 after Show all", (n_simple, n_complex, n_all) == (4, 5, 15),
-          f"{n_simple}/{n_complex}/{n_all}")
-    check("gallery cards say prepared + objective", pg.locator(".sample__prep").count() == 15 and pg.locator(".sample__obj").count() == 15)
+    check("gallery: 10 featured lessons + extended library", n_feat == 10 and n_all == 18, f"{n_feat}/{n_all}")
+    check("gallery cards say prepared + objective", pg.locator(".sample__prep").count() == n_all and pg.locator(".sample__obj").count() == n_all)
     pg.screenshot(path=f"{OUT}/01-gallery-desktop.png", full_page=True)
 
     # curated skull: nasal bone is the nose, mandible exists, no missing-part suggestions

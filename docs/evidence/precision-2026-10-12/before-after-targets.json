@@ -1,0 +1,2907 @@
+{
+ "before": {
+  "transit-control": {
+   "seconds": 6.9,
+   "parts": 1,
+   "targets": {
+    "valid": 1,
+    "total": 15,
+    "critical": 0,
+    "valid_pct": 6.7,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "Library",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Park",
+      "type": "landmark",
+      "parts": [
+       "park"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Central",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Museum",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "School",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Hospital",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Market",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Pool",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Depot",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Stadium",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Garden",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "River",
+      "type": "landmark",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Red route",
+      "type": "path",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Blue route",
+      "type": "path",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Green route",
+      "type": "path",
+      "parts": [],
+      "result": "missing"
+     }
+    ],
+    "graph": {
+     "route_membership": "0/15"
+    }
+   }
+  },
+  "skull-lateral-rotate": {
+   "seconds": 33.5,
+   "parts": 26,
+   "targets": {
+    "valid": 14,
+    "total": 25,
+    "critical": 3,
+    "valid_pct": 56.0,
+    "criticals": [
+     "mastoid portion covers zygomatic process, zygomatic arch",
+     "mastoid process covers styloid process",
+     "zygomatic arch covers mastoid process, occipital bone, ethmoid bone"
+    ],
+    "targets": [
+     {
+      "name": "coronal suture",
+      "type": "path",
+      "parts": [
+       "coronal suture"
+      ],
+      "points_covered": "1/3",
+      "result": "location_only"
+     },
+     {
+      "name": "parietal bone",
+      "type": "region",
+      "parts": [
+       "parietal bone"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     },
+     {
+      "name": "squamous suture",
+      "type": "path",
+      "parts": [
+       "squamous suture"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "temporal bone",
+      "type": "region",
+      "parts": [
+       "temporal bone"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "squamous temporal",
+      "type": "region",
+      "parts": [
+       "squamous temporal"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic process",
+      "type": "region",
+      "parts": [
+       "zygomatic process"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "external acoustic meatus",
+      "type": "region",
+      "parts": [
+       "external acoustic meatus"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lambdoid suture",
+      "type": "path",
+      "parts": [
+       "lambdoid suture"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "mastoid portion",
+      "type": "region",
+      "parts": [
+       "mastoid portion"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "zygomatic process",
+       "zygomatic arch"
+      ]
+     },
+     {
+      "name": "styloid process",
+      "type": "region",
+      "parts": [
+       "styloid process"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "mastoid process",
+      "type": "region",
+      "parts": [
+       "mastoid process"
+      ],
+      "points_covered": "0/1",
+      "result": "critical",
+      "covers": [
+       "styloid process"
+      ]
+     },
+     {
+      "name": "occipital bone",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "zygomatic arch",
+      "type": "region",
+      "parts": [
+       "zygomatic arch"
+      ],
+      "points_covered": "0/2",
+      "result": "critical",
+      "covers": [
+       "mastoid process",
+       "occipital bone",
+       "ethmoid bone"
+      ]
+     },
+     {
+      "name": "pterion",
+      "type": "landmark",
+      "parts": [
+       "pterion"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "frontal bone",
+      "type": "region",
+      "parts": [
+       "frontal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "greater wing of sphenoid bone",
+      "type": "region",
+      "parts": [
+       "greater wing of sphenoid bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "ethmoid bone",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "lacrimal bone",
+      "type": "region",
+      "parts": [
+       "lacrimal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lacrimal fossa",
+      "type": "landmark",
+      "parts": [
+       "lacrimal fossa"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "nasal bone",
+      "type": "region",
+      "parts": [
+       "nasal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic bone",
+      "type": "region",
+      "parts": [
+       "zygomatic bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "temporal process",
+      "type": "region",
+      "parts": [
+       "temporal process"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "maxilla",
+      "type": "region",
+      "parts": [
+       "maxilla"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mandible",
+      "type": "region",
+      "parts": [
+       "mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mental protuberance of mandible",
+      "type": "region",
+      "parts": [
+       "mental protuberance of mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "heart-internal-fresh": {
+   "seconds": 23.5,
+   "parts": 21,
+   "targets": null
+  },
+  "human-organs-notebook-contrast": {
+   "seconds": 13.1,
+   "parts": 12,
+   "targets": {
+    "valid": 2,
+    "total": 10,
+    "critical": 2,
+    "valid_pct": 20.0,
+    "criticals": [
+     "stomach covers kidneys",
+     "kidneys covers liver, large intestine"
+    ],
+    "targets": [
+     {
+      "name": "brain",
+      "type": "region",
+      "parts": [
+       "brain"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lungs",
+      "type": "region",
+      "parts": [
+       "lungs"
+      ],
+      "points_covered": "0/2",
+      "result": "wrong_place"
+     },
+     {
+      "name": "heart",
+      "type": "region",
+      "parts": [
+       "heart"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "liver",
+      "type": "region",
+      "parts": [
+       "liver"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "stomach",
+      "type": "region",
+      "parts": [
+       "stomach"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "kidneys"
+      ]
+     },
+     {
+      "name": "pancreas",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "kidneys",
+      "type": "region",
+      "parts": [
+       "kidneys"
+      ],
+      "points_covered": "1/2",
+      "result": "critical",
+      "covers": [
+       "liver",
+       "large intestine"
+      ]
+     },
+     {
+      "name": "small intestine",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "large intestine",
+      "type": "region",
+      "parts": [
+       "large intestine"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "urinary bladder",
+      "type": "region",
+      "parts": [
+       "urinary bladder"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "skull-lateral-fresh": {
+   "seconds": 24.2,
+   "parts": 25,
+   "targets": {
+    "valid": 14,
+    "total": 25,
+    "critical": 3,
+    "valid_pct": 56.0,
+    "criticals": [
+     "mastoid portion covers zygomatic process, zygomatic arch",
+     "mastoid process covers styloid process",
+     "zygomatic arch covers mastoid process, occipital bone, ethmoid bone"
+    ],
+    "targets": [
+     {
+      "name": "coronal suture",
+      "type": "path",
+      "parts": [
+       "coronal suture"
+      ],
+      "points_covered": "1/3",
+      "result": "location_only"
+     },
+     {
+      "name": "parietal bone",
+      "type": "region",
+      "parts": [
+       "parietal bone"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     },
+     {
+      "name": "squamous suture",
+      "type": "path",
+      "parts": [
+       "squamous suture"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "temporal bone",
+      "type": "region",
+      "parts": [
+       "temporal bone"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "squamous temporal",
+      "type": "region",
+      "parts": [
+       "squamous temporal"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic process",
+      "type": "region",
+      "parts": [
+       "zygomatic process"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "external acoustic meatus",
+      "type": "region",
+      "parts": [
+       "external acoustic meatus"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lambdoid suture",
+      "type": "path",
+      "parts": [
+       "lambdoid suture"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "mastoid portion",
+      "type": "region",
+      "parts": [
+       "mastoid portion"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "zygomatic process",
+       "zygomatic arch"
+      ]
+     },
+     {
+      "name": "styloid process",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "mastoid process",
+      "type": "region",
+      "parts": [
+       "mastoid process"
+      ],
+      "points_covered": "0/1",
+      "result": "critical",
+      "covers": [
+       "styloid process"
+      ]
+     },
+     {
+      "name": "occipital bone",
+      "type": "region",
+      "parts": [
+       "occipital bone"
+      ],
+      "points_covered": "0/2",
+      "result": "wrong_place"
+     },
+     {
+      "name": "zygomatic arch",
+      "type": "region",
+      "parts": [
+       "zygomatic arch"
+      ],
+      "points_covered": "0/2",
+      "result": "critical",
+      "covers": [
+       "mastoid process",
+       "occipital bone",
+       "ethmoid bone"
+      ]
+     },
+     {
+      "name": "pterion",
+      "type": "landmark",
+      "parts": [
+       "pterion"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "frontal bone",
+      "type": "region",
+      "parts": [
+       "frontal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "greater wing of sphenoid bone",
+      "type": "region",
+      "parts": [
+       "greater wing of sphenoid bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "ethmoid bone",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "lacrimal bone",
+      "type": "region",
+      "parts": [
+       "lacrimal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lacrimal fossa",
+      "type": "landmark",
+      "parts": [
+       "lacrimal fossa"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "nasal bone",
+      "type": "region",
+      "parts": [
+       "nasal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic bone",
+      "type": "region",
+      "parts": [
+       "zygomatic bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "temporal process",
+      "type": "region",
+      "parts": [
+       "temporal process"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "maxilla",
+      "type": "region",
+      "parts": [
+       "maxilla"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mandible",
+      "type": "region",
+      "parts": [
+       "mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mental protuberance of mandible",
+      "type": "region",
+      "parts": [
+       "mental protuberance of mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "water-cycle-fresh": {
+   "seconds": 16.2,
+   "parts": 6,
+   "targets": {
+    "valid": 4,
+    "total": 8,
+    "critical": 2,
+    "valid_pct": 50.0,
+    "criticals": [
+     "precipitation covers forbidden point 880,210",
+     "collection covers forbidden point 1050,700, forbidden point 600,600"
+    ],
+    "targets": [
+     {
+      "name": "sun",
+      "type": "region",
+      "parts": [
+       "sun"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "cloud",
+      "type": "region",
+      "parts": [
+       "cloud"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "sea",
+      "type": "region",
+      "parts": [
+       "sea"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mountain",
+      "type": "region",
+      "parts": [
+       "mountain"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "evaporation",
+      "type": "path",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "condensation",
+      "type": "path",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "precipitation",
+      "type": "path",
+      "parts": [
+       "precipitation"
+      ],
+      "points_covered": "0/2",
+      "result": "critical",
+      "covers": [
+       "forbidden point 880,210"
+      ]
+     },
+     {
+      "name": "collection",
+      "type": "path",
+      "parts": [
+       "collection"
+      ],
+      "points_covered": "3/3",
+      "result": "critical",
+      "covers": [
+       "forbidden point 1050,700",
+       "forbidden point 600,600"
+      ]
+     }
+    ],
+    "graph": null
+   }
+  },
+  "flower-fresh": {
+   "seconds": 11.8,
+   "parts": 7,
+   "targets": null
+  },
+  "bar-chart-fresh": {
+   "seconds": 12.7,
+   "parts": 5,
+   "targets": null
+  },
+  "blank": {
+   "seconds": 2.1,
+   "parts": 0,
+   "targets": null
+  },
+  "flowchart-control": {
+   "seconds": 10.3,
+   "parts": 7,
+   "targets": {
+    "valid": 4,
+    "total": 12,
+    "critical": 3,
+    "valid_pct": 33.3,
+    "criticals": [
+     "Water low? covers Log reading",
+     "Retry covers Wait, Close valve",
+     "Stop covers Open valve, Water high?"
+    ],
+    "targets": [
+     {
+      "name": "Start",
+      "type": "region",
+      "parts": [
+       "start"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Read sensor",
+      "type": "region",
+      "parts": [
+       "read sensor"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Water low?",
+      "type": "region",
+      "parts": [
+       "water low"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "Log reading"
+      ]
+     },
+     {
+      "name": "Open valve",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Wait",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Read again",
+      "type": "region",
+      "parts": [
+       "read again"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Water high?",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Close valve",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Log reading",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "Alert",
+      "type": "region",
+      "parts": [
+       "alert"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Retry",
+      "type": "region",
+      "parts": [
+       "retry"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "Wait",
+       "Close valve"
+      ]
+     },
+     {
+      "name": "Stop",
+      "type": "region",
+      "parts": [
+       "stop"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "Open valve",
+       "Water high?"
+      ]
+     }
+    ],
+    "graph": {
+     "edges_correct": "0/11",
+     "edges_wrong": 0
+    }
+   }
+  },
+  "animal-cell-fresh": {
+   "seconds": 13.8,
+   "parts": 7,
+   "targets": null
+  },
+  "geometry-control": {
+   "seconds": 8.0,
+   "parts": 4,
+   "targets": {
+    "valid": 4,
+    "total": 4,
+    "critical": 0,
+    "valid_pct": 100.0,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "circle",
+      "type": "mask",
+      "parts": [
+       "circle"
+      ],
+      "iou": 0.928,
+      "result": "valid"
+     },
+     {
+      "name": "triangle",
+      "type": "mask",
+      "parts": [
+       "triangle"
+      ],
+      "iou": 0.882,
+      "result": "valid"
+     },
+     {
+      "name": "rectangle",
+      "type": "mask",
+      "parts": [
+       "rectangle"
+      ],
+      "iou": 0.905,
+      "result": "valid"
+     },
+     {
+      "name": "square",
+      "type": "mask",
+      "parts": [
+       "square"
+      ],
+      "iou": 0.897,
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "earth-layers-fresh": {
+   "seconds": 13.2,
+   "parts": 5,
+   "targets": null
+  },
+  "skull-lateral-blur": {
+   "seconds": 26.2,
+   "parts": 26,
+   "targets": {
+    "valid": 16,
+    "total": 25,
+    "critical": 2,
+    "valid_pct": 64.0,
+    "criticals": [
+     "mastoid process covers styloid process",
+     "zygomatic arch covers occipital bone"
+    ],
+    "targets": [
+     {
+      "name": "coronal suture",
+      "type": "path",
+      "parts": [
+       "coronal suture"
+      ],
+      "points_covered": "1/3",
+      "result": "location_only"
+     },
+     {
+      "name": "parietal bone",
+      "type": "region",
+      "parts": [
+       "parietal bone"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     },
+     {
+      "name": "squamous suture",
+      "type": "path",
+      "parts": [
+       "squamous suture"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "temporal bone",
+      "type": "region",
+      "parts": [
+       "temporal bone"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "squamous temporal",
+      "type": "region",
+      "parts": [
+       "squamous temporal"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic process",
+      "type": "region",
+      "parts": [
+       "zygomatic process"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "external acoustic meatus",
+      "type": "region",
+      "parts": [
+       "external acoustic meatus"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lambdoid suture",
+      "type": "path",
+      "parts": [
+       "lambdoid suture"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "mastoid portion",
+      "type": "region",
+      "parts": [
+       "mastoid portion"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "styloid process",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "mastoid process",
+      "type": "region",
+      "parts": [
+       "mastoid process"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "styloid process"
+      ]
+     },
+     {
+      "name": "occipital bone",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "zygomatic arch",
+      "type": "region",
+      "parts": [
+       "zygomatic arch"
+      ],
+      "points_covered": "1/2",
+      "result": "critical",
+      "covers": [
+       "occipital bone"
+      ]
+     },
+     {
+      "name": "pterion",
+      "type": "landmark",
+      "parts": [
+       "pterion"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "frontal bone",
+      "type": "region",
+      "parts": [
+       "frontal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "greater wing of sphenoid bone",
+      "type": "region",
+      "parts": [
+       "greater wing of sphenoid bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "ethmoid bone",
+      "type": "region",
+      "parts": [
+       "ethmoid bone"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "lacrimal bone",
+      "type": "region",
+      "parts": [
+       "lacrimal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lacrimal fossa",
+      "type": "landmark",
+      "parts": [
+       "lacrimal fossa"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "nasal bone",
+      "type": "region",
+      "parts": [
+       "nasal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic bone",
+      "type": "region",
+      "parts": [
+       "zygomatic bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "temporal process",
+      "type": "region",
+      "parts": [
+       "temporal process"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "maxilla",
+      "type": "region",
+      "parts": [
+       "maxilla"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mandible",
+      "type": "region",
+      "parts": [
+       "mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mental protuberance of mandible",
+      "type": "region",
+      "parts": [
+       "mental protuberance of mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "mixed-circuit-rotate": {
+   "seconds": 10.0,
+   "parts": 0,
+   "targets": {
+    "error": "working image 853x1200 is not in the annotated orientation 1200x853",
+    "valid": 0,
+    "total": 4,
+    "critical": 0,
+    "targets": []
+   }
+  },
+  "human-organs-notebook-fresh": {
+   "seconds": 16.1,
+   "parts": 15,
+   "targets": {
+    "valid": 5,
+    "total": 10,
+    "critical": 1,
+    "valid_pct": 50.0,
+    "criticals": [
+     "kidneys covers large intestine"
+    ],
+    "targets": [
+     {
+      "name": "brain",
+      "type": "region",
+      "parts": [
+       "brain"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lungs",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "heart",
+      "type": "region",
+      "parts": [
+       "heart"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "liver",
+      "type": "region",
+      "parts": [
+       "liver"
+      ],
+      "points_covered": "0/2",
+      "result": "wrong_place"
+     },
+     {
+      "name": "stomach",
+      "type": "region",
+      "parts": [
+       "stomach"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "pancreas",
+      "type": "region",
+      "parts": [
+       "pancreas"
+      ],
+      "points_covered": "0/0",
+      "result": "valid"
+     },
+     {
+      "name": "kidneys",
+      "type": "region",
+      "parts": [
+       "kidneys"
+      ],
+      "points_covered": "0/2",
+      "result": "critical",
+      "covers": [
+       "large intestine"
+      ]
+     },
+     {
+      "name": "small intestine",
+      "type": "region",
+      "parts": [
+       "small intestine"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "large intestine",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "urinary bladder",
+      "type": "region",
+      "parts": [
+       "urinary bladder"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "mixed-circuit-fresh": {
+   "seconds": 10.0,
+   "parts": 4,
+   "targets": {
+    "valid": 3,
+    "total": 4,
+    "critical": 0,
+    "valid_pct": 75.0,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "battery",
+      "type": "region",
+      "parts": [
+       "battery, 12.0 volts"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "r1",
+      "type": "region",
+      "parts": [
+       "R1, 1.00 ohms"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "r2",
+      "type": "region",
+      "parts": [
+       "R2, 6.00 ohms"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "r3",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     }
+    ],
+    "graph": null
+   }
+  }
+ },
+ "after": {
+  "transit-control": {
+   "seconds": 6.1,
+   "parts": 15,
+   "targets": {
+    "valid": 15,
+    "total": 15,
+    "critical": 0,
+    "valid_pct": 100.0,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "Library",
+      "type": "landmark",
+      "parts": [
+       "library"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Park",
+      "type": "landmark",
+      "parts": [
+       "park"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Central",
+      "type": "landmark",
+      "parts": [
+       "central"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Museum",
+      "type": "landmark",
+      "parts": [
+       "museum"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "School",
+      "type": "landmark",
+      "parts": [
+       "school"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Hospital",
+      "type": "landmark",
+      "parts": [
+       "hospital"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Market",
+      "type": "landmark",
+      "parts": [
+       "market"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Pool",
+      "type": "landmark",
+      "parts": [
+       "pool"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Depot",
+      "type": "landmark",
+      "parts": [
+       "depot"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Stadium",
+      "type": "landmark",
+      "parts": [
+       "stadium"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Garden",
+      "type": "landmark",
+      "parts": [
+       "garden"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "River",
+      "type": "landmark",
+      "parts": [
+       "river"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Red route",
+      "type": "path",
+      "parts": [
+       "red route"
+      ],
+      "points_covered": "4/4",
+      "result": "valid"
+     },
+     {
+      "name": "Blue route",
+      "type": "path",
+      "parts": [
+       "blue route"
+      ],
+      "points_covered": "4/4",
+      "result": "valid"
+     },
+     {
+      "name": "Green route",
+      "type": "path",
+      "parts": [
+       "green route"
+      ],
+      "points_covered": "4/4",
+      "result": "valid"
+     }
+    ],
+    "graph": {
+     "route_membership": "15/15"
+    }
+   }
+  },
+  "skull-lateral-rotate": {
+   "seconds": 27.8,
+   "parts": 27,
+   "targets": {
+    "valid": 16,
+    "total": 25,
+    "critical": 3,
+    "valid_pct": 64.0,
+    "criticals": [
+     "mastoid portion covers zygomatic process, zygomatic arch",
+     "mastoid process covers styloid process",
+     "frontal bone covers ethmoid bone"
+    ],
+    "targets": [
+     {
+      "name": "coronal suture",
+      "type": "path",
+      "parts": [
+       "coronal suture"
+      ],
+      "points_covered": "2/3",
+      "result": "location_only"
+     },
+     {
+      "name": "parietal bone",
+      "type": "region",
+      "parts": [
+       "parietal bone"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     },
+     {
+      "name": "squamous suture",
+      "type": "path",
+      "parts": [
+       "squamous suture"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "temporal bone",
+      "type": "region",
+      "parts": [
+       "temporal bone"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "squamous temporal",
+      "type": "region",
+      "parts": [
+       "squamous temporal"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic process",
+      "type": "region",
+      "parts": [
+       "zygomatic process"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "external acoustic meatus",
+      "type": "region",
+      "parts": [
+       "external acoustic meatus"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lambdoid suture",
+      "type": "path",
+      "parts": [
+       "lambdoid suture"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "mastoid portion",
+      "type": "region",
+      "parts": [
+       "mastoid portion"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "zygomatic process",
+       "zygomatic arch"
+      ]
+     },
+     {
+      "name": "styloid process",
+      "type": "region",
+      "parts": [
+       "styloid process"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "mastoid process",
+      "type": "region",
+      "parts": [
+       "mastoid process"
+      ],
+      "points_covered": "0/1",
+      "result": "critical",
+      "covers": [
+       "styloid process"
+      ]
+     },
+     {
+      "name": "occipital bone",
+      "type": "region",
+      "parts": [
+       "occipital bone"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic arch",
+      "type": "region",
+      "parts": [
+       "zygomatic arch"
+      ],
+      "points_covered": "0/2",
+      "result": "wrong_place"
+     },
+     {
+      "name": "pterion",
+      "type": "landmark",
+      "parts": [
+       "pterion"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "frontal bone",
+      "type": "region",
+      "parts": [
+       "frontal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "ethmoid bone"
+      ]
+     },
+     {
+      "name": "greater wing of sphenoid bone",
+      "type": "region",
+      "parts": [
+       "greater wing of sphenoid bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "ethmoid bone",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "lacrimal bone",
+      "type": "region",
+      "parts": [
+       "lacrimal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lacrimal fossa",
+      "type": "landmark",
+      "parts": [
+       "lacrimal fossa"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "nasal bone",
+      "type": "region",
+      "parts": [
+       "nasal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic bone",
+      "type": "region",
+      "parts": [
+       "zygomatic bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "temporal process",
+      "type": "region",
+      "parts": [
+       "temporal process"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "maxilla",
+      "type": "region",
+      "parts": [
+       "maxilla"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mandible",
+      "type": "region",
+      "parts": [
+       "mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mental protuberance of mandible",
+      "type": "region",
+      "parts": [
+       "mental protuberance of mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "heart-internal-fresh": {
+   "seconds": 23.3,
+   "parts": 21,
+   "targets": null
+  },
+  "human-organs-notebook-contrast": {
+   "seconds": 11.6,
+   "parts": 12,
+   "targets": {
+    "valid": 3,
+    "total": 10,
+    "critical": 2,
+    "valid_pct": 30.0,
+    "criticals": [
+     "stomach covers kidneys",
+     "kidneys covers liver, large intestine"
+    ],
+    "targets": [
+     {
+      "name": "brain",
+      "type": "region",
+      "parts": [
+       "brain"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lungs",
+      "type": "region",
+      "parts": [
+       "lungs"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "heart",
+      "type": "region",
+      "parts": [
+       "heart"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "liver",
+      "type": "region",
+      "parts": [
+       "liver"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "stomach",
+      "type": "region",
+      "parts": [
+       "stomach"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "kidneys"
+      ]
+     },
+     {
+      "name": "pancreas",
+      "type": "region",
+      "parts": [
+       "pancreas"
+      ],
+      "points_covered": "0/0",
+      "result": "valid"
+     },
+     {
+      "name": "kidneys",
+      "type": "region",
+      "parts": [
+       "kidneys"
+      ],
+      "points_covered": "1/2",
+      "result": "critical",
+      "covers": [
+       "liver",
+       "large intestine"
+      ]
+     },
+     {
+      "name": "small intestine",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "large intestine",
+      "type": "region",
+      "parts": [
+       "large intestine"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "urinary bladder",
+      "type": "region",
+      "parts": [
+       "urinary bladder"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "skull-lateral-fresh": {
+   "seconds": 23.6,
+   "parts": 26,
+   "targets": {
+    "valid": 18,
+    "total": 25,
+    "critical": 2,
+    "valid_pct": 72.0,
+    "criticals": [
+     "mastoid portion covers zygomatic process, zygomatic arch",
+     "mastoid process covers styloid process"
+    ],
+    "targets": [
+     {
+      "name": "coronal suture",
+      "type": "path",
+      "parts": [
+       "coronal suture"
+      ],
+      "points_covered": "2/3",
+      "result": "location_only"
+     },
+     {
+      "name": "parietal bone",
+      "type": "region",
+      "parts": [
+       "parietal bone"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     },
+     {
+      "name": "squamous suture",
+      "type": "path",
+      "parts": [
+       "squamous suture"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "temporal bone",
+      "type": "region",
+      "parts": [
+       "temporal bone"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "squamous temporal",
+      "type": "region",
+      "parts": [
+       "squamous temporal"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic process",
+      "type": "region",
+      "parts": [
+       "zygomatic process"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "external acoustic meatus",
+      "type": "region",
+      "parts": [
+       "external acoustic meatus"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lambdoid suture",
+      "type": "path",
+      "parts": [
+       "lambdoid suture"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "mastoid portion",
+      "type": "region",
+      "parts": [
+       "mastoid portion"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "zygomatic process",
+       "zygomatic arch"
+      ]
+     },
+     {
+      "name": "styloid process",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "mastoid process",
+      "type": "region",
+      "parts": [
+       "mastoid process"
+      ],
+      "points_covered": "0/1",
+      "result": "critical",
+      "covers": [
+       "styloid process"
+      ]
+     },
+     {
+      "name": "occipital bone",
+      "type": "region",
+      "parts": [
+       "occipital bone"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic arch",
+      "type": "region",
+      "parts": [
+       "zygomatic arch"
+      ],
+      "points_covered": "0/2",
+      "result": "wrong_place"
+     },
+     {
+      "name": "pterion",
+      "type": "landmark",
+      "parts": [
+       "pterion"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "frontal bone",
+      "type": "region",
+      "parts": [
+       "frontal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "greater wing of sphenoid bone",
+      "type": "region",
+      "parts": [
+       "greater wing of sphenoid bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "ethmoid bone",
+      "type": "region",
+      "parts": [
+       "ethmoid bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lacrimal bone",
+      "type": "region",
+      "parts": [
+       "lacrimal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lacrimal fossa",
+      "type": "landmark",
+      "parts": [
+       "lacrimal fossa"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "nasal bone",
+      "type": "region",
+      "parts": [
+       "nasal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic bone",
+      "type": "region",
+      "parts": [
+       "zygomatic bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "temporal process",
+      "type": "region",
+      "parts": [
+       "temporal process"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "maxilla",
+      "type": "region",
+      "parts": [
+       "maxilla"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mandible",
+      "type": "region",
+      "parts": [
+       "mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mental protuberance of mandible",
+      "type": "region",
+      "parts": [
+       "mental protuberance of mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "water-cycle-fresh": {
+   "seconds": 11.8,
+   "parts": 8,
+   "targets": {
+    "valid": 8,
+    "total": 8,
+    "critical": 0,
+    "valid_pct": 100.0,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "sun",
+      "type": "region",
+      "parts": [
+       "sun"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "cloud",
+      "type": "region",
+      "parts": [
+       "cloud"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "sea",
+      "type": "region",
+      "parts": [
+       "sea"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mountain",
+      "type": "region",
+      "parts": [
+       "mountain"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "evaporation",
+      "type": "path",
+      "parts": [
+       "evaporation"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     },
+     {
+      "name": "condensation",
+      "type": "path",
+      "parts": [
+       "condensation"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     },
+     {
+      "name": "precipitation",
+      "type": "path",
+      "parts": [
+       "precipitation"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "collection",
+      "type": "path",
+      "parts": [
+       "collection"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "flower-fresh": {
+   "seconds": 7.8,
+   "parts": 7,
+   "targets": null
+  },
+  "bar-chart-fresh": {
+   "seconds": 10.3,
+   "parts": 5,
+   "targets": null
+  },
+  "blank": {
+   "seconds": 1.6,
+   "parts": 0,
+   "targets": null
+  },
+  "flowchart-control": {
+   "seconds": 9.5,
+   "parts": 12,
+   "targets": {
+    "valid": 12,
+    "total": 12,
+    "critical": 0,
+    "valid_pct": 100.0,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "Start",
+      "type": "region",
+      "parts": [
+       "start"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Read sensor",
+      "type": "region",
+      "parts": [
+       "read sensor"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Water low?",
+      "type": "region",
+      "parts": [
+       "water low"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Open valve",
+      "type": "region",
+      "parts": [
+       "open valve"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Wait",
+      "type": "region",
+      "parts": [
+       "wait"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Read again",
+      "type": "region",
+      "parts": [
+       "read again"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Water high?",
+      "type": "region",
+      "parts": [
+       "water high"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Close valve",
+      "type": "region",
+      "parts": [
+       "close valve"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Log reading",
+      "type": "region",
+      "parts": [
+       "log reading"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Alert",
+      "type": "region",
+      "parts": [
+       "alert"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Retry",
+      "type": "region",
+      "parts": [
+       "retry"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "Stop",
+      "type": "region",
+      "parts": [
+       "stop"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     }
+    ],
+    "graph": {
+     "edges_correct": "11/11",
+     "edges_wrong": 0
+    }
+   }
+  },
+  "animal-cell-fresh": {
+   "seconds": 12.2,
+   "parts": 7,
+   "targets": null
+  },
+  "geometry-control": {
+   "seconds": 7.2,
+   "parts": 4,
+   "targets": {
+    "valid": 4,
+    "total": 4,
+    "critical": 0,
+    "valid_pct": 100.0,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "circle",
+      "type": "mask",
+      "parts": [
+       "circle"
+      ],
+      "iou": 0.928,
+      "result": "valid"
+     },
+     {
+      "name": "triangle",
+      "type": "mask",
+      "parts": [
+       "triangle"
+      ],
+      "iou": 0.882,
+      "result": "valid"
+     },
+     {
+      "name": "rectangle",
+      "type": "mask",
+      "parts": [
+       "rectangle"
+      ],
+      "iou": 0.905,
+      "result": "valid"
+     },
+     {
+      "name": "square",
+      "type": "mask",
+      "parts": [
+       "square"
+      ],
+      "iou": 0.897,
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "earth-layers-fresh": {
+   "seconds": 11.9,
+   "parts": 5,
+   "targets": null
+  },
+  "skull-lateral-blur": {
+   "seconds": 19.3,
+   "parts": 24,
+   "targets": {
+    "valid": 16,
+    "total": 25,
+    "critical": 3,
+    "valid_pct": 64.0,
+    "criticals": [
+     "mastoid portion covers zygomatic process, zygomatic arch",
+     "styloid process covers occipital bone",
+     "mastoid process covers styloid process"
+    ],
+    "targets": [
+     {
+      "name": "coronal suture",
+      "type": "path",
+      "parts": [
+       "coronal suture"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     },
+     {
+      "name": "parietal bone",
+      "type": "region",
+      "parts": [
+       "parietal bone"
+      ],
+      "points_covered": "3/3",
+      "result": "valid"
+     },
+     {
+      "name": "squamous suture",
+      "type": "path",
+      "parts": [
+       "squamous suture"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "temporal bone",
+      "type": "region",
+      "parts": [
+       "temporal bone"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "squamous temporal",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "zygomatic process",
+      "type": "region",
+      "parts": [
+       "zygomatic process"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "external acoustic meatus",
+      "type": "region",
+      "parts": [
+       "external acoustic meatus"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lambdoid suture",
+      "type": "path",
+      "parts": [
+       "lambdoid suture"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "mastoid portion",
+      "type": "region",
+      "parts": [
+       "mastoid portion"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "zygomatic process",
+       "zygomatic arch"
+      ]
+     },
+     {
+      "name": "styloid process",
+      "type": "region",
+      "parts": [
+       "styloid process"
+      ],
+      "points_covered": "0/1",
+      "result": "critical",
+      "covers": [
+       "occipital bone"
+      ]
+     },
+     {
+      "name": "mastoid process",
+      "type": "region",
+      "parts": [
+       "mastoid process"
+      ],
+      "points_covered": "1/1",
+      "result": "critical",
+      "covers": [
+       "styloid process"
+      ]
+     },
+     {
+      "name": "occipital bone",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "zygomatic arch",
+      "type": "region",
+      "parts": [
+       "zygomatic arch"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "pterion",
+      "type": "landmark",
+      "parts": [
+       "pterion"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "frontal bone",
+      "type": "region",
+      "parts": [
+       "frontal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "greater wing of sphenoid bone",
+      "type": "region",
+      "parts": [
+       "greater wing of sphenoid bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "ethmoid bone",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "lacrimal bone",
+      "type": "region",
+      "parts": [
+       "lacrimal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lacrimal fossa",
+      "type": "landmark",
+      "parts": [
+       "lacrimal fossa"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "nasal bone",
+      "type": "region",
+      "parts": [
+       "nasal bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "zygomatic bone",
+      "type": "region",
+      "parts": [
+       "zygomatic bone"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "temporal process",
+      "type": "region",
+      "parts": [
+       "temporal process"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "maxilla",
+      "type": "region",
+      "parts": [
+       "maxilla"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mandible",
+      "type": "region",
+      "parts": [
+       "mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "mental protuberance of mandible",
+      "type": "region",
+      "parts": [
+       "mental protuberance of mandible"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "mixed-circuit-rotate": {
+   "seconds": 11.1,
+   "parts": 4,
+   "targets": {
+    "valid": 3,
+    "total": 4,
+    "critical": 0,
+    "valid_pct": 75.0,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "battery",
+      "type": "region",
+      "parts": [
+       "battery, 12.0 volts"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "r1",
+      "type": "region",
+      "parts": [
+       "R1, 1.00 ohms"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "r2",
+      "type": "region",
+      "parts": [
+       "R2, 6.00 ohms"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "r3",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "human-organs-notebook-fresh": {
+   "seconds": 15.5,
+   "parts": 14,
+   "targets": {
+    "valid": 6,
+    "total": 10,
+    "critical": 0,
+    "valid_pct": 60.0,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "brain",
+      "type": "region",
+      "parts": [
+       "brain"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "lungs",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     },
+     {
+      "name": "heart",
+      "type": "region",
+      "parts": [
+       "heart"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "liver",
+      "type": "region",
+      "parts": [
+       "liver"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "stomach",
+      "type": "region",
+      "parts": [
+       "stomach"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "pancreas",
+      "type": "region",
+      "parts": [
+       "pancreas"
+      ],
+      "points_covered": "0/0",
+      "result": "valid"
+     },
+     {
+      "name": "kidneys",
+      "type": "region",
+      "parts": [
+       "kidneys"
+      ],
+      "points_covered": "2/2",
+      "result": "valid"
+     },
+     {
+      "name": "small intestine",
+      "type": "region",
+      "parts": [
+       "small intestine"
+      ],
+      "points_covered": "0/1",
+      "result": "wrong_place"
+     },
+     {
+      "name": "large intestine",
+      "type": "region",
+      "parts": [
+       "large intestine"
+      ],
+      "points_covered": "1/2",
+      "result": "location_only"
+     },
+     {
+      "name": "urinary bladder",
+      "type": "region",
+      "parts": [
+       "urinary bladder"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     }
+    ],
+    "graph": null
+   }
+  },
+  "mixed-circuit-fresh": {
+   "seconds": 7.9,
+   "parts": 4,
+   "targets": {
+    "valid": 3,
+    "total": 4,
+    "critical": 0,
+    "valid_pct": 75.0,
+    "criticals": [],
+    "targets": [
+     {
+      "name": "battery",
+      "type": "region",
+      "parts": [
+       "battery, 12.0 volts"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "r1",
+      "type": "region",
+      "parts": [
+       "R1, 1.00 ohms"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "r2",
+      "type": "region",
+      "parts": [
+       "R2, 6.00 ohms"
+      ],
+      "points_covered": "1/1",
+      "result": "valid"
+     },
+     {
+      "name": "r3",
+      "type": "region",
+      "parts": [],
+      "result": "missing"
+     }
+    ],
+    "graph": null
+   }
+  }
+ }
+}
