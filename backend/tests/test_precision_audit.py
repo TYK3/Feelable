@@ -142,3 +142,9 @@ def test_annotated_targets(name, min_valid, max_crit):
     t = load_truth(os.path.join(QA, "precision", "truth"), os.path.splitext(name)[0])
     r = score(a, t)
     assert r["valid"] >= min_valid and r["critical"] <= max_crit, r
+    g = r.get("graph") or {}
+    if "edges_correct" in g:                       # flowchart: every arrow, none invented
+        assert g["edges_correct"] == "11/11" and g["edges_wrong"] == 0, g
+    if "route_membership" in g:                    # map: which stations each route serves
+        ok, tot = (int(v) for v in g["route_membership"].split("/"))
+        assert ok == tot, g

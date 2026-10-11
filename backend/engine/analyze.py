@@ -468,6 +468,8 @@ def _assign_roles(labels: list[Label], w: int, h: int) -> None:
         letters = sum(ch.isalpha() for ch in lb.text)
         if lb.bbox[1] >= bottom_zone and len(words) > 6:
             lb.role = "caption"
+        elif re.fullmatch(r"\s*(yes|no|true|false|y|n)\s*[.!]?\s*", lb.text, re.I):
+            lb.role = "other"             # a branch caption on a flowchart arrow, not a part name
         elif len(words) <= 4 and letters >= 2 and clean_name(lb.text):
             lb.role = "part_label"
         else:
@@ -1730,6 +1732,10 @@ def analyze(image_rgb: np.ndarray, *, use_ai: bool = True,
         except Exception:  # pragma: no cover
             pass
         try:
+            _flow_edges(analysis)
+        except Exception:  # pragma: no cover
+            pass
+        try:
             _declutter_linework(analysis)
         except Exception:  # pragma: no cover
             pass
@@ -1759,6 +1765,91 @@ _DESIGNATOR_RE = re.compile(
 _UNIT_WORDS = {"R": "ohms", "V": "volts", "C": "farads", "L": "henries"}
 _KIND_WORDS = {"R": "resistor", "V": "battery", "C": "capacitor", "L": "inductor"}
 _PREFIX_WORDS = {"k": "kilo", "K": "kilo", "M": "mega", "m": "milli", "u": "micro", "µ": "micro"}
+
+
+def _flow_edges(analysis: Analysis) -> None:
+    """Handover P1 flowchart: arrows between boxes are the lesson's logic. When at least four parts
+    are boxes named by the text inside them, each drawn arrow joining two of them becomes an edge
+    (direction from its arrowhead, "Yes"/"No" from a caption beside it) and is spoken in the box's
+    description: "Soil dry? A decision. Yes: open valve. No: log reading." Stored in
+    analysis.trace["edges"] so a check can compare them with the drawing."""
+    def text_inside(p) -> bool:
+        if getattr(p, "match_method", "") == "inside":
+            return True
+        for lb in analysis.labels or []:
+            if lb.part_id == p.id:
+                x0, y0, x1, y1 = lb.bbox
+                sub = p.mask[y0:y1, x0:x1]
+                ys_, xs_ = np.nonzero(p.mask > 0)
+                inbox = len(xs_) and xs_.min() <= x0 and xs_.max() >= x1 and ys_.min() <= y0 and ys_.max() >= y1
+                return bool(sub.size and ((sub > 0).mean() >= 0.9 or (inbox and (sub > 0).mean() >= 0.4)))
+        return False
+    boxes = [p for p in analysis.parts if p.include and getattr(p, "target_type", "region") == "region"
+             and p.mask is not None and text_inside(p)]
+    img = analysis.image
+    if len(boxes) < 4 or img is None:
+        return
+    # the arrows: dark strokes outside the boxes and away from any text (leader tracing may have
+    # claimed them, so start from the ink itself)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    lw = (gray < 110).astype(np.uint8)
+    for p in boxes:
+        lw[cv2.dilate((p.mask > 0).astype(np.uint8), np.ones((11, 11), np.uint8)) > 0] = 0
+    for lb in analysis.labels or []:
+        if re.fullmatch(r"\s*(yes|no|true|false)\s*[.!]?\s*", lb.text or "", re.I) or lb.role in ("part_label", "title", "caption", "other"):
+            x0, y0, x1, y1 = lb.bbox
+            lw[max(0, y0 - 2):y1 + 2, max(0, x0 - 2):x1 + 2] = 0
+    h, w = lw.shape[:2]
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
+    near = {p.id: cv2.dilate((p.mask > 0).astype(np.uint8), k) > 0 for p in boxes}
+    lw8 = (lw > 0).astype(np.uint8)
+    n, cc, st, _ = cv2.connectedComponentsWithStats(lw8, connectivity=8)
+    dt = cv2.distanceTransform(lw8, cv2.DIST_L2, 3)
+    captions = [lb for lb in (analysis.labels or [])
+                if re.fullmatch(r"\s*(yes|no|true|false)\s*[.!]?\s*", lb.text or "", re.I)]
+    edges = []
+    for c in range(1, n):
+        comp = cc == c
+        touch = [p for p in boxes if (near[p.id] & comp).any()]
+        if len(touch) != 2:
+            continue
+        a, b = touch
+        # arrowhead: the end with the widest stroke
+        def head_width(p):
+            zone = comp & near[p.id]
+            return float(dt[zone].max()) if zone.any() else 0.0
+        wa, wb = head_width(a), head_width(b)
+        if abs(wa - wb) < 0.6:
+            continue                                   # no clear head: direction unknown, say nothing
+        src, dst = (b, a) if wa > wb else (a, b)
+        ys, xs = np.nonzero(comp)
+        cap = None
+        for lb in captions:
+            cx, cy = (lb.bbox[0] + lb.bbox[2]) / 2, (lb.bbox[1] + lb.bbox[3]) / 2
+            if float(np.min(np.hypot(xs - cx, ys - cy))) <= 45:
+                cap = lb.text.strip().rstrip(".!").capitalize()
+        edges.append((src, dst, cap))
+    if not edges:
+        return
+    analysis.trace = {**(analysis.trace or {}),
+                      "edges": [{"from": s_.name, "to": d_.name, "label": cap} for s_, d_, cap in edges]}
+    for p in boxes:
+        outs = [(d_, cap) for s_, d_, cap in edges if s_ is p]
+        q = next((lb.text.strip() for lb in (analysis.labels or []) if lb.part_id == p.id), p.label_text or "")
+        decision = q.endswith("?") or len(outs) >= 2
+        head = f"{q[:1].upper()}{q[1:]}" if q.endswith("?") else f"{capitalise(p.name)}."
+        bits = [head + (" A decision." if decision else "")]
+        if outs:
+            if any(cap for _d, cap in outs):
+                bits.append(" ".join(f"{cap or 'Otherwise'}: {d_.name}." for d_, cap in outs))
+            else:
+                bits.append("Next: " + _join_names([d_.name for d_, _c in outs]) + ".")
+        elif not any(d_ is p for _s, d_, _c in edges):
+            pass
+        else:
+            bits.append("The end of the flow." if not outs else "")
+        if getattr(p, "description_source", "auto") == "auto":
+            p.description = " ".join(b for b in bits if b)
 
 
 _ROUTE_RE = re.compile(r"\b(route|line|loop|branch|path)\b", re.I)
@@ -1852,12 +1943,15 @@ def _network_targets(analysis: Analysis) -> None:
         for other in route_labels:                       # the legend text itself is not the route
             ox0, oy0, ox1, oy1 = other.bbox
             m[max(0, oy0 - 3):oy1 + 3, max(0, ox0 - 3):ox1 + 3] = 0
-        nc, ccr, str_, _ = cv2.connectedComponentsWithStats(m, connectivity=8)
+        # a dashed route is one route: bridge the dash gaps before judging length
+        gap = max(9, int(0.02 * diag))
+        joined = cv2.morphologyEx(m, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (gap, gap)))
+        nc, ccr, str_, _ = cv2.connectedComponentsWithStats(joined, connectivity=8)
         keepc = np.zeros(nc, bool)
         for c in range(1, nc):
             if max(str_[c, cv2.CC_STAT_WIDTH], str_[c, cv2.CC_STAT_HEIGHT]) >= 0.05 * diag:
                 keepc[c] = True
-        m = keepc[ccr].astype(np.uint8) * 255
+        m = (keepc[ccr] & (m > 0)).astype(np.uint8) * 255
         if not m.any():
             continue
         m = cv2.dilate(m, np.ones((3, 3), np.uint8))
@@ -1870,7 +1964,7 @@ def _network_targets(analysis: Analysis) -> None:
         lb.part_id = f"r{ri + 1}"
     # which stations each route serves (from geometry, so a teacher can check it against the map)
     routes = [p for p in new_parts if p.target_type == "path"]
-    near = {rp.id: cv2.dilate(rp.mask, np.ones((7, 7), np.uint8)) > 0 for rp in routes}
+    near = {rp.id: cv2.dilate(rp.mask, np.ones((17, 17), np.uint8)) > 0 for rp in routes}
     serves = {sp.id: [rp.name for rp in routes if (near[rp.id] & (sp.mask > 0)).any()]
               for sp in new_parts if sp.target_type == "landmark"}
     for rp in routes:
@@ -2483,6 +2577,16 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
             score = 300.0 - d - pen
             if best is None or score > best[1]:
                 best = (k, score, "leader")
+        if lds and comps:
+            # text that fills much of a closed box (a flowchart step) names that box, even when an
+            # arrow happens to end at the text and looks like a pointer of its own
+            bx = lb.bbox
+            barea = max(1, (bx[2] - bx[0]) * (bx[3] - bx[1]))
+            for k, c in enumerate(comps):
+                sub = c.mask[bx[1]:bx[3], bx[0]:bx[2]]
+                if sub.size and sub.mean() >= 0.9 and barea >= 0.12 * c.area:
+                    best = (k, 310.0, "on")
+                    break
         if i in clutter_labels and best is None:
             continue
         if best is None and not lds and comps:
@@ -2495,12 +2599,16 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
             ld = line_dist(bx)
             if on:
                 k = min(on, key=lambda k: comps[k].area)
+                sub_k = comps[k].mask[bx[1]:bx[3], bx[0]:bx[2]]
+                inside_score = 310.0 if (sub_k.size and sub_k.mean() >= 0.9) else 200.0
                 if ld <= 20:
                     # the outline of the box the label sits in is not an arrow: measure only to
                     # linework that is not that region's own border (flowchart / table cells)
                     ld = _line_dist_off_border(pre_lw, comps[k].mask, bx)
                 if ld > 20:
-                    best = (k, 200.0, "on")
+                    # text written wholly inside a box names that box, ahead of any pointer from
+                    # outside (a "Yes" branch arrow ending on a decision diamond)
+                    best = (k, inside_score, "on")
                 else:
                     arrow_labels.add(i)
             else:

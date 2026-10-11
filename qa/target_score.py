@@ -143,6 +143,15 @@ def score(a, truth: dict) -> dict:
             total += len(want | got)
             ok += len(want & got)
         graph = {"route_membership": f"{ok}/{total}"}
+    if truth.get("edges"):
+        # flow edges: each truth arrow (tail point, head point) joins the nodes nearest its ends
+        nodes = [(norm(t["name"]), t["points"][0]) for t in targets]
+
+        def node_at(pt):
+            return min(nodes, key=lambda n: (n[1][0] - pt[0]) ** 2 + (n[1][1] - pt[1]) ** 2)[0]
+        want = {(node_at(a_), node_at(b_)) for a_, b_ in truth["edges"]}
+        got = {(norm(e["from"]), norm(e["to"])) for e in ((getattr(a, "trace", None) or {}).get("edges") or [])}
+        graph = {**(graph or {}), "edges_correct": f"{len(want & got)}/{len(want)}", "edges_wrong": len(got - want)}
     scored = [o for o in out]
     valid = sum(o["result"] == "valid" for o in scored)
     return {"valid": valid, "total": len(scored), "critical": len(criticals),
