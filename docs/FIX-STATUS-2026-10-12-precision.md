@@ -109,7 +109,7 @@ Evidence is in `docs/evidence/precision-2026-10-12/`: before and after overlays 
 
 ## Tests run
 
-- Backend: **305 passed**, including the new `tests/test_precision_audit.py`. That file covers the code-risk regressions, boundary tracing, mirror twins, the title blocker and the trace edit, and runs the annotated end-to-end targets with graph checks.
+- Backend: **304 passed**, including the new `tests/test_precision_audit.py`. That file covers the code-risk regressions, boundary tracing, mirror twins, the title blocker and the trace edit, and runs the annotated end-to-end targets with graph checks.
 - Browser, local build: `qa/e2e_precision.py` **27/27**. This covers the gallery, skull counts and chips, sutures as boundaries, Undo/Redo status, zoom, the title blocker, flowchart and map descriptions, 48 px targets at 390 and 320 px, no sideways scroll, full-screen drawing, and a painted student canvas. `qa/e2e_fixes.py` passed **16/16**.
 
 ## Still open and unverified
