@@ -51,6 +51,6 @@ cd backend && python ../qa/check_gallery.py /tmp/gallery-check   # exactly 15, f
 
 | id | file | source |
 |---|---|---|
-| `heart-internal` | heart-internal.jpg | OpenStax *Anatomy and Physiology* 2e, Figure 19.9 "Internal Anatomy of the Heart", CC BY 4.0 |
+| `heart-internal` | heart-internal.jpg | OpenStax *Anatomy and Physiology* (GitHub `openstax/osbooks-anatomy-physiology`, `media/2008_Internal_Anatomy_of_the_HeartN.jpg`), CC BY 4.0 |
 | `human-organs-notebook` | human-organs-notebook.png | hand-drawn classroom notebook page supplied by the Feelable team |
-| `mixed-circuit` | mixed-circuit.jpg | OpenStax *University Physics Volume 2*, Figure 10.14 (resistors in series and parallel), CC BY 4.0 |
+| `mixed-circuit` | mixed-circuit.jpg | OpenStax *University Physics* (GitHub `openstax/osbooks-university-physics-bundle`, `media/CNX_UPhysics_27_01_ResistPar2.jpg`), CC BY 4.0 |
