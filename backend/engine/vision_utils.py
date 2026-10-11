@@ -595,7 +595,9 @@ _MODIFIERS = {"smooth", "rough", "intermediate", "outer", "inner", "left", "righ
 _NUMBER_WORDS = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "both", "several", "many"}
 _CAPTION_WORDS = {"contains", "contain", "maintains", "maintain", "connect", "connects", "against", "between",
                   "allows", "allow", "filled", "made", "used", "called", "where", "which", "that", "this", "these",
-                  "site", "stores", "store", "forms", "form", "keeps", "helps", "gives", "carries", "holds", "is", "are"}
+                  "site", "stores", "store", "forms", "form", "keeps", "helps", "gives", "carries", "holds", "is", "are",
+                  # F07: view captions and figure references are not structures to draw
+                  "view", "section", "plane", "projection", "figure", "fig", "diagram", "sagittal", "coronal"}
 
 
 def looks_like_structure(text: str) -> bool:
@@ -607,6 +609,9 @@ def looks_like_structure(text: str) -> bool:
         return False
     toks = re.findall(r"[a-z]+", t)
     if not toks or re.search(r"\d", t):
+        return False
+    # F07: equations and symbol fragments ("Vp v- v", "I = V/R") are not physical parts
+    if re.search(r"[=<>+/×±]", t) or sum(1 for w in toks if len(w) == 1) >= 2:
         return False
     if any(w in _NUMBER_WORDS for w in toks) or any(w in _CAPTION_WORDS for w in toks):
         return False

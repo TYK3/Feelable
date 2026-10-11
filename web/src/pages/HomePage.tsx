@@ -44,6 +44,8 @@ function errorFor(err: unknown, heic = false): ProcError {
       return { code, recovery: "choose", message: "We couldn't find a diagram in this photo. Photograph just the diagram, filling the frame, in good light." };
     case "busy":
       return { code, recovery: "retry", message: "The server is busy making other diagrams. Retry in a moment — your photo is still here." };
+    case "timeout":
+      return { code, recovery: "choose", message: "This diagram took too long to process. Try again, or use a smaller or clearer photo. Your other lessons are not affected." };
     case "network":
       return { code, recovery: "retry", message: "We couldn't reach the Feelable server. Check your connection, then retry." };
     case "unavailable":
@@ -59,13 +61,13 @@ const sleep = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
 const READ_STEPS = [
   { img: "1-read", title: "Read every label.",
-    text: "On-device OCR finds the text; blurry words are re-read up close and checked against 880 science terms.",
+    text: "Feelable's server finds the text (OCR); blurry words are re-read up close and checked against 880 science terms.",
     alt: "The skull figure with every label highlighted in yellow." },
   { img: "2-follow", title: "Follow each pointer.",
     text: "Every pointer line is traced from its label to the spot it names.",
     alt: "Pointer lines traced in black from each label to a yellow dot on the bone it names." },
   { img: "3-trace", title: "Trace the shapes.",
-    text: "Where neighbours share a colour, it zooms in and carves along the real edge. With AI on, Gemini finds what a lost pointer meant.",
+    text: "Where neighbours share a colour, it zooms in to separate them. With automatic descriptions on, Gemini helps interpret lost pointers. You review every result.",
     alt: "Each bone outlined; the ones carved out up close are shaded yellow." },
   { img: "4-feel", title: "Make it feelable.",
     text: "A swell-paper page with textures and braille keys, a 3D model, and a talking phone mode.",

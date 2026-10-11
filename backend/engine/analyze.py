@@ -165,7 +165,7 @@ def _load_truncated(data: bytes, fmt) -> Image.Image:
     return im
 
 
-def load_image(data: bytes) -> np.ndarray:
+def load_image(data: bytes, notes: list | None = None) -> np.ndarray:
     """Decode image bytes -> RGB uint8 with bounded memory.
 
     * PNG / JPEG / WebP / GIF (first frame) / TIFF / BMP / HEIC / HEIF (pillow-heif, if installed);
@@ -199,6 +199,8 @@ def load_image(data: bytes) -> np.ndarray:
             raise NotAnImage()
         if getattr(im, "n_frames", 1) > 1:
             im.seek(0)                                   # animated GIF / WebP / multi-page TIFF
+            if notes is not None:   # F10: say that only the first frame was used
+                notes.append("This is an animated image. Only its first frame was used.")
         if im.format == "JPEG" and max(w0, h0) > LOAD_MAX_SIDE:
             # decode at 1/2, 1/4 or 1/8 scale: never allocates the full 48 MP frame
             k = LOAD_DRAFT_SIDE / max(w0, h0)
@@ -207,6 +209,9 @@ def load_image(data: bytes) -> np.ndarray:
             im.load()
         except OSError:
             im = _load_truncated(data, im.format)        # a few bytes missing at the end: keep it
+            if notes is not None:   # F10: a recovered file is not a normal successful scan
+                notes.append("The image file was incomplete at its end. The missing edge was "
+                             "recovered; check the result carefully or send a complete file.")
         if max(im.size) > LOAD_MAX_SIDE:
             f = max(im.size) / LOAD_MAX_SIDE
             if f >= 2 and im.mode not in ("P", "1", "I;16", "I;16B", "I;16L", "I;16N"):

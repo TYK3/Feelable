@@ -189,3 +189,7 @@ def draw_cells(ink: np.ndarray, cells: list[int], x: int, y: int, px_per_mm: flo
 def draw_braille(ink: np.ndarray, text: str, x: int, y: int, px_per_mm: float) -> tuple[int, int]:
     """Draw raised dots (255) for `text` with the top-left of the first cell at (x, y). Returns (w, h) px."""
     return draw_cells(ink, to_cells(text), x, y, px_per_mm)
+
+
+# F03: prefix for braille text that could not be printed in full (read by readiness)
+OVERFLOW_PREFIX = "Braille overflow: "

@@ -171,6 +171,41 @@ def text_box(text: str, font) -> tuple[int, int]:
 
 
 BRAILLE_WARNING_PREFIX = "Braille ("
+# F03: text that could not be printed in full. Lines starting with this prefix are surfaced by
+# readiness as a blocking "braille_overflow" issue, so a cut key can never publish quietly.
+BRAILLE_OVERFLOW_PREFIX = braille.OVERFLOW_PREFIX
+TITLE_MAX_ROWS = 3          # braille title rows before the title is reported as overflowing
+TITLE_ROW_GAP_MM = 2.0      # space between wrapped braille title rows
+
+
+def _wrap_cells(text: str, maxc: int) -> list[list[int]]:
+    """Split `text` into lines of at most `maxc` cells, breaking at spaces where possible.
+    A single word longer than a line is split by cell (never dropped)."""
+    lines: list[list[int]] = []
+    cur: list[int] = []
+    for word in (text or "").split():
+        wc = braille.to_cells(word)
+        if not wc:
+            continue
+        sep = [0] if cur else []
+        if len(cur) + len(sep) + len(wc) <= maxc:
+            cur = cur + sep + wc
+            continue
+        if cur:
+            lines.append(cur)
+            cur = []
+        while len(wc) > maxc:
+            lines.append(wc[:maxc])
+            wc = wc[maxc:]
+        cur = wc
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+def _title_block_mm(rows: int) -> float:
+    """Height (mm) of `rows` stacked braille title rows."""
+    return rows * braille.cell_height_mm() + max(0, rows - 1) * TITLE_ROW_GAP_MM
 
 
 def _braille_warning(analysis: Analysis, title: str, included: list[Part]) -> None:
@@ -182,8 +217,9 @@ def _braille_warning(analysis: Analysis, title: str, included: list[Part]) -> No
     warns = [w for w in (analysis.warnings or []) if not w.startswith(BRAILLE_WARNING_PREFIX)]
     if bad:
         shown = " ".join(sorted(bad)[:12]) + (" …" if len(bad) > 12 else "")
-        warns.append(f"{BRAILLE_WARNING_PREFIX}{braille.BRAILLE_CODE}) has no sign for: {shown} — "
-                     f"left out of the braille; check or rename these words")
+        # F02: a limitation of this translator, not of UEB itself
+        warns.append(f"{BRAILLE_WARNING_PREFIX}{braille.BRAILLE_CODE}) Feelable cannot currently translate: {shown} — "
+                     f"left out of the braille; rename these using plain letters and numbers")
     analysis.warnings = warns
 
 
@@ -205,9 +241,18 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
     title = (analysis.title or "").strip()
     max_cells = int((W - 2 * margin - mm(braille.BRAILLE_DOT_SPACING_MM + braille.BRAILLE_DOT_DIAMETER_MM))
                     // mm(braille.BRAILLE_CELL_SPACING_MM)) + 1
-    title_cells = braille.to_cells(title)[:max_cells] if options.title_in_braille else []
-    title_h = int(round(mm(TITLE_ROW_MM))) if (title_cells or (title and options.title_in_braille)) else 0
+    # F03: wrap the title onto more braille rows instead of cutting it at one row's width
+    title_lines = _wrap_cells(title, max_cells) if options.title_in_braille else []
+    if len(title_lines) > TITLE_MAX_ROWS:
+        title_lines = title_lines[:TITLE_MAX_ROWS]
+        title_cut = True
+    else:
+        title_cut = False
+    title_cells = title_lines
+    title_h = int(round(mm(_title_block_mm(len(title_lines)) + 4.5))) if title_cells else (
+        int(round(mm(TITLE_ROW_MM))) if (title and options.title_in_braille) else 0)
     _braille_warning(analysis, (title if options.title_in_braille else ""), included)
+    _overflow_warnings(analysis, title_cut, title_cells, title, options.title_in_braille)
 
     # ---------------------------------------------------------------- layout
     inset = mm(INSET_MM)
@@ -443,8 +488,11 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
     # ---------------------------------------------------------------- title
     title_box = None
     if title_cells:
-        braille.draw_cells(ink, title_cells, margin, margin, ppm)
-        tw = int(round(mm(braille.cells_width_mm(len(title_cells)))))
+        tw = 0
+        for r_i, line in enumerate(title_cells):
+            y_row = margin + int(round(r_i * (braille.cell_height_mm() + TITLE_ROW_GAP_MM) * ppm))
+            braille.draw_cells(ink, line, margin, y_row, ppm)
+            tw = max(tw, int(round(mm(braille.cells_width_mm(len(line))))))
         title_box = (margin, margin, margin + max(tw, 1), margin + title_h)
 
     # ---------------------------------------------------------------- braille keys
@@ -457,6 +505,11 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
 
     # ---------------------------------------------------------------- legend page
     legend_ink, legend = _legend(included, W, H, margin, ppm)
+    cut = [e for e in legend if e.get("cut")]
+    if cut:
+        analysis.warnings = list(analysis.warnings or []) + [
+            f"{BRAILLE_OVERFLOW_PREFIX}{len(cut)} key line(s) are too long for the braille-only key "
+            f"and were cut ({', '.join(str(e['key']) for e in cut[:6])}); use the print key or shorten the names"]
 
     # ---------------------------------------------------------------- checks
     checks = _checks(drawing, outline_layer, outline_area, outline_len, tex_layer, solid_layer, lw, ids, byid, textures, adj,
@@ -698,7 +751,7 @@ def _print_layer(ink, included, key_boxes, title, title_box, title_cells, W, H, 
         occ[max(0, y0 - 3):y1 + 3, max(0, x0 - 3):x1 + 3] = 255
     labels = {}
     if title:
-        ty = margin + int(round(braille.cell_height_mm() * ppm + 1.2 * ppm)) if title_cells else margin
+        ty = (margin + int(round(_title_block_mm(len(title_cells)) * ppm + 1.2 * ppm))) if title_cells else margin
         tw, th = text_box(title, small)
         if ty + th <= H and not occ[ty:ty + th, margin:margin + tw].any():
             d.text((margin, ty), title, font=small, fill=PRINT_GREY, anchor="lt")
@@ -757,6 +810,14 @@ def _find_label_spot(occ, key_box, tw, th, W, H, margin, ppm, reach_mm=12.0):
     return int(LX[yy, xx]), int(LY[yy, xx])
 
 
+def _overflow_warnings(analysis: Analysis, title_cut: bool, title_cells, title: str, in_braille: bool) -> None:
+    """Replace earlier overflow warnings with the current ones (re-renders must not pile up)."""
+    warns = [w for w in (analysis.warnings or []) if not w.startswith(BRAILLE_OVERFLOW_PREFIX)]
+    if title_cut and in_braille:
+        warns.append(f"{BRAILLE_OVERFLOW_PREFIX}the title is too long to print in full; shorten it")
+    analysis.warnings = warns
+
+
 def _legend(included, W, H, margin, ppm):
     ink = np.zeros((H, W), np.uint8)
     mm = lambda v: v * ppm
@@ -800,7 +861,9 @@ def _legend(included, W, H, margin, ppm):
         maxc = max(3, int((colw - mm(4.0)) // mm(braille.BRAILLE_CELL_SPACING_MM)) + 1)
         for col in cols:
             for r in col:
-                r["cells"] = r["cells"][:maxc]
+                if len(r["cells"]) > maxc:
+                    r["cut"] = True
+                    r["cells"] = r["cells"][:maxc]
         layout = (per, cols, [colw] * ncols, False)
     per, cols, widths, with_print = layout
     legend = []
@@ -811,6 +874,8 @@ def _legend(included, W, H, margin, ppm):
             y = int(round(y_start + r_i * pitch))
             bw, bh = braille.draw_cells(ink, r["cells"], int(x), y, ppm)
             entry = {"part_id": r["p"].id, "key": r["p"].key, "name": r["p"].name, "x": int(x), "y": y}
+            if r.get("cut"):
+                entry["cut"] = True
             if with_print:
                 th = text_box("Ag", font)[1]     # constant: rows line up regardless of descenders
                 entry["print_x"] = int(x + bmax + mm(5))

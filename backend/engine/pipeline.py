@@ -246,6 +246,13 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
                            "part_id": str(p.id),
                            "message": f"Feelable cannot currently translate {shown} in “{p.name}”. "
                                       "Rename it using plain letters and numbers."})
+    # F03: braille text that could not be printed in full blocks the lesson (never publish a cut key)
+    _OVF = _braille.OVERFLOW_PREFIX
+    for w in (getattr(analysis, "warnings", None) or []):
+        if str(w).startswith(_OVF):
+            issues.append({"code": "braille_overflow", "severity": "block", "action": "shorten",
+                           "part_id": None,
+                           "message": str(w)[len(_OVF):]})
     blocked = any(i["severity"] == "block" for i in issues)
     open_warnings = sum(1 for i in issues if i["severity"] == "warn")
     # F04: approval records the teacher's decision; "Ready to teach" needs no open checks as well.
@@ -516,8 +523,12 @@ def run_job(image_bytes: bytes, job_dir: str, *, use_ai: bool = True, paper: str
     t_start = time.perf_counter()
     _emit(progress, "read")
     analyze_mod = _mod("analyze")
+    image_notes: list[str] = []
     try:
-        image = analyze_mod.load_image(image_bytes)
+        if _accepts_kw(analyze_mod.load_image, "notes"):
+            image = analyze_mod.load_image(image_bytes, notes=image_notes)
+        else:
+            image = analyze_mod.load_image(image_bytes)
     except ValueError as e:
         raise BadImage(str(e) or "Not an image") from e
 
@@ -528,6 +539,8 @@ def run_job(image_bytes: bytes, job_dir: str, *, use_ai: bool = True, paper: str
         else:
             analysis = analyze_mod.analyze(image, use_ai=use_ai)
         del image
+        if image_notes:   # F10: decode notes (incomplete file, animation) are shown in review
+            analysis.warnings = list(analysis.warnings or []) + image_notes
         measured = time.perf_counter() - t0
         t_analyze = float((analysis.timings or {}).get("analyze", measured))
         ai_error = None

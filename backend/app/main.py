@@ -187,6 +187,17 @@ class WorkerBusy(RuntimeError):
     pass
 
 
+class EngineTimeout(TimeoutError):
+    """F05: one engine stage ran past its deadline; the worker was stopped, not left running."""
+
+
+# F05: a single engine call may not run longer than this (seconds). Fresh uploads normally take
+# tens of seconds; a stalled worker must become a recoverable failure instead of a hung job.
+ENGINE_DEADLINE_S = float(os.environ.get("FEELABLE_ENGINE_DEADLINE_S", "300"))
+MSG_TIMEOUT = ("This diagram took too long to process. Try again, or use a smaller or clearer photo. "
+               "Your other lessons are not affected.")
+
+
 def _new_pool():
     import multiprocessing as mp
     from concurrent.futures import ProcessPoolExecutor
@@ -201,6 +212,7 @@ def _engine_call(fn_name: str, *args, _token: str | None = None, **kwargs):
         return getattr(pipeline, fn_name)(*args, **kwargs)
     global _POOL
     from concurrent.futures import CancelledError
+    from concurrent.futures import TimeoutError as FuturesTimeout
     from concurrent.futures.process import BrokenProcessPool
     for attempt in range(2):
         with _POOL_LOCK:
@@ -214,9 +226,15 @@ def _engine_call(fn_name: str, *args, _token: str | None = None, **kwargs):
             if _token:
                 _FUTURES[_token] = fut
         try:
-            return fut.result()
+            return fut.result(timeout=ENGINE_DEADLINE_S)
         except CancelledError:
             raise JobCancelled()
+        except FuturesTimeout:
+            # F05: stop the stuck worker so the queue is released; the next job starts a fresh one
+            _kill_pool_for(pool)
+            if _token:
+                _CANCELLED.discard(_token)
+            raise EngineTimeout(MSG_TIMEOUT)
         except BrokenProcessPool:
             with _POOL_LOCK:
                 if _POOL is pool:
@@ -234,6 +252,21 @@ def _engine_call(fn_name: str, *args, _token: str | None = None, **kwargs):
 
 
 _KILLED_POOLS: "weakref.WeakSet" = __import__("weakref").WeakSet()
+
+
+def _kill_pool_for(pool) -> None:
+    """Kill the worker process behind `pool` and retire the pool (used for deadlines)."""
+    global _POOL
+    with _POOL_LOCK:
+        if _POOL is pool:
+            _POOL = None
+    _KILLED_POOLS.add(pool)
+    for proc in list((getattr(pool, "_processes", None) or {}).values()):
+        try:
+            proc.kill()
+        except Exception:  # pragma: no cover
+            pass
+    pool.shutdown(wait=False, cancel_futures=True)
 
 
 def _was_killed_for_cancel(pool) -> bool:
@@ -347,6 +380,8 @@ def _classify_error(e: BaseException, head: bytes = b"") -> tuple[int, str, str]
         return 400, "not_image", MSG_NOT_IMAGE
     if isinstance(e, (WorkerOOM, MemoryError)):
         return 413, "too_big", MSG_OOM
+    if isinstance(e, EngineTimeout):
+        return 504, "timeout", MSG_TIMEOUT
     if isinstance(e, (WorkerBusy, TimeoutError, ConnectionError)):
         return 503, "busy", MSG_BUSY
     return 500, "server", f"Processing failed: {_short_reason(e)}"
