@@ -154,6 +154,8 @@ def _part_fields(p) -> dict:
         "label_text": str(lt) if lt else None,
         "match_method": str(getattr(p, "match_method", "none") or "none"),
         "description_source": src if src in ("auto", "ai", "teacher") else "auto",
+        "target_type": str(getattr(p, "target_type", "region") or "region"),
+        "extent": str(getattr(p, "extent", "full") or "full"),
     }
 
 
@@ -241,7 +243,7 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
             continue                          # already added by the teacher / a caption fragment / a group
         missing.append({"code": "dropped_label", "severity": "warn", "action": "draw", "target": nm,
                         "bbox": label_box(nm), "target_bbox": target_box(nm),
-                        "message": f"Possible missing part: {nm[:1].upper()}{nm[1:]}. It's labelled in the "
+                        "message": f"{nm[:1].upper()}{nm[1:]} has no matching outline. It's labelled in the "
                                    "picture but drawn too small to feel."})
     # 2. uncertain names
     names: list[dict] = []
@@ -249,6 +251,15 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
         if _UNNAMED_RE.match(str(p.name).strip()):
             names.append({"code": "unnamed", "severity": "warn", "action": "rename", "part_id": str(p.id),
                           "message": f"“{p.name}” has no name yet. Give it a name a student will understand."})
+    for p in inc:
+        if str(getattr(p, "extent", "full")) == "unresolved":
+            what = {"boundary": "its course is not traced yet", "path": "its course is not traced yet"}.get(
+                str(getattr(p, "target_type", "region")), "its outline is not traced yet")
+            nm = str(p.name)
+            names.append({"code": "extent_unresolved", "severity": "warn", "action": "outline",
+                          "part_id": str(p.id), "target": nm, "target_bbox": [int(v) for v in p.bbox],
+                          "message": f"{nm[:1].upper()}{nm[1:]}: location found, {what}. "
+                                     "Suggest an outline or draw it."})
     unmatched = []
     for lb in (getattr(analysis, "unmatched_labels", None) or []):
         lb = str(lb)
@@ -257,26 +268,25 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
         unmatched.append(lb)
         names.append({"code": "unmatched_label", "severity": "warn", "action": "draw", "target": lb,
                       "bbox": label_box(lb), "target_bbox": target_box(lb),
-                      "message": f"Possible missing part: {lb[:1].upper()}{lb[1:]}. Its label isn't matched to "
-                                 "any shape."})
+                      "message": f"{lb[:1].upper()}{lb[1:]} has no matching outline."})
     # 3. layout suggestions (crowding reported once, not twice)
     layout: list[dict] = []
     if len(inc) > MAX_COMFORTABLE_PARTS:
         layout.append({"code": "too_many", "severity": "warn", "action": "reduce",
-                       "message": f"This diagram is crowded ({len(inc)} parts). Switch some off, merge them, or "
-                                  f"make a close-up of the busiest area ({MAX_COMFORTABLE_PARTS} or fewer is easier)."})
+                       "message": f"The full image has {len(inc)} targets. Create detail pages (close-ups) to "
+                                  "make them easier to explore, or choose the parts for this lesson."})
     for c in checks:
         if not c.get("passed"):
             if len(inc) > MAX_COMFORTABLE_PARTS and "parts or fewer" in str(c.get("rule", "")):
                 continue
             detail = f": {c.get('detail')}" if c.get("detail") else ""
             layout.append({"code": "geometry", "severity": "warn",
-                           "message": f"Tactile layout check failed — {c.get('rule', '')}{detail}"})
+                           "message": f"Print layout check: {c.get('rule', '')}{detail}"})
     issues += missing + names + layout
     if ai_error:
         issues.append({"code": "ai_failed", "severity": "warn",
-                       "message": f"AI descriptions didn't work ({ai_error}). The descriptions come from the "
-                                  "image labels; check them or try AI again."})
+                       "message": "Descriptions could not be added. Your diagram is saved. Retry descriptions "
+                                  "or continue.", "detail": str(ai_error)})
     if kind in _PHOTO_KINDS:
         issues.append({"code": "photo", "severity": "info",
                        "message": "Simplified from a photo — check the outline matches what you want to teach."})
@@ -290,6 +300,16 @@ def build_readiness(analysis, checks: list[dict], approved: bool, ai_error: str 
                            "part_id": str(p.id),
                            "message": f"Feelable cannot currently translate {shown} in “{p.name}”. "
                                       "Rename it using plain letters and numbers."})
+    # P1 (precision audit): the raised title is Braille too - unsupported symbols there must block as
+    # well, never be dropped silently (H₂O would become "HO")
+    tbad = _braille.unsupported_chars(str(getattr(analysis, "title", "") or ""))
+    if tbad:
+        shown = " ".join(sorted(tbad)[:8])
+        issues.append({"code": "braille_unsupported_title", "severity": "block", "action": "retitle",
+                       "part_id": None,
+                       "message": f"Feelable cannot currently translate {shown} in the title "
+                                  f"“{analysis.title}”. Edit the title using plain letters and numbers "
+                                  "(for example H2O for H₂O)."})
     # F03: braille text that could not be printed in full blocks the lesson (never publish a cut key)
     _OVF = _braille.OVERFLOW_PREFIX
     for w in (getattr(analysis, "warnings", None) or []):

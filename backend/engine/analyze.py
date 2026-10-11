@@ -10,6 +10,7 @@ Pipeline (all offline, deterministic):
 from __future__ import annotations
 
 import io
+import os
 import re
 import threading
 import time
@@ -389,6 +390,30 @@ def _flatten_lighting(img: np.ndarray) -> np.ndarray:
 # ============================================================================ text
 
 
+def _line_dist_off_border(lw: np.ndarray, region: np.ndarray, box, band: int = 9) -> float:
+    """Distance (px) from text box `box` to the nearest linework pixel drawn *inside* `region`
+    (the box / cell the text sits in), ignoring its own outline and arrows that end at its edge.
+    inf when there is none nearby."""
+    h, w = lw.shape[:2]
+    x0, y0, x1, y1 = box
+    m = 60
+    X0, Y0, X1, Y1 = max(0, x0 - m), max(0, y0 - m), min(w, x1 + m), min(h, y1 + m)
+    sub = lw[Y0:Y1, X0:X1] > 0
+    reg = (region[Y0:Y1, X0:X1] > 0).astype(np.uint8)
+    if not sub.any():
+        return float("inf")
+    k = np.ones((2 * band + 1, 2 * band + 1), np.uint8)
+    inner = cv2.erode(reg, k) > 0       # an arrow drawn over the region, not its outline or
+    ys, xs = np.nonzero(sub & inner)    # an arrow arriving at its edge from outside
+    if not len(xs):
+        return float("inf")
+    xs = xs + X0
+    ys = ys + Y0
+    dx = np.maximum(0, np.maximum(x0 - xs, xs - x1))
+    dy = np.maximum(0, np.maximum(y0 - ys, ys - y1))
+    return float(np.hypot(dx, dy).min())
+
+
 def _assign_roles(labels: list[Label], w: int, h: int) -> None:
     if not labels:
         return
@@ -413,6 +438,19 @@ def _assign_roles(labels: list[Label], w: int, h: int) -> None:
             continue
         if score > best:
             best, title_idx = score, i
+    if title_idx is None:
+        # a heading in ordinary type (a flowchart / map title): the topmost line of 3+ words,
+        # at least as tall as the typical label, alone at the top of the page
+        alpha = [i for i, lb in enumerate(labels) if any(ch.isalpha() for ch in lb.text)]
+        if alpha:
+            med = float(np.median([heights[i] for i in alpha]))
+            top = min(alpha, key=lambda i: labels[i].bbox[1])
+            lb = labels[top]
+            others_top = min((labels[i].bbox[1] for i in alpha if i != top), default=h)
+            if (lb.bbox[3] <= top_zone + 0.05 * h and 3 <= len(lb.text.split()) <= 10
+                    and heights[top] >= 0.95 * med and others_top >= lb.bbox[3] + 0.5 * heights[top]
+                    and not re.search(r"[=<>?]", lb.text)):
+                title_idx = top
     if title_idx is not None:
         t = labels[title_idx]
         t.role = "title"
@@ -591,10 +629,12 @@ def _find_leaders(img: np.ndarray, labels: list[Label], nonbg: np.ndarray,
                 continue
             if (not end_junction or not protect_crossings) and len(pts) >= 6:
                 # thinning shortens / frays stroke ends: keep walking along the dark stroke
-                a_, b_ = pts[-min(len(pts), 10)], pts[-1]
+                # a pointer often runs on across another organ to its target (the kidney arrow
+                # crosses the colon): follow the straight continuation well past a crossing
+                a_, b_ = pts[-min(len(pts), 20)], pts[-1]
                 v = np.array([b_[0] - a_[0], b_[1] - a_[1]], np.float64)
                 v /= max(1e-6, float(np.hypot(*v)))
-                for t in range(1, 31):
+                for t in range(1, 91):
                     qx, qy = int(round(b_[0] + v[0] * t)), int(round(b_[1] + v[1] * t))
                     if not (0 <= qx < w and 0 <= qy < h) or not thin_m[max(0, qy - 1):qy + 2, max(0, qx - 1):qx + 2].any():
                         break
@@ -1174,8 +1214,12 @@ def _auto_orient(img: np.ndarray, labels_all: list[Label], feats: dict) -> tuple
         sc = _ocr_score(labs)
         if sc > best_score:
             best_deg, best_labels, best_score = deg, labs, sc
-    if best_deg and best_labels is not None and \
-            best_score >= 1.5 * _ocr_score(labels_all) + 2 and len(_good_labels(best_labels)) >= 2:
+    base = _ocr_score(labels_all)
+    if best_deg and best_labels is not None and best_score >= 1.5 * base + 2 and (
+            len(_good_labels(best_labels)) >= 2
+            # electrical / maths notation ("R1 = 1.00 Ω") has few dictionary words: a turn that
+            # reads several times more text with confidence is the right one
+            or (best_score >= 3.0 * base + 3 and sum(lb.confidence >= 0.6 for lb in best_labels) >= 3)):
         return best_deg, best_labels
     return 0, None
 
@@ -1682,6 +1726,10 @@ def analyze(image_rgb: np.ndarray, *, use_ai: bool = True,
         except Exception:  # pragma: no cover
             pass
         try:
+            _network_targets(analysis)
+        except Exception:  # pragma: no cover
+            pass
+        try:
             _declutter_linework(analysis)
         except Exception:  # pragma: no cover
             pass
@@ -1711,6 +1759,141 @@ _DESIGNATOR_RE = re.compile(
 _UNIT_WORDS = {"R": "ohms", "V": "volts", "C": "farads", "L": "henries"}
 _KIND_WORDS = {"R": "resistor", "V": "battery", "C": "capacitor", "L": "inductor"}
 _PREFIX_WORDS = {"k": "kilo", "K": "kilo", "M": "mega", "m": "milli", "u": "micro", "µ": "micro"}
+
+
+_ROUTE_RE = re.compile(r"\b(route|line|loop|branch|path)\b", re.I)
+
+
+def _network_targets(analysis: Analysis) -> None:
+    """Handover P1 "map and wire topology": a transit / network map is stations (ringed dots,
+    each named by the text beside it) joined by coloured routes (named by the legend entry printed
+    in the route's colour). Stations become point targets, routes path targets; colour fills that
+    the lines happen to enclose are not structures. Needs >= 4 ringed stations, >= 3 of them named,
+    so ordinary diagrams with a few dots are untouched."""
+    img = analysis.image
+    if img is None:
+        return
+    h, w = img.shape[:2]
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    light = (gray > 200).astype(np.uint8)
+    dark = gray < 110
+    n, cc, st, cen = cv2.connectedComponentsWithStats(light, connectivity=4)
+    diag = float(np.hypot(h, w))
+    rmin, rmax = max(3, int(0.003 * diag)), max(8, int(0.014 * diag))
+    stations = []
+    for i in range(1, n):
+        bw, bh, area = st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT], st[i, cv2.CC_STAT_AREA]
+        r = (bw + bh) / 4.0
+        if not (rmin <= r <= rmax) or abs(bw - bh) > 0.3 * max(bw, bh):
+            continue
+        if area < 0.6 * np.pi * r * r:
+            continue
+        comp = (cc == i).astype(np.uint8)
+        ring = (cv2.dilate(comp, np.ones((5, 5), np.uint8)) > 0) & (comp == 0)
+        if ring.sum() == 0 or dark[ring].mean() < 0.6:
+            continue
+        cx_, cy_ = float(cen[i][0]), float(cen[i][1])
+        if any(lb.bbox[0] - 2 <= cx_ <= lb.bbox[2] + 2 and lb.bbox[1] - 2 <= cy_ <= lb.bbox[3] + 2
+               for lb in (analysis.labels or [])):
+            continue                                      # the hole of an "o" in a word
+        stations.append((cx_, cy_, r))
+    if len(stations) < 4:
+        return
+    labels = [lb for lb in (analysis.labels or []) if lb.role in ("part_label", "other") and clean_name(lb.text)]
+    route_labels = [lb for lb in labels if _ROUTE_RE.search(lb.text)]
+    stn_labels = [lb for lb in labels if lb not in route_labels]
+    pairs = []
+    for si, (x, y, r) in enumerate(stations):
+        for li, lb in enumerate(stn_labels):
+            d = rect_distance(x, y, lb.bbox)
+            if d <= 3 * r + 25:
+                pairs.append((d, si, li))
+    pairs.sort()
+    s_name, l_used = {}, set()
+    for d, si, li in pairs:
+        if si in s_name or li in l_used:
+            continue
+        s_name[si] = li
+        l_used.add(li)
+    if len(s_name) < 3:
+        return
+    names_l = {clean_name(stn_labels[li].text) for li in s_name.values()}
+    # colour fills between the routes and parts that only repeat a station's name are not targets
+    keep = []
+    for p in analysis.parts:
+        if p.name in names_l or p.name.startswith("part "):
+            continue
+        keep.append(p)
+    new_parts: list[Part] = []
+    for si, (x, y, r) in enumerate(stations):
+        m = np.zeros((h, w), np.uint8)
+        cv2.circle(m, (int(round(x)), int(round(y))), int(round(r + 3)), 255, -1)
+        lb = stn_labels[s_name[si]] if si in s_name else None
+        nm = clean_name(lb.text) if lb is not None else ""
+        new_parts.append(Part(
+            id=f"s{si + 1}", name=nm or f"part s{si + 1}", description="", key="", color=(255, 255, 255),
+            mask=m, polygons=mask_polygons(m, 1.5), bbox=mask_bbox(m), area=int((m > 0).sum()), count=1,
+            include=True, kind="region", label_text=(clean_text(lb.text) or lb.text) if lb is not None else None,
+            match_method="nearest" if lb is not None else "none", target_type="landmark", extent="full"))
+        if lb is not None:
+            lb.part_id = f"s{si + 1}"
+    lab = rgb_to_lab(img).astype(np.float32)
+    chroma = np.hypot(lab[:, :, 1] - 128 if lab[:, :, 1].max() > 100 else lab[:, :, 1],
+                      lab[:, :, 2] - 128 if lab[:, :, 2].max() > 100 else lab[:, :, 2])
+    for ri, lb in enumerate(route_labels):
+        x0, y0, x1, y1 = lb.bbox
+        sub = lab[y0:y1, x0:x1].reshape(-1, 3)
+        csub = chroma[y0:y1, x0:x1].reshape(-1)
+        if csub.size == 0 or (csub > 20).sum() < 15:
+            continue
+        ref = np.median(sub[csub > 20], axis=0)
+        dist = np.linalg.norm(lab - ref, axis=2)
+        m = ((dist < 22) & (chroma > 20)).astype(np.uint8)
+        for other in route_labels:                       # the legend text itself is not the route
+            ox0, oy0, ox1, oy1 = other.bbox
+            m[max(0, oy0 - 3):oy1 + 3, max(0, ox0 - 3):ox1 + 3] = 0
+        nc, ccr, str_, _ = cv2.connectedComponentsWithStats(m, connectivity=8)
+        keepc = np.zeros(nc, bool)
+        for c in range(1, nc):
+            if max(str_[c, cv2.CC_STAT_WIDTH], str_[c, cv2.CC_STAT_HEIGHT]) >= 0.05 * diag:
+                keepc[c] = True
+        m = keepc[ccr].astype(np.uint8) * 255
+        if not m.any():
+            continue
+        m = cv2.dilate(m, np.ones((3, 3), np.uint8))
+        nm = clean_name(lb.text)
+        new_parts.append(Part(
+            id=f"r{ri + 1}", name=nm, description="", key="",
+            color=tuple(int(v) for v in np.median(img[m > 0], axis=0)), mask=m, polygons=mask_polygons(m, 1.5),
+            bbox=mask_bbox(m), area=int((m > 0).sum()), count=1, include=True, kind="line",
+            label_text=clean_text(lb.text) or lb.text, match_method="legend", target_type="path", extent="full"))
+        lb.part_id = f"r{ri + 1}"
+    # which stations each route serves (from geometry, so a teacher can check it against the map)
+    routes = [p for p in new_parts if p.target_type == "path"]
+    near = {rp.id: cv2.dilate(rp.mask, np.ones((7, 7), np.uint8)) > 0 for rp in routes}
+    serves = {sp.id: [rp.name for rp in routes if (near[rp.id] & (sp.mask > 0)).any()]
+              for sp in new_parts if sp.target_type == "landmark"}
+    for rp in routes:
+        served = [sp.name for sp in new_parts if sp.target_type == "landmark" and not sp.name.startswith("part ")
+                  and rp.name in serves.get(sp.id, [])]
+        if served:
+            rp.flow = "stops at " + _join_names(served)
+    for sp in new_parts:
+        if sp.target_type == "landmark" and len(serves.get(sp.id, [])) >= 2:
+            sp.flow = "interchange for the " + _join_names(serves[sp.id])
+    analysis.parts = keep + new_parts
+    analysis.diagram_type = "network"
+    analysis.unmatched_labels = [u for u in (analysis.unmatched_labels or []) if u not in names_l]
+    _describe(analysis.parts)
+    for p in analysis.parts:
+        if p.target_type == "landmark" and p.flow:
+            p.description = f"{capitalise(p.name)} station, {p.flow}."
+        elif p.target_type == "landmark" and p.match_method == "nearest":
+            p.description = f"{capitalise(p.name)} station."
+        elif p.target_type == "path" and p.flow:
+            p.description = f"{capitalise(p.name)}, {p.flow}."
+    from engine.tactile import assign_keys
+    assign_keys(analysis.parts)
 
 
 def _circuit_components(analysis: Analysis) -> None:
@@ -2032,6 +2215,12 @@ def _reading_issues(analysis: Analysis) -> None:
             "message": "This looks like a labelled diagram, but its labels couldn't be read reliably, so only a "
                        "simple outline was made. For the full lesson, retake the photo sharper and straight on, "
                        "or use a screenshot. Approve only if a simple outline is what you want."})
+    if (analysis.trace or {}).get("ocr_failed"):
+        issues.append({
+            "code": "ocr_failed", "severity": "warn", "action": "retry",
+            "message": "Feelable could not read the text in this picture (the text reader failed, which is "
+                       "not the same as finding no labels). Try again; if it keeps happening, name the "
+                       "parts yourself."})
     if issues:
         analysis.trace = {**(analysis.trace or {}), "issues": issues}
 
@@ -2076,7 +2265,10 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
 
     # 3. OCR + orientation + roles ----------------------------------------------------------
     _progress(progress, "read")
+    from engine.ocr import take_failure
+    take_failure()
     labels_all = run_ocr(img, min_confidence=0.0)
+    debug["ocr_failed"] = take_failure()
     rotation, rot_labels = _auto_orient(img, labels_all, feats)
     if rotation:
         img = _rotate_cw(img, rotation)
@@ -2230,7 +2422,7 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
 
     def plural(text):
         t = clean_name(text)
-        return bool(re.search(r"[a-z]{3,}s$", t)) and not re.search(r"(ss|us|is|ys)$", t)
+        return bool(re.search(r"[a-z]{3,}s$", t)) and not re.search(r"(ss|us|is|[^aeiou]ys)$", t)
 
     part_label_idx = [i for i, lb in enumerate(labels) if lb.role == "part_label"]
 
@@ -2303,6 +2495,10 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
             ld = line_dist(bx)
             if on:
                 k = min(on, key=lambda k: comps[k].area)
+                if ld <= 20:
+                    # the outline of the box the label sits in is not an arrow: measure only to
+                    # linework that is not that region's own border (flowchart / table cells)
+                    ld = _line_dist_off_border(pre_lw, comps[k].mask, bx)
                 if ld > 20:
                     best = (k, 200.0, "on")
                 else:
@@ -2323,6 +2519,10 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
         if best is not None:
             targets[i] = best
 
+    debug["label_targets"] = {labels[i].text: (targets[i][0], round(targets[i][1], 1), targets[i][2], comps[targets[i][0]].cand)
+                              for i in targets}
+    debug["arrow_labels"] = [labels[i].text for i in arrow_labels]
+    debug["roles"] = [(lb.text, lb.role) for lb in labels]
     # split clusters whose components are named differently (e.g. 'left lung' / 'right lung')
     groups: list[tuple[int, np.ndarray, list[int]]] = []   # (cand idx, filled mask bool, comp idxs)
     comp_to_group: dict[int, int] = {}
@@ -2390,7 +2590,25 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
         if g is None or g not in gid_to_part:
             continue
         pairs.append((sc, i, gid_to_part[g], meth))
-    pairs.sort(key=lambda t: (-t[0], t[1]))
+    # ties (several pointers ending in one region): the WHOLE structure ("temporal bone") owns the
+    # region before a part of it ("zygomatic process"), then the pointer that ends deepest inside;
+    # the others are carved out of it later. Label order must not decide anatomy.
+    from engine.grounding import is_subpart
+    _dts: dict[int, np.ndarray] = {}
+
+    def tip_depth(i, k) -> float:
+        lds = leaders_by_label.get(i) or []
+        if not lds or k >= len(comps):
+            return 0.0
+        if k not in _dts:
+            _dts[k] = cv2.distanceTransform(comps[k].mask.astype(np.uint8), cv2.DIST_L2, 3)
+        x = int(min(w - 1, max(0, round(lds[0].end[0]))))
+        y = int(min(h - 1, max(0, round(lds[0].end[1]))))
+        return float(_dts[k][y, x])
+    pairs = [(sc, i, pi, meth, is_subpart(clean_name(labels[i].text)),
+              tip_depth(i, targets[i][0]) if meth == "leader" else 0.0) for sc, i, pi, meth in pairs]
+    pairs.sort(key=lambda t: (-round(t[0]), t[4], -t[5], t[1]))
+    pairs = [t[:4] for t in pairs]
     taken_l, taken_p = set(), set()
     method_names = {"leader": "leader", "on": "inside", "near": "nearest"}
     for sc, i, pi, meth in pairs:
@@ -2463,6 +2681,24 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
                 grown = _grow_named_blob(img, de_bg, Ld.end, parts, N)
                 if grown is not None:
                     break
+        if grown is None and plural(labels[i].text) and dots:
+            # many small dots named together ("ribosomes"): the target is the set of dots in the
+            # region the pointer lands in - every instance, not one spot at the tip
+            ex_, ey_ = lds[0].end if lds else (None, None)
+            host = None
+            if ex_ is not None:
+                for p in parts:
+                    if p.mask is not None and p.mask[min(h - 1, max(0, int(ey_))), min(w - 1, max(0, int(ex_)))]:
+                        if host is None or p.area < host.area:
+                            host = p
+            sel = [(x, y, r) for (x, y, r) in dots
+                   if host is None or host.mask[min(h - 1, int(y)), min(w - 1, int(x))]]
+            if len(sel) >= 3:
+                gm = np.zeros((h, w), np.uint8)
+                for (x, y, r) in sel:
+                    cv2.circle(gm, (int(round(x)), int(round(y))), max(2, int(round(r)) + 1), 255, -1)
+                grown = gm
+                dropped[:] = [d for d in dropped if not re.match(r"^\d+ small dots|^lots of tiny specks", d)]
         if grown is None:
             dropped.append(f"{nm} (too small to feel)")
             continue
@@ -2474,6 +2710,7 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
                           color=(int(col[0]), int(col[1]), int(col[2])),
                           mask=grown, polygons=mask_polygons(grown, 1.5), bbox=mask_bbox(grown),
                           area=int((grown > 0).sum()), count=1, include=True, kind="region")
+            target.count = max(1, cv2.connectedComponents((grown > 0).astype(np.uint8))[0] - 1)
             parts.append(target)
         target.name = nm
         target.label_text = clean_text(labels[i].text) or labels[i].text
@@ -2487,6 +2724,38 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
     if mode == "colour" and parts:
         _ground(work, parts, labels, part_label_idx, taken_l, leaders_by_label, clutter_labels,
                 dropped, plural, use_ai=use_ai, title=title, progress=progress)
+    # plural labels still unplaced whose pointer ends inside a region holding many small dots
+    # ("Ribosomes" -> the dots in the cytoplasm): the target is that set of dots
+    for i in part_label_idx:
+        if i in taken_l or labels[i].part_id is not None or not plural(labels[i].text) or len(dots) < 3:
+            continue
+        lds = leaders_by_label.get(i) or []
+        nm = clean_name(labels[i].text)
+        if not lds or not nm or any(p.name == nm for p in parts):
+            continue
+        ex_, ey_ = int(min(w - 1, max(0, lds[0].end[0]))), int(min(h - 1, max(0, lds[0].end[1])))
+        hosts = [p for p in parts if p.mask is not None and p.mask[ey_, ex_]]
+        host = min(hosts, key=lambda p: p.area) if hosts else None
+        if host is None or nearest_dot(ex_, ey_) > 60:
+            continue
+        inner = [p for p in parts if p is not host and p.mask is not None and p.area < host.area]
+        sel = [(x, y, r) for (x, y, r) in dots if host.mask[min(h - 1, int(y)), min(w - 1, int(x))]
+               and not any(p.mask[min(h - 1, int(y)), min(w - 1, int(x))] for p in inner)]
+        if len(sel) < 3:
+            continue
+        gm = np.zeros((h, w), np.uint8)
+        for (x, y, r) in sel:
+            cv2.circle(gm, (int(round(x)), int(round(y))), max(2, int(round(r)) + 1), 255, -1)
+        col = np.median(img[gm > 0], axis=0)
+        gp = Part(id=f"p{len(parts) + 1}", name=nm, description="", key="",
+                  color=(int(col[0]), int(col[1]), int(col[2])), mask=gm, polygons=mask_polygons(gm, 1.5),
+                  bbox=mask_bbox(gm), area=int((gm > 0).sum()),
+                  count=max(1, cv2.connectedComponents((gm > 0).astype(np.uint8))[0] - 1), include=True,
+                  kind="region", label_text=clean_text(labels[i].text) or labels[i].text, match_method="leader")
+        parts.append(gp)
+        labels[i].part_id = gp.id
+        taken_l.add(i)
+        dropped[:] = [d for d in dropped if not re.match(r"^\d+ small dots|^lots of tiny specks", d)]
     if parts:
         _refine_grounding(work, parts, labels, part_label_idx, taken_l, leaders_by_label, dropped, plural)
 
@@ -2521,6 +2790,12 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
 
     # 12. linework ------------------------------------------------------------------------
     linework = _linework(ink, tmask, lmask, [p.mask for p in parts], thin_m, mode, N)
+    # process arrows ("Evaporation" beside the arrow from the sea to the cloud) are learning targets
+    try:
+        linework = _process_paths(img, ink & ~(tmask > 0), labels, part_label_idx, leaders_by_label,
+                                  arrow_labels, parts, linework, dropped)
+    except Exception:  # pragma: no cover - never lose the analysis over an optional target type
+        pass
 
     # title & type ------------------------------------------------------------------------
     if not title:
@@ -2583,6 +2858,8 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
         analysis.trace = _trace(debug, labels, parts)
     except Exception:  # pragma: no cover - the inspector view is a nicety; never lose the analysis
         analysis.trace = {}
+    if debug.get("ocr_failed"):
+        analysis.trace = {**(analysis.trace or {}), "ocr_failed": debug["ocr_failed"]}
     _sanitize_names(analysis)
 
     # 14. AI enrichment -------------------------------------------------------------------
@@ -2599,6 +2876,123 @@ def _analyze_impl(image_rgb: np.ndarray, *, use_ai: bool = True,
 
     analysis.timings["analyze"] = round(time.perf_counter() - t0, 3)
     return analysis, debug
+
+
+_PROCESS_RE = re.compile(r"^(?:[a-z]+(?:ation|ition|ption|ction|ssion|sion|ing)|run ?off|flow|current|"
+                         r"transpiration|evaporation|condensation|precipitation|infiltration|percolation)$")
+
+
+def _process_paths(img, stroke_ink, labels, part_label_idx, leaders_by_label, arrow_labels, parts, linework,
+                   dropped) -> np.ndarray:
+    """Labels that caption a drawn ARROW (a process: evaporation, condensation, collection) name the
+    arrow as a path target with its direction, instead of being dropped as print-only captions or
+    pinned to the region the word happens to sit on. Returns linework without the claimed arrows."""
+    h, w = img.shape[:2]
+    k3 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    thick = cv2.morphologyEx(stroke_ink.astype(np.uint8), cv2.MORPH_OPEN, k3)   # drop 1-2 px outlines
+    if not thick.any():
+        return linework
+    n, cc, st, _ = cv2.connectedComponentsWithStats(thick, connectivity=8)
+    dt = cv2.distanceTransform(thick, cv2.DIST_L2, 3)
+    used: set[int] = set()
+    by_id = {p.id: p for p in parts}
+    named = [p for p in parts if p.name and not p.name.startswith("part ")]
+    for i in part_label_idx:
+        lb = labels[i]
+        nm = clean_name(lb.text)
+        if not nm:
+            continue
+        if not _PROCESS_RE.match(nm):
+            continue              # "Lungs" beside its pointer arrow names the lungs, not the arrow
+        lh = max(8, lb.bbox[3] - lb.bbox[1])
+        reach = max(60, 3 * lh)
+        x0, y0, x1, y1 = lb.bbox
+        X0, Y0, X1, Y1 = max(0, x0 - reach), max(0, y0 - reach), min(w, x1 + reach), min(h, y1 + reach)
+        sub = cc[Y0:Y1, X0:X1]
+        best = None
+        for c in np.unique(sub):
+            if c == 0 or c in used:
+                continue
+            bw, bh, area = st[c, cv2.CC_STAT_WIDTH], st[c, cv2.CC_STAT_HEIGHT], st[c, cv2.CC_STAT_AREA]
+            length = float(np.hypot(bw, bh))
+            if length < 3 * lh or area > 0.02 * h * w:
+                continue
+            mean_w = area / max(1.0, length)
+            if mean_w > 14:                       # a filled shape, not a stroke
+                continue
+            ys, xs = np.nonzero(sub == c)
+            dx = np.maximum(0, np.maximum(x0 - (xs + X0), (xs + X0) - x1))
+            dy = np.maximum(0, np.maximum(y0 - (ys + Y0), (ys + Y0) - y1))
+            d = float(np.hypot(dx, dy).min())
+            if d <= reach and (best is None or d < best[0]):
+                best = (d, int(c))
+        if best is None:
+            continue
+        c = best[1]
+        comp = (cc == c)
+        # the arrow must not just be some part's outline
+        if any(p.mask is not None and ((p.mask > 0) & comp).sum() >= 0.9 * comp.sum()
+               and getattr(p, "target_type", "region") == "region" and p.area < 4 * comp.sum() for p in parts):
+            continue
+        used.add(c)
+        mask = cv2.dilate(comp.astype(np.uint8) * 255, k3, iterations=1)
+        # direction: of the two far ends, the arrowhead is the wider one
+        ys, xs = np.nonzero(comp)
+        pts = np.stack([xs, ys], 1).astype(np.float32)
+        hull = cv2.convexHull(pts).reshape(-1, 2)
+        if len(hull) >= 2:
+            dd = np.linalg.norm(hull[:, None, :] - hull[None, :, :], axis=2)
+            a_i, b_i = np.unravel_index(int(np.argmax(dd)), dd.shape)
+            ends = [hull[a_i], hull[b_i]]
+        else:
+            ends = [pts[0], pts[-1]]
+
+        def width_at(e):
+            ex, ey = int(e[0]), int(e[1])
+            win = dt[max(0, ey - 14):ey + 15, max(0, ex - 14):ex + 15]
+            return float(win.max()) if win.size else 0.0
+        wa, wb = width_at(ends[0]), width_at(ends[1])
+        flow = ""
+        if abs(wa - wb) >= 0.8:
+            tail, head = (ends[1], ends[0]) if wa > wb else (ends[0], ends[1])
+
+            def near_name(pt):
+                bestq, bd = None, 90.0
+                for q in named:
+                    if q.mask is None or getattr(q, "target_type", "region") != "region":
+                        continue
+                    qd = cv2.distanceTransform(255 - (q.mask > 0).astype(np.uint8) * 255, cv2.DIST_L2, 3)
+                    v = float(qd[min(h - 1, int(pt[1])), min(w - 1, int(pt[0]))])
+                    if v < bd:
+                        bestq, bd = q, v
+                return bestq.name if bestq is not None else None
+            fa, fb = near_name(tail), near_name(head)
+            if fa and fb and fa != fb:
+                flow = f"from the {fa} to the {fb}"
+            elif fb:
+                flow = f"towards the {fb}"
+            elif fa:
+                flow = f"away from the {fa}"
+        # the word may have been pinned on the region it sits on / a cloud its arrow points at
+        if lb.part_id is not None and lb.part_id in by_id:
+            old = by_id[lb.part_id]
+            if old.name == nm and old.match_method in ("inside", "leader", "nearest"):
+                old.name = f"part {old.id[1:]}"
+                old.label_text = None
+                old.match_method = "none"
+                old.include = False
+                dropped.append(f"{nm}: the shape under this arrow caption was switched off (switch on in Fix parts if needed)")
+        col = np.median(img[comp], axis=0)
+        p = Part(id=f"a{len(parts) + 1}", name=nm, description="", key="",
+                 color=(int(col[0]), int(col[1]), int(col[2])), mask=mask,
+                 polygons=mask_polygons(mask, 1.5), bbox=mask_bbox(mask), area=int((mask > 0).sum()), count=1,
+                 include=True, kind="line", label_text=clean_text(lb.text) or lb.text,
+                 match_method="arrow", target_type="path", extent="full", flow=flow)
+        parts.append(p)
+        lb.part_id = p.id
+        if linework is not None and linework.shape == mask.shape:
+            linework = np.where(cv2.dilate(mask, k3, iterations=2) > 0, 0, linework).astype(linework.dtype)
+    return linework
 
 
 _ARROW_CHARS = "<>→←↑↓»«"
@@ -2726,6 +3120,9 @@ def _nudge_tip(Ld, parts: list[Part], w: int, h: int, reach: int = 15) -> tuple[
 
 _LANDMARK_RE = re.compile(r"\b(suture|fossa|foramen|meatus|notch|tubercle|tuberosity|protuberance|pterion|"
                           r"apex|sulcus|groove|crest|condyle|fissure|junction|node|point|hilum|hilus)\b")
+# what a landmark-type name actually is (handover P0): a boundary path, a point, or a small region
+_BOUNDARY_RE = re.compile(r"\b(suture|fissure|sulcus|groove|junction)\b")
+_POINT_RE = re.compile(r"\b(pterion|apex|point|bregma|lambda|nasion|inion|asterion)\b")
 MAX_LANDMARKS = 8
 LANDMARK_MAX_FRAC = 0.015    # a region named like a landmark but bigger than this is a mismatch
 LANDMARK_EXTRA_PARTS = 8     # landmark spots may exceed the region cap by this many
@@ -2819,7 +3216,7 @@ def _refine_grounding(work: np.ndarray, parts: list[Part], labels: list[Label], 
 
     for round_ in range(3):
         try:
-            added, ungrounded = grounding.prune_far_fragments(parts, tips, plural, N)
+            added, ungrounded = grounding.prune_far_fragments(parts, tips, plural, N, img=work)
         except Exception:  # pragma: no cover - never lose the analysis over a refinement
             added, ungrounded = [], []
         if round_ == 0:
@@ -2846,7 +3243,11 @@ def _refine_grounding(work: np.ndarray, parts: list[Part], labels: list[Label], 
     except Exception:  # pragma: no cover
         grounding.ORIGIN.clear()
         left_out = 0
-    if left_out:
+    try:
+        grounding.recover_siblings(work, parts, plural)
+    except Exception:  # pragma: no cover - never lose the analysis over a refinement
+        pass
+    if left_out and any(not p.include for p in parts):
         dropped.append(f"{left_out} unlabelled {'piece' if left_out == 1 else 'pieces'} separated from named parts "
                        "(switched off; switch on in Fix parts if needed)")
     # landmarks
@@ -2873,23 +3274,49 @@ def _refine_grounding(work: np.ndarray, parts: list[Part], labels: list[Label], 
         db = disk > 0
         if occupied[db].mean() < 0.3:
             continue                                  # the pointer ends on paper, not on the drawing
-        for q in parts:                               # the spot is cut out of what it sits on
-            if q.mask is not None and ((q.mask > 0) & db).any():
-                rest = (q.mask > 0) & ~db
-                if rest.sum() >= 40:
-                    grounding._set_mask(q, (rest * 255).astype(np.uint8))
-        col = np.median(work[db], axis=0)
+        # the target keeps its true type; parent structures are never cut to make room for it
+        ttype, extent, mask = "landmark", "unresolved", disk
+        if _BOUNDARY_RE.search(nm):
+            ttype = "boundary"
+            try:
+                traced = grounding.trace_boundary(parts, x, y, reach=2 * r, min_len=6 * r)
+            except Exception:  # pragma: no cover
+                traced = None
+            if traced is not None:
+                mask, extent = traced, "full"
+        elif _POINT_RE.search(nm):
+            extent = "full"                           # a point landmark is fully located by its tip
+        mb = mask > 0
+        col = np.median(work[mb], axis=0)
         mp = Part(id=f"m{len(parts) + 1}", name=nm, description="", key="",
-                  color=(int(col[0]), int(col[1]), int(col[2])), mask=disk,
-                  polygons=mask_polygons(disk, 1.5), bbox=mask_bbox(disk), area=int(db.sum()), count=1,
-                  include=True, kind="region", label_text=clean_text(labels[i].text) or labels[i].text,
-                  match_method="landmark")
+                  color=(int(col[0]), int(col[1]), int(col[2])), mask=mask,
+                  polygons=mask_polygons(mask, 1.5), bbox=mask_bbox(mask), area=int(mb.sum()), count=1,
+                  include=True, kind="line" if ttype == "boundary" and extent == "full" else "region",
+                  label_text=clean_text(labels[i].text) or labels[i].text,
+                  match_method="landmark", target_type=ttype, extent=extent)
         parts.append(mp)
         labels[i].part_id = mp.id
         taken_l.add(i)
         names.add(nm)
         dropped[:] = [d for d in dropped if d != f"{nm} (too small to feel)"]
         made += 1
+    # a suture that was matched to a small region at its pointer tip is still a boundary: trace it
+    for p in parts:
+        if (getattr(p, "target_type", "region") != "region" or not p.name or not _BOUNDARY_RE.search(p.name)
+                or p.match_method in ("teacher", "ai") or p.id not in tips):
+            continue
+        x, y = tips[p.id][0]
+        others = [q for q in parts if q is not p]
+        try:
+            traced = grounding.trace_boundary(others, x, y, reach=2 * r, min_len=6 * r)
+        except Exception:  # pragma: no cover
+            traced = None
+        p.target_type = "boundary"
+        if traced is not None:
+            grounding._set_mask(p, traced)
+            p.kind, p.extent = "line", "full"
+        else:
+            p.extent = "unresolved"
 
 
 def _outline_blob(img: np.ndarray, x: int, y: int, N: int, R: int = 130):
@@ -3016,7 +3443,10 @@ def _join_label_lines(labels: list[Label], leaders_by_label: dict) -> None:
         b = labels[j]
         if b.role != "part_label" or any(c in b.text for c in _ARROW_CHARS):
             continue
-        b_has_leader = bool(leaders_by_label.get(j))
+        bh_ = max(1, b.bbox[3] - b.bbox[1])
+        # a stub "leader" (a notebook ruling touching the word) is not a pointer of its own
+        b_has_leader = any(np.hypot(L.points[0][0] - L.end[0], L.points[0][1] - L.end[1]) > 2.5 * bh_
+                           for L in leaders_by_label.get(j, []))
         if not re.fullmatch(r"[A-Za-z][A-Za-z' -]*", b.text.strip()) or len(b.text.split()) > 2:
             continue
         bx0, by0, bx1, by1 = b.bbox
@@ -3214,9 +3644,16 @@ def _resolve_unnamed(parts: list[Part], ink_clean: np.ndarray, title: str, dropp
     for u in [p for p in alive if not p.name]:
         kids = holds_named(u)
         if len(kids) >= 2:
-            # (c) the whole object: name it after the title
+            # (c) the whole object: name it after the title - only when it really surrounds the
+            # named parts (inside its outline) and the title names ONE object ("cell", not "organs");
+            # never to give a leftover piece next to two organs a name it does not have
             noun = main_noun(title)
-            if noun:
+            cu = _main_contour(u.mask)
+            hull = np.zeros_like(u.mask)
+            if cu is not None:
+                cv2.drawContours(hull, [cv2.convexHull(cu)], -1, 255, -1)
+            inside = [q for q in kids if ((q.mask > 0) & (hull > 0)).sum() >= 0.7 * max(1, q.area)]
+            if noun and len(inside) >= 2 and not re.search(r"[a-z]{3,}s$", noun):
                 u.name = noun
                 kids = sorted(kids, key=lambda q: -max(q.bbox[2] - q.bbox[0], q.bbox[3] - q.bbox[1]))  # outside in
                 desc_override[id(u)] = (f"{capitalise(noun)}. Contains the "
@@ -3252,6 +3689,10 @@ def _describe(parts: list[Part]) -> None:
                 continue
             if int((m & (q.mask > 0)).sum()) >= 0.9 * p.area and (cont is None or q.area < cont.area):
                 cont = q
+        if getattr(p, "target_type", "region") in ("path", "boundary"):
+            cont = None                          # a line crossing a region is not "inside" it
+            if getattr(p, "flow", "") and getattr(p, "match_method", "") == "arrow":
+                s += f" An arrow {p.flow}."
         if cont is not None and not cont.name.startswith("part ") and _reads_as_container(cont, parts):
             s += f" Inside the {cont.name}."
         p.description = s

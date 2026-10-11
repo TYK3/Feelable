@@ -1,0 +1,123 @@
+{
+ "size": [
+  900,
+  1200
+ ],
+ "note": "Annotated by hand from the source image (points read off a pixel grid), not from Feelable output. Pancreas is ambiguous in this drawing: only exclusions are scored.",
+ "targets": [
+  {
+   "name": "brain",
+   "points": [
+    [
+     420,
+     215
+    ]
+   ]
+  },
+  {
+   "name": "lungs",
+   "points": [
+    [
+     335,
+     565
+    ],
+    [
+     510,
+     565
+    ]
+   ],
+   "note": "two instances"
+  },
+  {
+   "name": "heart",
+   "points": [
+    [
+     440,
+     560
+    ]
+   ]
+  },
+  {
+   "name": "liver",
+   "points": [
+    [
+     350,
+     690
+    ],
+    [
+     430,
+     650
+    ]
+   ]
+  },
+  {
+   "name": "stomach",
+   "points": [
+    [
+     480,
+     690
+    ]
+   ]
+  },
+  {
+   "name": "pancreas",
+   "points": [],
+   "forbid_extra": [
+    [
+     480,
+     690
+    ],
+    [
+     350,
+     690
+    ]
+   ],
+   "ambiguous": true
+  },
+  {
+   "name": "kidneys",
+   "points": [
+    [
+     355,
+     775
+    ],
+    [
+     490,
+     780
+    ]
+   ],
+   "note": "two instances"
+  },
+  {
+   "name": "small intestine",
+   "points": [
+    [
+     420,
+     840
+    ]
+   ]
+  },
+  {
+   "name": "large intestine",
+   "points": [
+    [
+     310,
+     825
+    ],
+    [
+     530,
+     825
+    ]
+   ]
+  },
+  {
+   "name": "urinary bladder",
+   "points": [
+    [
+     420,
+     985
+    ]
+   ]
+  }
+ ]
+}

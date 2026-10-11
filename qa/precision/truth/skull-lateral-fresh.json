@@ -1,0 +1,301 @@
+{
+ "size": [
+  1200,
+  823
+ ],
+ "note": "Annotated by hand from the source image (points read off a pixel grid), not from Feelable output. Leader tips from the source; sutures are boundary paths, pterion a point landmark.",
+ "targets": [
+  {
+   "name": "coronal suture",
+   "type": "path",
+   "points": [
+    [
+     617,
+     80
+    ],
+    [
+     665,
+     180
+    ],
+    [
+     690,
+     260
+    ]
+   ]
+  },
+  {
+   "name": "parietal bone",
+   "points": [
+    [
+     387,
+     128
+    ],
+    [
+     300,
+     250
+    ],
+    [
+     450,
+     250
+    ]
+   ]
+  },
+  {
+   "name": "squamous suture",
+   "type": "path",
+   "points": [
+    [
+     542,
+     300
+    ],
+    [
+     450,
+     365
+    ]
+   ]
+  },
+  {
+   "name": "temporal bone",
+   "points": [
+    [
+     542,
+     352
+    ],
+    [
+     560,
+     420
+    ]
+   ],
+   "contains": [
+    "squamous temporal",
+    "mastoid portion",
+    "zygomatic process",
+    "mastoid process",
+    "styloid process",
+    "external acoustic meatus",
+    "zygomatic arch"
+   ]
+  },
+  {
+   "name": "squamous temporal",
+   "points": [
+    [
+     546,
+     397
+    ]
+   ]
+  },
+  {
+   "name": "zygomatic process",
+   "points": [
+    [
+     632,
+     477
+    ]
+   ]
+  },
+  {
+   "name": "external acoustic meatus",
+   "points": [
+    [
+     552,
+     505
+    ]
+   ]
+  },
+  {
+   "name": "lambdoid suture",
+   "type": "path",
+   "points": [
+    [
+     262,
+     457
+    ],
+    [
+     330,
+     505
+    ]
+   ]
+  },
+  {
+   "name": "mastoid portion",
+   "points": [
+    [
+     455,
+     515
+    ]
+   ]
+  },
+  {
+   "name": "styloid process",
+   "points": [
+    [
+     506,
+     573
+    ]
+   ]
+  },
+  {
+   "name": "mastoid process",
+   "points": [
+    [
+     594,
+     579
+    ]
+   ]
+  },
+  {
+   "name": "occipital bone",
+   "points": [
+    [
+     235,
+     480
+    ],
+    [
+     300,
+     527
+    ]
+   ]
+  },
+  {
+   "name": "zygomatic arch",
+   "points": [
+    [
+     630,
+     470
+    ],
+    [
+     700,
+     470
+    ]
+   ],
+   "contains": [
+    "zygomatic process",
+    "temporal process"
+   ]
+  },
+  {
+   "name": "pterion",
+   "type": "landmark",
+   "points": [
+    [
+     689,
+     301
+    ]
+   ]
+  },
+  {
+   "name": "frontal bone",
+   "points": [
+    [
+     757,
+     138
+    ]
+   ]
+  },
+  {
+   "name": "greater wing of sphenoid bone",
+   "synonyms": [
+    "greater wing of sphenoid"
+   ],
+   "points": [
+    [
+     739,
+     347
+    ]
+   ]
+  },
+  {
+   "name": "ethmoid bone",
+   "points": [
+    [
+     846,
+     369
+    ]
+   ]
+  },
+  {
+   "name": "lacrimal bone",
+   "points": [
+    [
+     871,
+     390
+    ]
+   ]
+  },
+  {
+   "name": "lacrimal fossa",
+   "type": "landmark",
+   "points": [
+    [
+     880,
+     406
+    ]
+   ]
+  },
+  {
+   "name": "nasal bone",
+   "points": [
+    [
+     939,
+     392
+    ]
+   ]
+  },
+  {
+   "name": "zygomatic bone",
+   "points": [
+    [
+     811,
+     375
+    ]
+   ],
+   "contains": [
+    "temporal process",
+    "zygomatic arch"
+   ]
+  },
+  {
+   "name": "temporal process",
+   "points": [
+    [
+     789,
+     451
+    ]
+   ]
+  },
+  {
+   "name": "maxilla",
+   "points": [
+    [
+     939,
+     531
+    ]
+   ]
+  },
+  {
+   "name": "mandible",
+   "points": [
+    [
+     816,
+     708
+    ]
+   ],
+   "contains": [
+    "mental protuberance of mandible"
+   ]
+  },
+  {
+   "name": "mental protuberance of mandible",
+   "synonyms": [
+    "mental protuberance"
+   ],
+   "points": [
+    [
+     971,
+     733
+    ]
+   ]
+  }
+ ]
+}

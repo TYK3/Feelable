@@ -22,6 +22,8 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Callable, Optional
 
+import re
+
 import cv2
 import numpy as np
 
@@ -71,10 +73,16 @@ def _support(grad: np.ndarray, piece: np.ndarray, region: np.ndarray) -> float:
     k = np.ones((3, 3), np.uint8)
     edge = piece & ~cv2.erode(piece.astype(np.uint8), k).astype(bool)
     edge &= cv2.erode(region.astype(np.uint8), k, iterations=2).astype(bool)
-    if edge.sum() < 8:
-        return 99.0                                   # the piece is bounded by the region's own outline
     inner = cv2.erode(piece.astype(np.uint8), k, iterations=3).astype(bool)
     base = float(np.median(grad[inner])) if inner.sum() > 20 else float(np.median(grad[region]))
+    if edge.sum() < 8:
+        # the piece is bounded by the region's own outline: judge that outline's evidence instead
+        # of assuming it (missing evidence is not strong evidence)
+        outer = piece & ~cv2.erode(piece.astype(np.uint8), k).astype(bool)
+        if outer.sum() < 8:
+            return 0.0
+        b = float(grad[outer].mean())
+        return 0.0 if b < EDGE_MIN else b / max(base, 1.0)
     b = float(grad[edge].mean())
     if b < EDGE_MIN:
         return 0.0
@@ -100,16 +108,35 @@ def _to_full(piece_z: np.ndarray, box, z: float, shape) -> np.ndarray:
     return full
 
 
-def _largest(mask_u8: np.ndarray, x: int, y: int) -> np.ndarray:
-    """Keep the connected piece that contains (or is closest to) the seed."""
+NEAREST_PIECE_PX = 12       # a seed on background takes the piece within this distance
+
+
+def _largest(mask_u8: np.ndarray, x: int, y: int, radius: int = NEAREST_PIECE_PX) -> np.ndarray:
+    """Keep the connected piece that contains the seed, else the one closest to it within
+    `radius` px. Nothing near (or two pieces equally near) -> empty: a big distant piece must never
+    be taken just because it is big."""
     n, cc = cv2.connectedComponents((mask_u8 > 0).astype(np.uint8))
-    if n <= 2:
+    if n <= 1:
         return mask_u8
-    lab_ = cc[min(cc.shape[0] - 1, max(0, y)), min(cc.shape[1] - 1, max(0, x))]
+    hh, ww = cc.shape
+    xi, yi = min(ww - 1, max(0, x)), min(hh - 1, max(0, y))
+    lab_ = int(cc[yi, xi])
     if lab_ == 0:
-        areas = np.bincount(cc.ravel())
-        areas[0] = 0
-        lab_ = int(np.argmax(areas))
+        y0, y1, x0, x1 = max(0, yi - radius), min(hh, yi + radius + 1), max(0, xi - radius), min(ww, xi + radius + 1)
+        sub = cc[y0:y1, x0:x1]
+        ys, xs = np.nonzero(sub)
+        if not len(xs):
+            return np.zeros_like(mask_u8)
+        d = np.hypot(xs + x0 - xi, ys + y0 - yi)
+        best = {}
+        for lbl, dd in zip(sub[ys, xs], d):
+            best[int(lbl)] = min(best.get(int(lbl), 1e9), float(dd))
+        order = sorted(best.items(), key=lambda t: t[1])
+        if order[0][1] > radius or (len(order) > 1 and order[1][1] - order[0][1] < 1.0):
+            return np.zeros_like(mask_u8)
+        lab_ = order[0][0]
+    elif n <= 2:
+        return mask_u8
     return ((cc == lab_) * 255).astype(np.uint8)
 
 
@@ -275,6 +302,27 @@ def _carve_window(img, seed: Seed, others: list[Seed], blocked: np.ndarray, R: i
     return full
 
 
+_SUBPART_RE = re.compile(r"\b(process|portion|arch|fossa|tubercle|tuberosity|spine|crest|head|neck|wing|squamous|"
+                         r"ramus|angle|condyle|foramen|meatus|notch|protuberance|horn|facet|groove|sulcus|"
+                         r"suture|apex|border|margin|surface|lobe|cusp|leaflet)\b")
+
+
+def is_subpart(name: str) -> bool:
+    """A name for part OF a structure ("mastoid portion", "zygomatic process"), not a whole one."""
+    return bool(_SUBPART_RE.search((name or "").lower()))
+
+
+_GENERIC = {"bone", "of", "the", "and", "left", "right", "part", "region"}
+
+
+def _shares_word(a: str, b: str) -> bool:
+    """'squamous temporal' / 'temporal bone' share 'temporal'; 'greater wing of sphenoid bone' and
+    'parietal bone' only share the generic 'bone' (the wing belongs to the sphenoid)."""
+    wa = {x for x in re.findall(r"[a-z]+", (a or "").lower()) if x not in _GENERIC}
+    wb = {x for x in re.findall(r"[a-z]+", (b or "").lower()) if x not in _GENERIC}
+    return bool(wa & wb)
+
+
 def ground_labels(img: np.ndarray, parts: list[Part], seeds: list[Seed], owners: dict[int, Seed],
                   on_named: Callable[[Seed, Part], None],
                   minor: Optional[Callable[[str], bool]] = None) -> list[Part]:
@@ -332,6 +380,8 @@ def ground_labels(img: np.ndarray, parts: list[Part], seeds: list[Seed], owners:
             if ws_host.area > 0:
                 ws_pieces = split_host(img, ws_host, ss, owner)
         pieces = comp_pieces + ws_pieces
+        keep_parent = owner is not None and not is_subpart(owner.name) and host.name == owner.name
+        nested = np.zeros_like(hm)
         for s, m in pieces[:budget]:
             mb = (m > 0) & hm
             if mb.sum() == 0:
@@ -344,10 +394,13 @@ def ground_labels(img: np.ndarray, parts: list[Part], seeds: list[Seed], owners:
             elif rest.sum() < 0.1 * host.area:
                 break                                    # never swallow the host's own structure
             hm = rest
+            if keep_parent and is_subpart(s.name) and _shares_word(s.name, owner.name):
+                nested |= mb                             # a part OF the host: the host keeps its extent
             p = _new_part(img, m, s, len(parts) + len(new) + 1)
             new.append(p)
             on_named(s, p)
             budget -= 1
+        hm = hm | nested
         if hm.sum() != (host.mask > 0).sum():
             _set_mask(host, (hm * 255).astype(np.uint8))
     parts.extend(new)
@@ -430,8 +483,21 @@ FAR_KEEP_MAX = 0.10          # ... but never a gap wider than this x image diago
 FAR_PLURAL_DIST = 0.35       # a repeated structure (lungs, kidneys) may sit this far (x image diagonal)
 
 
+COLOUR_SPLIT_DE = 8.0       # Lab distance (8-bit Lab, lightness down-weighted for shading): a piece this different from the pointed-at piece is
+                            # another structure the colour clustering lumped in
+
+
+def _piece_lab(lab: np.ndarray, m: np.ndarray) -> Optional[np.ndarray]:
+    core = cv2.erode(m.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    if core.sum() < 30:
+        core = m
+    if core.sum() < 10:
+        return None
+    return np.median(lab[core], axis=0)
+
+
 def prune_far_fragments(parts: list[Part], tips: dict[str, list[tuple[int, int]]], is_plural,
-                        N: int) -> tuple[list[Part], list[str]]:
+                        N: int, img: Optional[np.ndarray] = None) -> tuple[list[Part], list[str]]:
     """F01: a name must not cover unexplained distant pieces. For each part with pointer tips,
     the pieces its pointers land on (or the piece nearest a tip) are anchors; other pieces are kept
     only when close to an anchor, or - for a plural / repeated name - when similar in size.
@@ -439,16 +505,25 @@ def prune_far_fragments(parts: list[Part], tips: dict[str, list[tuple[int, int]]
     specks are dropped. Returns the new parts (already appended)."""
     new: list[Part] = []
     ungrounded: list[str] = []
-    min_piece = max(150, int(MIN_PIECE_FRAC * N))
+    # a piece cut away from a wrong name is kept for review unless it is a real speck: a kidney body
+    # (0.08% of a notebook page) must not vanish just because it was lumped in with the heart
+    min_piece = max(150, int(0.4 * MIN_PIECE_FRAC * N))
     if not parts:
         return new, ungrounded
     h, w = parts[0].mask.shape[:2]
     diag = float(np.hypot(h, w))
+    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB).astype(np.float32) if img is not None else None
     for p in list(parts):
         t = tips.get(p.id)
         if not t or p.mask is None or not p.include:
             continue
-        n, cc, st, cent = cv2.connectedComponentsWithStats((p.mask > 0).astype(np.uint8), connectivity=8)
+        pm8 = (p.mask > 0).astype(np.uint8)
+        # pieces joined only by a hairline (a k-means colour cluster snaking along a suture) are
+        # separate pieces: break bridges thinner than ~7 px before judging distance
+        opened = cv2.morphologyEx(pm8, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7)))
+        if opened.sum() < 0.6 * pm8.sum():
+            opened = pm8
+        n, cc, st, cent = cv2.connectedComponentsWithStats(opened, connectivity=8)
         if n <= 1:
             continue
         anchors = {c for c in (_comp_at(cc, x, y, 4) for x, y in t) if c > 0}
@@ -475,10 +550,21 @@ def prune_far_fragments(parts: list[Part], tips: dict[str, list[tuple[int, int]]
         plural = bool(is_plural(p.label_text or p.name))
         anchor_shapes = [_shape_sig(cc == c, int(st[c, cv2.CC_STAT_AREA])) for c in anchors]
         drop = np.zeros((h, w), bool)
+        a_lab = None
+        if lab is not None:
+            am = np.zeros((h, w), bool)
+            for c in anchors:
+                am |= cc == c
+            a_lab = _piece_lab(lab, am)
         for c in range(1, n):
             if c in anchors:
                 continue
             bx, by, bw, bh, area = (int(v) for v in st[c])
+            if a_lab is not None and area >= 60 and not plural:
+                pl = _piece_lab(lab, cc == c)
+                if pl is not None and float(np.linalg.norm((pl - a_lab) * (0.35, 1.0, 1.0))) > COLOUR_SPLIT_DE:
+                    drop |= cc == c               # a differently coloured structure lumped in
+                    continue
             gap = min(_box_gap((bx, by, bw, bh), tuple(int(v) for v in b)) for b in a_boxes)
             if gap <= min(FAR_KEEP_FRAC * a_size, FAR_KEEP_MAX * diag):
                 continue
@@ -489,6 +575,12 @@ def prune_far_fragments(parts: list[Part], tips: dict[str, list[tuple[int, int]]
             drop |= cc == c
         if not drop.any():
             continue
+        if opened is not pm8:
+            # hand the hairline pixels the opening removed to whichever side they are nearer
+            kept_o = (opened > 0) & ~drop
+            d_keep = cv2.distanceTransform((~kept_o).astype(np.uint8), cv2.DIST_L2, 3)
+            d_drop = cv2.distanceTransform((~drop).astype(np.uint8), cv2.DIST_L2, 3)
+            drop = (pm8 > 0) & (drop | ((opened == 0) & (d_drop < d_keep)))
         keep = (p.mask > 0) & ~drop
         _set_mask(p, (keep * 255).astype(np.uint8))
         p.count = max(1, cv2.connectedComponents(keep.astype(np.uint8), connectivity=8)[0] - 1)
@@ -564,6 +656,17 @@ def _looks_like_copy(m: np.ndarray, area: int, anchors: list) -> bool:
                 and cv2.matchShapes(c, a_c, cv2.CONTOURS_MATCH_I1, 0) <= 0.2:
             return True
     return False
+
+
+def _shape_dist(m: np.ndarray, area: int, sig) -> float:
+    """0 = same kind of shape as `sig` (mirror images count as the same)."""
+    _, sol, el, c = _shape_sig(m, area)
+    _, a_sol, a_el, a_c = sig
+    if c is None or a_c is None:
+        return 9.0
+    if abs(sol - a_sol) > 0.2 or max(el, a_el) / max(1e-6, min(el, a_el)) > 2.0:
+        return 9.0
+    return float(cv2.matchShapes(c, a_c, cv2.CONTOURS_MATCH_I1, 0))
 
 
 # piece -> id() of the part it was taken from (only for one analysis run; see regroup_unclaimed)
@@ -688,3 +791,166 @@ def propose_outline(img: np.ndarray, inside: list[tuple[float, float]], outside:
     if area < max(60, int(0.0002 * N)) or area > 0.6 * N:
         return None
     return out
+
+
+def trace_boundary(parts: list[Part], x: int, y: int, reach: int, min_len: int) -> Optional[np.ndarray]:
+    """A boundary target (a suture, a fissure) pointed at near (x, y): the shared border of the two
+    regions that meet there, followed along its whole course - not a spot at the pointer tip.
+    Returns a thin uint8 mask, or None when no two regions meet near the tip (extent unresolved)."""
+    regs = [p for p in parts if p.mask is not None and p.mask.any()
+            and getattr(p, "target_type", "region") == "region"]
+    if len(regs) < 2:
+        return None
+    h, w = regs[0].mask.shape[:2]
+    x0, y0, x1, y1 = max(0, x - reach), max(0, y - reach), min(w, x + reach + 1), min(h, y + reach + 1)
+    near = [p for p in regs if p.mask[y0:y1, x0:x1].any()]
+    if len(near) < 2:
+        return None
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+    best = None
+    for i in range(len(near)):
+        for j in range(i + 1, len(near)):
+            a, b = near[i], near[j]
+            # nested parts (squamous temporal inside temporal bone) have no border between them
+            ia, ib = (a.mask > 0), (b.mask > 0)
+            inter = int((ia & ib).sum())
+            if inter > 0.5 * min(int(ia.sum()), int(ib.sum())):
+                continue
+            band = cv2.dilate(a.mask, k) & cv2.dilate(b.mask, k)
+            sub = band[y0:y1, x0:x1]
+            ys, xs = np.nonzero(sub)
+            if not len(xs):
+                continue
+            d = np.hypot(xs + x0 - x, ys + y0 - y)
+            m = int(np.argmin(d))
+            if best is None or d[m] < best[0]:
+                best = (float(d[m]), band, (int(xs[m] + x0), int(ys[m] + y0)))
+    if best is None:
+        return None
+    _, band, (bx, by) = best
+    n, cc = cv2.connectedComponents((band > 0).astype(np.uint8))
+    comp = (cc == cc[by, bx]).astype(np.uint8)
+    ys, xs = np.nonzero(comp)
+    length = float(np.hypot(xs.max() - xs.min(), ys.max() - ys.min())) if len(xs) else 0.0
+    if length < min_len:
+        return None
+    return comp * 255
+
+
+def recover_siblings(img: np.ndarray, parts: list[Part], is_plural) -> int:
+    """Paired / repeated structures: "Kidneys" pointed at ONE kidney also covers the other one;
+    a "large intestine" drawn as two colon segments either side of the body keeps both. An
+    unnamed piece joins a named part only when it has the same colour, a similar size and shape,
+    and - for a singular name - sits mirror-wise across the drawing's midline. Returns merges."""
+    named = [p for p in parts if p.name and not p.name.startswith("part ") and p.mask is not None
+             and getattr(p, "target_type", "region") == "region" and p.match_method not in ("teacher",)]
+    loose = [q for q in parts if (not q.name or q.name.startswith("part ")) and q.mask is not None
+             and q.mask.any()]
+    if not named or not loose:
+        return 0
+    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB).astype(np.float32)
+    h, w = img.shape[:2]
+    allm = np.zeros((h, w), bool)
+    for p in parts:
+        if p.mask is not None and p.include:
+            allm |= p.mask > 0
+    xs = np.nonzero(allm.any(0))[0]
+    mid = (xs.min() + xs.max()) / 2.0 if len(xs) else w / 2.0
+    merged = 0
+    k5 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    for p in named:
+        # 0. shading: the pointer landed on a darker rim of an organ whose lighter body clustered
+        # apart - an unnamed piece the part wraps around (same hue) is the rest of it
+        pm = p.mask > 0
+        pl0 = _piece_lab(lab, pm)
+        ring = (cv2.dilate(pm.astype(np.uint8), k5) > 0) & ~pm
+        if pl0 is not None and ring.sum() > 0:
+            for q in list(loose):
+                qm = q.mask > 0
+                n2, cc2, st2, _ = cv2.connectedComponentsWithStats(qm.astype(np.uint8), connectivity=8)
+                for c in range(1, n2):
+                    piece = cc2 == c
+                    share = float((ring & piece).sum()) / float(ring.sum())
+                    if share < 0.3 or st2[c, cv2.CC_STAT_AREA] > 4 * pm.sum():
+                        continue
+                    ql = _piece_lab(lab, piece)
+                    if ql is None or float(np.hypot(*(ql[1:] - pl0[1:]))) > 11.0:
+                        continue
+                    pm = pm | piece
+                    rest = qm & ~piece
+                    if rest.sum() >= 40:
+                        _set_mask(q, (rest * 255).astype(np.uint8))
+                    else:
+                        q.mask = np.zeros_like(q.mask)
+                        q.area = 0
+                        q.include = False
+                    qm = rest
+            if pm.sum() != (p.mask > 0).sum():
+                _set_mask(p, (pm * 255).astype(np.uint8))
+                loose = [x for x in loose if x.mask is not None and x.mask.any()]
+        n, cc, st, cen = cv2.connectedComponentsWithStats(pm.astype(np.uint8), connectivity=8)
+        if n < 2:
+            continue
+        main = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+        comp = cc == main
+        plab = _piece_lab(lab, comp)
+        if plab is None:
+            continue
+        sig = _shape_sig(comp, int(st[main, cv2.CC_STAT_AREA]))
+        pcx, pcy = cen[main]
+        plural = bool(is_plural(p.label_text or p.name))
+        best = None
+        for q in loose:
+            qm = q.mask > 0
+            n2, cc2, st2, cen2 = cv2.connectedComponentsWithStats(qm.astype(np.uint8), connectivity=8)
+            for c in range(1, n2):
+                area = int(st2[c, cv2.CC_STAT_AREA])
+                ratio = area / max(1, int(st[main, cv2.CC_STAT_AREA]))
+                if not (0.4 <= ratio <= 2.5):
+                    continue
+                piece = cc2 == c
+                ql = _piece_lab(lab, piece)
+                qcx, qcy = cen2[c]
+                exact_mirror = abs(qcx - (2 * mid - pcx)) <= 0.04 * w and abs(qcy - pcy) <= 0.05 * h
+                cdist = float(np.linalg.norm((ql - plab) * (0.35, 1.0, 1.0))) if ql is not None else 99.0
+                if cdist > (14.0 if exact_mirror and plural else 10.0):
+                    continue
+                mirrored = abs(qcx - (2 * mid - pcx)) <= 0.08 * w and abs(qcy - pcy) <= 0.12 * h
+                if not (mirrored or plural):
+                    continue
+                if not mirrored and np.hypot(qcx - pcx, qcy - pcy) > 0.45 * np.hypot(h, w):
+                    continue
+                d = _shape_dist(piece, area, sig)
+                if exact_mirror and plural:
+                    d = min(d, 0.3)                   # the mirror twin of a pointed-at pair member
+                if mirrored and cdist <= 6.0 and d <= 0.8:
+                    d = min(d, 0.34)                  # same colour, mirror position: the other side
+                if d > 0.35:
+                    continue
+                score = d + (0 if mirrored else 0.2)
+                if best is None or score < best[0]:
+                    best = (score, q, piece)
+        if best is None:
+            continue
+        _, q, piece = best
+        # the twin's own rim / shading pieces in the same leftover part come with it
+        near = cv2.dilate(piece.astype(np.uint8), k5, iterations=2) > 0
+        qm_all = q.mask > 0
+        n3, cc3 = cv2.connectedComponents(qm_all.astype(np.uint8), connectivity=8)
+        for c3 in range(1, n3):
+            pc3 = cc3 == c3
+            if (pc3 & near).any() and pc3.sum() <= piece.sum():
+                piece = piece | pc3
+        rest = (q.mask > 0) & ~piece
+        _set_mask(p, ((pm | piece) * 255).astype(np.uint8))
+        p.count = max(1, cv2.connectedComponents((p.mask > 0).astype(np.uint8), connectivity=8)[0] - 1)
+        if rest.sum() >= 40:
+            _set_mask(q, (rest * 255).astype(np.uint8))
+        else:
+            q.mask = np.zeros_like(q.mask)
+            q.area = 0
+            q.include = False
+        loose = [x for x in loose if x.mask is not None and x.mask.any()]
+        merged += 1
+    parts[:] = [x for x in parts if x.mask is not None and x.mask.any()]
+    return merged

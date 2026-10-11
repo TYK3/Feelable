@@ -307,7 +307,8 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
     for p in included:
         m = warp((p.mask > 0).astype(np.uint8) * 255)
         n, cc, st, _ = cv2.connectedComponentsWithStats(m)
-        if n > 2:
+        if n > 2 and not (p.count >= 3 and n - 1 >= 3 and st[1:, cv2.CC_STAT_AREA].max() < 4 * tiny_px):
+            # (a set of tiny dots named together - ribosomes - keeps every dot; each is enlarged below)
             areas = st[1:, cv2.CC_STAT_AREA]
             keep = np.concatenate([[False], (areas >= tiny_px) | (areas == areas.max())])
             m = np.where(keep[cc], 255, 0).astype(np.uint8)
@@ -332,8 +333,15 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
     tm: dict[str, np.ndarray] = {}
     enlarged: list[str] = []
     enlarge_ok = True
+    # boundary / path targets (a suture, a process arrow) are raised LINES along their course:
+    # never scaled up like a small blob, never given a texture or an outline of their own
+    line_ids = {p.id for p in included if getattr(p, "target_type", "region") in ("boundary", "path")
+                and getattr(p, "extent", "full") == "full"}
     for p in included:
         m = base[p.id]
+        if p.id in line_ids and m.any():
+            tm[p.id] = _dilate(m, mm(0.5))
+            continue
         if not m.any():
             tm[p.id] = m
             continue
@@ -369,6 +377,8 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
     ancestors: dict[str, set[str]] = {i: set() for i in ids}
     for b in ids:
         for a in ids:
+            if a in line_ids or b in line_ids:
+                continue                      # a line over a region is not nested in it
             if a != b and area[a] > area[b] and area[b] > 0 and _mostly_inside(tm[b], tm[a]):
                 ancestors[b].add(a)
     children = {a: {b for b in ids if a in ancestors[b]} for a in ids}
@@ -395,7 +405,9 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
         # (a large solid area swells into one slab on swell paper and is hard to read)
         comp_area_mm2[i] = float(np.max(st[1:, cv2.CC_STAT_AREA])) / ppm ** 2 if n > 1 else 0.0
     for i in ids:
-        if children[i]:
+        if i in line_ids:
+            textures[i] = "solid"
+        elif children[i]:
             textures[i] = "none"
     for i in ids:
         if i in textures:
@@ -448,6 +460,8 @@ def render_tactile(analysis: Analysis, options: TactileOptions = TactileOptions(
         part_polygons[i] = [[(int(x), int(y)) for x, y in c.reshape(-1, 2)] for c in cs]
         if cs:
             largest_contour[i] = max(cs, key=cv2.contourArea)
+        if i in line_ids:
+            continue                          # drawn as a solid raised line, no double outline
         outline_area += _draw_poly_outline(outline_layer, cs, oth)
         outline_len += sum(cv2.arcLength(c, True) for c in cs)
 

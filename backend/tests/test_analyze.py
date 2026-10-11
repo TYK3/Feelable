@@ -290,8 +290,11 @@ def test_plant_cell(plant_result):
         assert nm in names, names
     assert _part(a, "chloroplast").count == 5
     assert _part(a, "mitochondrion").count == 3
-    assert any(d.startswith("ribosomes") for d in a.dropped), a.dropped
-    assert any("small dots" in d for d in a.dropped)
+    # precision audit: a plural label pointing among dots names every dot instance, it is not
+    # dropped as "too small" (the tactile step enlarges each dot to a feelable size)
+    rib = _part(a, "ribosomes")
+    assert rib is not None and rib.count >= 3, a.dropped
+    assert not any(d.startswith("ribosomes") for d in a.dropped), a.dropped
     assert a.title in ("plant cell", "typical plant cell")
     assert _part(a, "nucleus").description == "Nucleus. Inside the cytoplasm."
     assert "There are" not in _part(a, "chloroplast").description   # shape counts are not object counts

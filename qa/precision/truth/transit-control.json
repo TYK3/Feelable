@@ -1,0 +1,275 @@
+{
+ "size": [
+  1200,
+  900
+ ],
+ "note": "Synthetic diagnostic; truth from graph-controls-groundtruth.json (audit).",
+ "targets": [
+  {
+   "name": "Library",
+   "type": "landmark",
+   "points": [
+    [
+     100,
+     200
+    ]
+   ]
+  },
+  {
+   "name": "Park",
+   "type": "landmark",
+   "points": [
+    [
+     330,
+     200
+    ]
+   ]
+  },
+  {
+   "name": "Central",
+   "type": "landmark",
+   "points": [
+    [
+     570,
+     400
+    ]
+   ]
+  },
+  {
+   "name": "Museum",
+   "type": "landmark",
+   "points": [
+    [
+     820,
+     400
+    ]
+   ]
+  },
+  {
+   "name": "School",
+   "type": "landmark",
+   "points": [
+    [
+     1090,
+     600
+    ]
+   ]
+  },
+  {
+   "name": "Hospital",
+   "type": "landmark",
+   "points": [
+    [
+     100,
+     600
+    ]
+   ]
+  },
+  {
+   "name": "Market",
+   "type": "landmark",
+   "points": [
+    [
+     330,
+     600
+    ]
+   ]
+  },
+  {
+   "name": "Pool",
+   "type": "landmark",
+   "points": [
+    [
+     820,
+     200
+    ]
+   ]
+  },
+  {
+   "name": "Depot",
+   "type": "landmark",
+   "points": [
+    [
+     1090,
+     200
+    ]
+   ]
+  },
+  {
+   "name": "Stadium",
+   "type": "landmark",
+   "points": [
+    [
+     330,
+     100
+    ]
+   ]
+  },
+  {
+   "name": "Garden",
+   "type": "landmark",
+   "points": [
+    [
+     570,
+     750
+    ]
+   ]
+  },
+  {
+   "name": "River",
+   "type": "landmark",
+   "points": [
+    [
+     820,
+     750
+    ]
+   ]
+  },
+  {
+   "name": "Red route",
+   "type": "path",
+   "points": [
+    [
+     215,
+     200
+    ],
+    [
+     450,
+     300
+    ],
+    [
+     695,
+     400
+    ],
+    [
+     955,
+     500
+    ]
+   ]
+  },
+  {
+   "name": "Blue route",
+   "type": "path",
+   "points": [
+    [
+     215,
+     600
+    ],
+    [
+     450,
+     500
+    ],
+    [
+     695,
+     300
+    ],
+    [
+     955,
+     200
+    ]
+   ]
+  },
+  {
+   "name": "Green route",
+   "type": "path",
+   "points": [
+    [
+     330,
+     150
+    ],
+    [
+     330,
+     400
+    ],
+    [
+     450,
+     675
+    ],
+    [
+     695,
+     750
+    ]
+   ]
+  }
+ ],
+ "routes": [
+  [
+   "Red route",
+   "#b51b2e",
+   [
+    [
+     100,
+     200
+    ],
+    [
+     330,
+     200
+    ],
+    [
+     570,
+     400
+    ],
+    [
+     820,
+     400
+    ],
+    [
+     1090,
+     600
+    ]
+   ]
+  ],
+  [
+   "Blue route",
+   "#1651a4",
+   [
+    [
+     100,
+     600
+    ],
+    [
+     330,
+     600
+    ],
+    [
+     570,
+     400
+    ],
+    [
+     820,
+     200
+    ],
+    [
+     1090,
+     200
+    ]
+   ]
+  ],
+  [
+   "Green route",
+   "#23733a",
+   [
+    [
+     330,
+     100
+    ],
+    [
+     330,
+     200
+    ],
+    [
+     330,
+     600
+    ],
+    [
+     570,
+     750
+    ],
+    [
+     820,
+     750
+    ]
+   ]
+  ]
+ ]
+}

@@ -601,7 +601,9 @@ def health():
         ai["sends"] = getattr(_ai_mod, "SENDS", None) or AI_SENDS
     except Exception:  # pragma: no cover
         ai["sends"] = AI_SENDS
-    return {"status": "ok", "version": VERSION, "ai": ai,
+    # which build is answering (audit: "health exposes a version, not a deployed commit")
+    commit = (os.environ.get("RENDER_GIT_COMMIT") or os.environ.get("FEELABLE_COMMIT") or "").strip()[:40] or None
+    return {"status": "ok", "version": VERSION, "commit": commit, "ai": ai,
             "limits": {"name": pipeline.NAME_MAX, "description": pipeline.DESCRIPTION_MAX,
                        "title": pipeline.TITLE_MAX},
             "retention_hours": storage.RETENTION_HOURS}

@@ -52,7 +52,7 @@ def _worker(path: str, job_dir: str, q):
         q.put({"ok": False, "error": f"{type(e).__name__}: {e}", "tb": traceback.format_exc()[-1500:]})
 
 
-def _run_one(path: str, out_dir: str, timeout: float) -> dict:
+def _run_one(path: str, out_dir: str, timeout: float, truth_dir: str | None = None) -> dict:
     name = os.path.splitext(os.path.basename(path))[0]
     job_dir = tempfile.mkdtemp(prefix="fb-")
     q = mp.get_context("spawn").Queue()
@@ -78,6 +78,11 @@ def _run_one(path: str, out_dir: str, timeout: float) -> dict:
         state = pickle.load(f)
     a = state["analysis"]
     rec.update(measure(a, r.get("readiness") or {}))
+    if truth_dir:
+        from target_score import load_truth, score
+        t = load_truth(truth_dir, name)
+        if t:
+            rec["targets"] = score(a, t)
     rec["warnings"] = r.get("warnings") or []
     try:
         overlay(a, os.path.join(out_dir, f"{name}-overlay.jpg"), rec)
@@ -214,12 +219,13 @@ def main():
     ap.add_argument("images", nargs="+")
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--timeout", type=float, default=300)
+    ap.add_argument("--truth", default=None, help="folder of hand annotations (qa/precision/truth)")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     from concurrent.futures import ThreadPoolExecutor
     recs = []
     with ThreadPoolExecutor(args.workers) as ex:
-        futs = {ex.submit(_run_one, p, args.out, args.timeout): p for p in args.images}
+        futs = {ex.submit(_run_one, p, args.out, args.timeout, args.truth): p for p in args.images}
         for f in futs:
             pass
         from concurrent.futures import as_completed
@@ -230,7 +236,9 @@ def main():
                 json.dump(rec, fh, indent=1, default=str)
             print(f"{rec['status']:7} {rec.get('seconds', 0):6.1f}s {rec['name'][:45]:45} parts={rec.get('parts')} "
                   f"hits={rec.get('endpoint_hits')}/{(rec.get('endpoint_hits') or 0) + (rec.get('endpoint_misses') or 0)} "
-                  f"far={len(rec.get('far_fragments') or [])} ready={rec.get('readiness')}", flush=True)
+                  f"far={len(rec.get('far_fragments') or [])} ready={rec.get('readiness')}"
+                  + (f" targets={rec['targets'].get('valid')}/{rec['targets'].get('total')} crit={rec['targets'].get('critical')}"
+                     if rec.get("targets") else ""), flush=True)
     recs.sort(key=lambda r: r["name"])
     with open(os.path.join(args.out, "summary.csv"), "w", newline="") as fh:
         w = csv.writer(fh)

@@ -189,7 +189,8 @@ def _check_polygons(polys):
 
 PART_KEYS = {"id", "key", "name", "description", "include", "color", "texture", "count", "area",
              "source_bbox", "source_polygons", "tactile_polygons", "key_position",
-             "label_text", "match_method", "description_source"}                       # v2
+             "label_text", "match_method", "description_source",                       # v2
+             "target_type", "extent"}                                                  # precision audit
 RESULT_KEYS = {"id", "created_at", "title", "diagram_type", "ai_used", "page_flattened", "source", "tactile",
                "parts", "dropped", "warnings", "checks", "timings", "files",
                "version", "input_kind", "notes", "retention_hours", "expires_at", "readiness"}  # v2
@@ -240,6 +241,8 @@ def assert_job_result_schema(r: dict) -> None:
         assert p["label_text"] is None or isinstance(p["label_text"], str)
         assert isinstance(p["match_method"], str)
         assert p["description_source"] in ("auto", "ai", "teacher")
+        assert p["target_type"] in ("region", "boundary", "path", "landmark", "group")
+        assert p["extent"] in ("full", "unresolved")
     for k in ("dropped", "warnings"):
         assert isinstance(r[k], list) and all(isinstance(x, str) for x in r[k])
     assert isinstance(r["checks"], list)

@@ -246,7 +246,7 @@ def test_readiness_rules(fake_engine):
     codes = [i["code"] for i in rd["issues"]]
     assert codes == ["unnamed", "unmatched_label", "geometry", "ai_failed", "photo"]
     assert rd["issues"][0]["part_id"] == a.parts[0].id and rd["issues"][0]["action"] == "rename"
-    assert "Gemini rate limit" in rd["issues"][3]["message"] and rd["issues"][4]["severity"] == "info"
+    assert "Gemini rate limit" in rd["issues"][3]["detail"] and "Your diagram is saved" in rd["issues"][3]["message"] and rd["issues"][4]["severity"] == "info"
     assert rd["status"] == "needs_review" and rd["geometry"] == {"passed": 1, "total": 2}
     assert rd["unmatched_labels"] == ["vacuole"]
     # F04: approval with open checks is not "ready to teach"; only a clean approved lesson is.
@@ -367,7 +367,7 @@ def test_ai_describe_keeps_teacher_text_unless_overwrite(client, fake_engine):
     ai.last_error = lambda: "Gemini rate limit — try again in a minute"
     j = client.post(f"/api/jobs/{jid}/ai-describe", json={"overwrite_teacher": True}, headers=h).json()
     issue = next(i for i in j["readiness"]["issues"] if i["code"] == "ai_failed")
-    assert "rate limit" in issue["message"] and issue["severity"] == "warn"
+    assert "rate limit" in issue["detail"] and issue["severity"] == "warn"
     assert client.post(f"/api/jobs/{jid}/ai-describe", json={"overwrite_teacher": "yes"},
                        headers=h).status_code == 400
 
@@ -378,7 +378,7 @@ def test_ai_failure_during_upload_is_a_warning(client, fake_engine):
     ai.last_error = lambda: "AI timed out"
     job, _ = _create(client, use_ai="true")     # fake analyze leaves ai_used False
     issue = next(i for i in job["readiness"]["issues"] if i["code"] == "ai_failed")
-    assert "AI timed out" in issue["message"]
+    assert "AI timed out" in issue["detail"]
 
 
 def test_students_see_only_the_approved_snapshot(client):

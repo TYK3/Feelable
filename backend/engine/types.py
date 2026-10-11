@@ -66,6 +66,13 @@ class Part:
     label_text: Optional[str] = None          # the OCR label this part was matched to (source text)
     match_method: str = "none"                # "leader" | "inside" | "nearest" | "ai" | "teacher" | "none"
     description_source: str = "auto"          # "auto" | "ai" | "teacher"
+    # what kind of learning target this is (handover P0): a filled "region"; a "boundary" between
+    # two regions (a suture); a "path" with a course and often a direction (a process arrow, a
+    # route, a wire); a "landmark" point (pterion); a "group" naming several parts. A boundary /
+    # landmark marked only at its pointer tip has extent "unresolved" until traced or checked.
+    target_type: str = "region"
+    extent: str = "full"                      # "full" | "unresolved"
+    flow: str = ""                            # path targets: "from the sea to the cloud" (arrow direction)
 
     def __setstate__(self, state):
         _fill_missing_defaults(self, state)

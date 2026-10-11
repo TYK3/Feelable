@@ -1,0 +1,25 @@
+{
+ "size": [
+  1000,
+  650
+ ],
+ "note": "Masks from the audit's geometry ground truth.",
+ "targets": [
+  {
+   "name": "circle",
+   "mask": "geometry/circle-groundtruth.png"
+  },
+  {
+   "name": "triangle",
+   "mask": "geometry/triangle-groundtruth.png"
+  },
+  {
+   "name": "rectangle",
+   "mask": "geometry/rectangle-groundtruth.png"
+  },
+  {
+   "name": "square",
+   "mask": "geometry/square-groundtruth.png"
+  }
+ ]
+}

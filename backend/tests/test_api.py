@@ -36,6 +36,8 @@ def test_health(client):
     assert r.status_code == 200
     body = r.json()
     sends = body["ai"].pop("sends")
+    commit = body.pop("commit")
+    assert commit is None or isinstance(commit, str)
     assert "Gemini" in sends and "24 h" in sends
     assert body == {"status": "ok", "version": "0.1.0", "ai": {"provider": None, "model": None},
                     "limits": {"name": 60, "description": 400, "title": 80}, "retention_hours": 24}

@@ -1,0 +1,129 @@
+{
+ "size": [
+  1200,
+  814
+ ],
+ "note": "Annotated by hand from the source image (points read off a pixel grid), not from Feelable output. Process names are traced arrows.",
+ "targets": [
+  {
+   "name": "sun",
+   "points": [
+    [
+     190,
+     195
+    ]
+   ]
+  },
+  {
+   "name": "cloud",
+   "points": [
+    [
+     530,
+     195
+    ]
+   ]
+  },
+  {
+   "name": "sea",
+   "points": [
+    [
+     200,
+     660
+    ]
+   ]
+  },
+  {
+   "name": "mountain",
+   "points": [
+    [
+     900,
+     500
+    ]
+   ]
+  },
+  {
+   "name": "evaporation",
+   "type": "path",
+   "points": [
+    [
+     262,
+     560
+    ],
+    [
+     330,
+     380
+    ],
+    [
+     425,
+     275
+    ]
+   ]
+  },
+  {
+   "name": "condensation",
+   "type": "path",
+   "points": [
+    [
+     645,
+     155
+    ],
+    [
+     700,
+     140
+    ],
+    [
+     740,
+     145
+    ]
+   ]
+  },
+  {
+   "name": "precipitation",
+   "type": "path",
+   "points": [
+    [
+     775,
+     300
+    ],
+    [
+     771,
+     370
+    ]
+   ],
+   "forbid_extra": [
+    [
+     880,
+     210
+    ]
+   ]
+  },
+  {
+   "name": "collection",
+   "type": "path",
+   "points": [
+    [
+     950,
+     625
+    ],
+    [
+     760,
+     678
+    ],
+    [
+     560,
+     672
+    ]
+   ],
+   "forbid_extra": [
+    [
+     1050,
+     700
+    ],
+    [
+     600,
+     600
+    ]
+   ]
+  }
+ ]
+}

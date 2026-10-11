@@ -1,0 +1,45 @@
+{
+ "size": [
+  1200,
+  853
+ ],
+ "note": "Annotated by hand from the source image (points read off a pixel grid), not from Feelable output. Components only; wire graph scored separately when available.",
+ "targets": [
+  {
+   "name": "battery",
+   "points": [
+    [
+     40,
+     325
+    ]
+   ]
+  },
+  {
+   "name": "r1",
+   "points": [
+    [
+     420,
+     120
+    ]
+   ]
+  },
+  {
+   "name": "r2",
+   "points": [
+    [
+     600,
+     600
+    ]
+   ]
+  },
+  {
+   "name": "r3",
+   "points": [
+    [
+     1015,
+     600
+    ]
+   ]
+  }
+ ]
+}

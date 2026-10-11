@@ -61,6 +61,16 @@ def _limit_ort_threads() -> None:
     rutils.SessionOptions = make_opts
 
 
+_FAILED = threading.local()
+
+
+def take_failure() -> str | None:
+    """The text-reading engine error since the last call (this thread), or None."""
+    e = getattr(_FAILED, "error", None)
+    _FAILED.error = None
+    return e
+
+
 def run_ocr(image_rgb: np.ndarray, min_confidence: float = MIN_CONFIDENCE,
             restore_spaces: bool = True) -> list[Label]:
     """Detect + recognise text. Returns labels with axis-aligned int boxes (x0, y0, x1, y1).
@@ -75,7 +85,9 @@ def run_ocr(image_rgb: np.ndarray, min_confidence: float = MIN_CONFIDENCE,
         engine = _get_engine()
         with _RUN_LOCK:  # onnx sessions are thread-safe, but rapidocr keeps some state; be safe
             result, _elapse = engine(np.ascontiguousarray(image_rgb))
-    except Exception:  # pragma: no cover - defensive
+    except Exception as e:  # pragma: no cover - defensive
+        # an engine failure is not "no text": remember it so the analysis can say so (audit P1)
+        _FAILED.error = f"{type(e).__name__}"
         return []
     if not result:
         return []
