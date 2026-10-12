@@ -60,13 +60,87 @@ pinned: false
 |---|---|
 | 🧭 [Judges: a 2-minute tour](#-judges-a-2-minute-tour) | 🏆 [Award categories](#-award-categories-we-are-eligible-for) |
 | 🖼️ [The ten lessons](#️-the-ten-lessons-five-basic-five-complex) | ✅ [Rules and submission checklist](#-hackathon-rules-and-submission-checklist) |
-| 💡 [The problem](#-the-problem-and-who-it-is-for) | 🙏 [Credits and AI tools used](#-credits-and-ai-tools-used) |
+| 📖 [The story](#-the-story-behind-feelable) · 🎯 [The problem](#-the-problem-statement) | 🙏 [Credits and AI tools used](#-credits-and-ai-tools-used) |
 | ⚙️ [How it works](#️-how-it-works-image-ai-from-start-to-finish) | 🛠️ [Run it yourself](#️-run-it-yourself) |
 | 🏗️ [Architecture](#️-architecture-how-the-pipeline-and-services-fit-together) | 🗺️ [Repo map](#️-run-it-yourself) |
 | 📊 [Measured results](#-measured-results) | 🚧 [Known limits](#-known-limits) |
 | 🎯 [The judging criteria](#-how-feelable-meets-each-judging-criterion) | ❓ [Questions and answers](#-questions-and-answers) |
 
 </details>
+
+---
+
+## 📖 The story behind Feelable
+
+<table>
+<tr><td>
+
+When Banana Hacks announced its theme, *image everything*, we looked at what image AI projects usually make: stories turned into comics, outfit try-ons, room redesigns, sketches turned into websites. They are clever, but every one of them makes **pictures for people who can see**.
+
+So we asked the opposite question:
+
+<h3 align="center">💭 Who does image AI leave out?</h3>
+
+Once we asked it, the answer was obvious: **people who can't see the image at all.**
+
+Then we looked at how a diagram reaches a blind student today, and the answer surprised us. It reaches them **by hand**.
+
+1. A teacher of the visually impaired, or a specialist transcriber, redraws every figure from scratch.
+2. They simplify it, choose a texture for each part, and swap labels for braille.
+3. They print it on swell paper, then heat it until the lines rise.
+
+That takes 10–15 minutes for a simple diagram and **hours for a complex one**, around 300 hours for a single textbook. So students wait **weeks**.
+
+AI image describers don't close the gap. Research on AI descriptions of STEM images found they miss the **structure** a blind student needs ([source](https://scitepress.org/publishedPapers/2024/129968/pdf/index.html)). "The left ventricle is a chamber of the heart" doesn't tell you that it sits **bottom right, below the left atrium, beside the septum**. Only a shape under your finger does that.
+
+That became our idea:
+
+<h3 align="center">✋ Use image AI not to make a new picture for the eyes,<br>but to remake an existing picture for the fingers.</h3>
+
+</td></tr>
+</table>
+
+> 🎬 **Picture this** *(what we are building toward; it has not yet been tested in a classroom)*
+>
+> Before a biology lesson, the teacher photographs the heart diagram on page 112. By the time the class opens their books, the blind student in the front row has a raised-line copy on her desk, and a phone that says *"left ventricle"* when her finger finds it. She is learning **the same page, in the same lesson, at the same time** as everyone else.
+
+---
+
+## 🎯 The problem statement
+
+<table>
+<tr><td>
+
+### Blind and partially sighted students are taught from diagrams they cannot see. Turning each diagram into something they can touch takes a specialist hours, so students wait weeks, and they fall behind in the subjects that depend on diagrams most: biology, physics, geography, maths and computing.
+
+</td></tr>
+</table>
+
+<p align="center"><b>How might we turn any textbook diagram into an accurate, touchable, talking lesson in seconds, while keeping the teacher in control?</b></p>
+
+<table>
+<tr>
+<td align="center" width="33%"><h3>⏱️ hours</h3><sub>to hand-make one complex tactile diagram<br>(<a href="https://arxiv.org/abs/2504.04722">TactileNet</a>)</sub></td>
+<td align="center" width="33%"><h3>📚 ~300 h</h3><sub>to adapt one textbook<br>(<a href="https://nemo.asee.org/public/conferences/327/papers/38322/download">ASEE</a>)</sub></td>
+<td align="center" width="33%"><h3>📅 weeks</h3><sub>that students wait for their materials<br>(<a href="https://carleton.ca/news/story/communicating-visual-information-vision-impaired">Carleton University</a>)</sub></td>
+</tr>
+</table>
+
+### Why the options that exist today fall short
+
+| Today's option | ✅ Good at | ❌ Falls short |
+|---|---|---|
+| ✍️ Hand-made tactile graphics | Accurate, made by an expert | Hours per diagram, and specialist time is scarce |
+| 📦 Transcription services | Professional quality | Weeks of turnaround, so the lesson has moved on |
+| 🗣️ AI image descriptions | Instant | Say *what* is there, not *where*. Nothing to feel. |
+| 🎨 Generic image AI | Makes beautiful pictures | Makes them for eyes |
+| 🍌 **Feelable** | **A structure-aware draft in seconds, as a print, a 3D model and a talking phone** | The teacher still checks it, and we think that is right |
+
+### Who it is for
+
+- 👩‍🏫 **Teachers of blind students** get a print-ready first draft in seconds instead of an hour, and they approve every part.
+- 🧑‍🎓 **Blind students** can explore on swell paper, on a 3D print, or with no printer at all on a phone that speaks.
+- 🏫 **Schools** can use it on day one: the core pipeline runs on our own server **with no paid API**.
 
 ---
 
@@ -110,24 +184,6 @@ Every featured lesson was reviewed and corrected in Feelable. Click any card to 
 </details>
 
 <sub>An extended library on the site holds eight earlier examples (plant cell, heart, digestive system and others). Some of their outlines have not been re-checked, and the site says so.</sub>
-
----
-
-## 💡 The problem and who it is for
-
-<table>
-<tr>
-<td align="center" width="33%"><h3>⏱️ hours</h3><sub>to hand-make one complex tactile diagram<br>(<a href="https://arxiv.org/abs/2504.04722">TactileNet</a>)</sub></td>
-<td align="center" width="33%"><h3>📚 ~300 h</h3><sub>to adapt one textbook<br>(<a href="https://nemo.asee.org/public/conferences/327/papers/38322/download">ASEE</a>)</sub></td>
-<td align="center" width="33%"><h3>📅 weeks</h3><sub>that students wait for their materials<br>(<a href="https://carleton.ca/news/story/communicating-visual-information-vision-impaired">Carleton University</a>)</sub></td>
-</tr>
-</table>
-
-AI image describers say *what* a diagram shows. A blind learner also needs to know **how it is laid out**: which part is where, how big it is, and what touches what. That takes a graphic they can feel.
-
-- 👩‍🏫 **Teachers of blind students** get a print-ready first draft in seconds instead of an hour, and they approve every part.
-- 🧑‍🎓 **Blind students** can explore on swell paper, on a 3D print, or with no printer at all on a phone that speaks.
-- 🏫 **Schools** can use it on day one: the core pipeline runs on our own server **with no paid API**.
 
 ---
 
@@ -370,7 +426,7 @@ Each criterion is scored from 1 to 5, and all five count equally.
 <tr><td>⚙️ <b>Technical execution and difficulty</b></td><td>A multi-stage vision pipeline, not an API wrapper: neural OCR with zoomed re-reads, pointer tracing across crossings, zoom-and-carve watershed, boundary tracing, flowchart and map graph extraction, Gemini grounding refined by GrabCut, tactile rules measured on the output, UEB braille and watertight STL. Graded against hand-annotated targets.</td><td><a href="#️-architecture-how-the-pipeline-and-services-fit-together">Architecture</a>, <code>qa/target_score.py</code>, <a href="#-measured-results">results</a></td></tr>
 <tr><td>💡 <b>Innovation and creativity</b></td><td>Image AI aimed at <b>fingers instead of eyes</b>. One photo becomes a raised-line print, a 3D relief and a phone you can touch and hear. Sutures as borders, arrows as paths and flowcharts as graphs are what a blind reader needs, and what describers leave out.</td><td><a href="#️-how-it-works-image-ai-from-start-to-finish">How it works</a></td></tr>
 <tr><td>🖼️ <b>Use of the image AI theme</b></td><td>The image is both the input and the output. Vision reads, segments and grounds the picture, and Feelable <b>generates</b> a new image designed for touch, a 3D model and speech. Remove the image AI and nothing is left.</td><td><a href="#️-the-ten-lessons-five-basic-five-complex">The ten lessons</a></td></tr>
-<tr><td>🌍 <b>Impact and usefulness</b></td><td>A measured bottleneck (hours per diagram, weeks of waiting) and a clear user (teachers of blind students). It is free to run, needs no key for the core, and has teacher approval built in.</td><td><a href="#-the-problem-and-who-it-is-for">The problem</a></td></tr>
+<tr><td>🌍 <b>Impact and usefulness</b></td><td>A measured bottleneck (hours per diagram, weeks of waiting) and a clear user (teachers of blind students). It is free to run, needs no key for the core, and has teacher approval built in.</td><td><a href="#-the-problem-statement">The problem</a></td></tr>
 <tr><td>🎨 <b>Design, presentation and demo</b></td><td>Upload → Review → Fix → Share. 48 px touch targets, no sideways scroll at 320 px, a talking touch mode, the Basic/Complex gallery, and a <b>Scan details</b> tab that shows the AI's work on your own picture. Demo video of 3 minutes or less.</td><td><a href="https://feelable.onrender.com">Live site</a>, <a href="DEMO_SCRIPT.md">demo script</a>, <a href="DEVPOST.md">write-up</a></td></tr>
 </table>
 
@@ -386,7 +442,6 @@ Every submission is considered for every category, so nothing needs applying for
 | 🎨 **Best Creative Tool** | 🟢🟢🟢 | Image AI in the hands of a teacher **making** something. The teacher stays the author: they review, rename, draw a missing part on the photo, trace a border, write what the student hears, and approve. |
 | 🤯 **Most Surprising Output** | 🟢🟢🟢 | An image AI project whose output is a picture you **can't see but can feel**: raised lines with braille, a 3D-printed relief, and a phone that speaks a flowchart's Yes/No branches under your finger. |
 | 🙌 **People's Choice** | 🟢🟢 | Easy to grasp in five seconds. Close your eyes, touch the phone, and hear "left ventricle". |
-| 🔧 **Best Fine-tune** | ⚪ | We did **not** train a model, LoRA or adapter, and we'd rather say so plainly. |
 
 ---
 
@@ -591,6 +646,13 @@ python qa/e2e_precision.py http://localhost:8000 /tmp/shots                     
 ## ❓ Questions and answers
 
 <details>
+<summary><b>Where did the idea come from?</b></summary>
+
+From looking at what image AI usually makes (comics, try-ons, redesigns) and asking who it leaves out. People who can't see images get nothing from a better picture. Then we found that their diagrams are still remade by hand, taking hours each and weeks of waiting. See [the story](#-the-story-behind-feelable).
+
+</details>
+
+<details>
 <summary><b>Isn't this just an image description API with extra steps?</b></summary>
 
 No. A describer returns a sentence. Feelable has to know **where every part is and exactly where its edge runs**, because a finger follows that edge.
@@ -702,13 +764,6 @@ Next we will test with teachers of the visually impaired and blind students, the
 <summary><b>Did you use AI to build it?</b></summary>
 
 Yes, and we say so as the rules ask. **Gemini** runs inside the product (vision, descriptions, voice). **Claude (Anthropic)** helped us write code, tests and documentation as a coding assistant. The idea, the product decisions and the review of every change are ours. See [credits](#-credits-and-ai-tools-used).
-
-</details>
-
-<details>
-<summary><b>Did you fine-tune a model?</b></summary>
-
-No, and we don't claim Best Fine-tune. Our "tuning" is the pipeline, the science vocabulary and a scored benchmark.
 
 </details>
 
