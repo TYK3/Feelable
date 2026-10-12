@@ -1,4 +1,10 @@
-# Demo video script, v2 (≤ 3 min)
+# Demo video
+
+**The finished video is [`docs/video/feelable-demo.mp4`](docs/video/feelable-demo.mp4) (2 min 54 s), with timed subtitles in [`docs/video/feelable-demo.srt`](docs/video/feelable-demo.srt).** The subtitle file doubles as a voiceover script if you want to record narration over it. The scripts that recorded and edited it are in [`docs/video/src`](docs/video/src).
+
+Below is the original shot plan, kept for reference.
+
+## Original script, v2 (≤ 3 min)
 
 Record at 1440×900 (browser) plus a phone (screen recording or filmed). Speak slowly; the visuals carry it.
 

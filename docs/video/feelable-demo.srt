@@ -1,0 +1,116 @@
+1
+00:00:00,300 --> 00:00:04,233
+Feelable. Every diagram, feelable. Snap a textbook diagram, and get a picture a blind student can feel and hear.
+
+2
+00:00:04,833 --> 00:00:09,233
+Image AI makes amazing pictures: comics, outfit try-ons, room redesigns. But every one of them is made for people who can see.
+
+3
+00:00:09,833 --> 00:00:13,233
+So we asked the opposite question: who does image AI leave out?
+
+4
+00:00:13,833 --> 00:00:20,233
+Blind students learn from the same textbooks, but every diagram is remade by hand. That takes hours for a complex diagram, around 300 hours per textbook, and students wait weeks.
+
+5
+00:00:20,833 --> 00:00:26,766
+So we use image AI not to make a new picture for the eyes, but to remake a picture for the fingers: a swell-paper print, a 3D relief, and a phone that talks.
+
+6
+00:00:27,374 --> 00:00:33,656
+Feelable turns a diagram into something a blind student can feel and hear
+
+7
+00:00:33,656 --> 00:00:41,891
+Ten reviewed lessons: five basic, five complex
+
+8
+00:00:42,213 --> 00:00:43,230
+A teacher takes a photo of a worksheet Water cycle, photographed on a desk
+
+9
+00:00:43,230 --> 00:01:01,461
+Real processing, not sped up Read labels → find parts → tactile rules → braille, PDF and 3D
+
+10
+00:01:01,461 --> 00:01:07,023
+Evaporation, condensation, precipitation and collection become arrows you can follow Every part gets its own texture and a braille label
+
+11
+00:01:07,337 --> 00:01:12,129
+The hard case: a dense textbook skull with 27 labelled parts
+
+12
+00:01:12,129 --> 00:01:13,931
+Original on the left, tactile on the right Textures for each bone, sutures as raised lines, braille beside every part
+
+13
+00:01:13,931 --> 00:01:16,048
+Scan details: what the image AI saw, step by step
+
+14
+00:01:16,048 --> 00:01:18,983
+Scan details: what the image AI saw, step by step Every label read with neural OCR, blurry words re-read up close
+
+15
+00:01:18,983 --> 00:01:21,847
+Scan details: what the image AI saw, step by step Every pointer line followed from its label to its tip
+
+16
+00:01:21,847 --> 00:01:24,696
+Scan details: what the image AI saw, step by step Bones split along their real edges, even when they share a colour
+
+17
+00:01:24,696 --> 00:01:28,220
+Scan details: what the image AI saw, step by step Sutures traced as the border two bones share
+
+18
+00:01:28,536 --> 00:01:30,997
+The teacher stays in charge Anything uncertain is listed first, with a fix for each
+
+19
+00:01:30,997 --> 00:01:36,626
+Draw a missing part on the photo Click inside it and Feelable suggests the outline
+
+20
+00:01:36,626 --> 00:01:43,748
+Zoom in to check the edge Students only see a lesson after the teacher approves it
+
+21
+00:01:44,073 --> 00:01:46,503
+Not just shapes: structure A flowchart becomes boxes and arrows a student can follow
+
+22
+00:01:46,503 --> 00:01:50,308
+“Soil dry? A decision. Yes: open valve. No: log reading.” What the student hears when they touch the diamond
+
+23
+00:01:50,602 --> 00:01:52,879
+A bus map becomes stations and routes Dashed and solid routes stay distinct by touch, not by colour
+
+24
+00:01:52,879 --> 00:01:56,486
+“Central: an interchange” Feelable works out where routes meet from the picture itself
+
+25
+00:01:56,690 --> 00:02:01,708
+Approve and publish Then print it, 3D-print it, or hand the student a QR code
+
+26
+00:02:01,708 --> 00:02:20,130
+A 3D-printable relief of the same diagram
+
+27
+00:02:20,433 --> 00:02:41,033
+No printer? The student's phone talks. Touch a part to hear its name, double-tap to hear more, and feel a buzz at every edge.
+
+28
+00:02:41,633 --> 00:02:48,566
+We measure where every outline lands against targets we annotated by hand: valid targets went from 67 to 104 of 142, flowchart arrows 11 of 11, bus routes 15 of 15.
+
+29
+00:02:49,166 --> 00:02:53,566
+Feelable. Every diagram, feelable. Try it at feelable dot onrender dot com.
+
