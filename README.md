@@ -22,7 +22,7 @@ pinned: false
 <p align="center">
   <a href="https://feelable.onrender.com"><img alt="Try it live" src="https://img.shields.io/badge/▶%20try%20it%20live-feelable.onrender.com-FFD23F?style=for-the-badge&labelColor=17171C"></a>
   <a href="DEVPOST.md"><img alt="Devpost write-up" src="https://img.shields.io/badge/📝%20write--up-DEVPOST.md-FFFFFF?style=for-the-badge&labelColor=17171C"></a>
-  <a href="docs/video/feelable-demo.mp4"><img alt="Watch the demo video" src="https://img.shields.io/badge/🎬%20watch%20the%20demo-2%3A54-FFFFFF?style=for-the-badge&labelColor=17171C"></a>
+  <a href="https://youtu.be/aORqEIG18dE"><img alt="Watch the demo video" src="https://img.shields.io/badge/🎬%20watch%20the%20demo-2%3A54-FFFFFF?style=for-the-badge&labelColor=17171C"></a>
 </p>
 
 <p align="center">
@@ -38,8 +38,13 @@ pinned: false
 <a id="-watch-the-demo"></a>
 
 <p align="center">
-  <a href="docs/video/feelable-demo.mp4"><img src="docs/video/preview.gif" alt="Feelable demo preview: the slider moves between a labelled skull diagram and its tactile version" width="80%"></a><br>
-  <a href="docs/video/feelable-demo.mp4"><b>▶ Watch the full demo (2 min 54 s)</b></a> · <a href="docs/video/feelable-demo.srt">subtitles</a>
+  <a href="https://youtu.be/aORqEIG18dE"><img src="docs/video/highlights.gif" alt="35-second highlights of Feelable: a water-cycle photo becomes a tactile page, the skull lesson and its scan details, a flowchart, a 3D relief, and a phone naming each part of a cell as it is touched" width="90%"></a><br>
+  <sub>▲ 35-second highlights, playing on a loop with no sound. The full narrated demo is below.</sub>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/aORqEIG18dE"><img src="docs/video/youtube-thumb.jpg" alt="Watch the Feelable demo on YouTube: 2 minutes 54 seconds, narrated" width="62%"></a><br>
+  <a href="https://youtu.be/aORqEIG18dE"><b>▶ Watch the full narrated demo on YouTube (2:54)</b></a> · <a href="docs/video/feelable-demo.mp4">download the video</a> · <a href="docs/video/feelable-demo.srt">subtitles</a>
 </p>
 
 The video shows the story behind Feelable, then a real photo being processed (not sped up), the dense skull lesson and its Scan details, the teacher's fix tools, a flowchart and a bus map, publishing with a QR code and 3D relief, and a student exploring on a phone. It was recorded from the running app and narrated with an open text-to-speech model (Kokoro); [`docs/video/src`](docs/video/src) rebuilds it.
@@ -433,7 +438,7 @@ Each criterion is scored from 1 to 5, and all five count equally.
 <tr><td>💡 <b>Innovation and creativity</b></td><td>Image AI aimed at <b>fingers instead of eyes</b>. One photo becomes a raised-line print, a 3D relief and a phone you can touch and hear. Sutures as borders, arrows as paths and flowcharts as graphs are what a blind reader needs, and what describers leave out.</td><td><a href="#️-how-it-works-image-ai-from-start-to-finish">How it works</a></td></tr>
 <tr><td>🖼️ <b>Use of the image AI theme</b></td><td>The image is both the input and the output. Vision reads, segments and grounds the picture, and Feelable <b>generates</b> a new image designed for touch, a 3D model and speech. Remove the image AI and nothing is left.</td><td><a href="#️-the-ten-lessons-five-basic-five-complex">The ten lessons</a></td></tr>
 <tr><td>🌍 <b>Impact and usefulness</b></td><td>A measured bottleneck (hours per diagram, weeks of waiting) and a clear user (teachers of blind students). It is free to run, needs no key for the core, and has teacher approval built in.</td><td><a href="#-the-problem-statement">The problem</a></td></tr>
-<tr><td>🎨 <b>Design, presentation and demo</b></td><td>Upload → Review → Fix → Share. 48 px touch targets, no sideways scroll at 320 px, a talking touch mode, the Basic/Complex gallery, and a <b>Scan details</b> tab that shows the AI's work on your own picture. Demo video of 3 minutes or less.</td><td><a href="https://feelable.onrender.com">Live site</a>, <a href="docs/video/feelable-demo.mp4">demo video</a>, <a href="DEVPOST.md">write-up</a></td></tr>
+<tr><td>🎨 <b>Design, presentation and demo</b></td><td>Upload → Review → Fix → Share. 48 px touch targets, no sideways scroll at 320 px, a talking touch mode, the Basic/Complex gallery, and a <b>Scan details</b> tab that shows the AI's work on your own picture. Demo video of 3 minutes or less.</td><td><a href="https://feelable.onrender.com">Live site</a>, <a href="https://youtu.be/aORqEIG18dE">demo video</a>, <a href="DEVPOST.md">write-up</a></td></tr>
 </table>
 
 ---
@@ -461,7 +466,7 @@ Every submission is considered for every category, so nothing needs applying for
 | Project name | **Feelable** |
 | One-paragraph description | [At the top of this README](#description) and in [`DEVPOST.md`](DEVPOST.md) |
 | Public GitHub link | https://github.com/TYK3/feelable |
-| Demo video, 3 minutes or less | ✅ [**Watch the demo (2:54)**](docs/video/feelable-demo.mp4), with subtitles in [`feelable-demo.srt`](docs/video/feelable-demo.srt) |
+| Demo video, 3 minutes or less | ✅ [**Watch the demo on YouTube (2:54)**](https://youtu.be/aORqEIG18dE), also [in this repo](docs/video/feelable-demo.mp4), with subtitles in [`feelable-demo.srt`](docs/video/feelable-demo.srt) |
 | Demoable without hardware | ✅ Hosted at https://feelable.onrender.com and works over a screen share. A printer is optional. |
 
 </details>

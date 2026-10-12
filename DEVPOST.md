@@ -1,6 +1,6 @@
 # Feelable — Every diagram, feelable.
 
-**Try it:** https://feelable.onrender.com · **Code:** https://github.com/TYK3/feelable
+**Try it:** https://feelable.onrender.com · **Code:** https://github.com/TYK3/feelable · **Demo video:** https://youtu.be/aORqEIG18dE
 
 ## Inspiration
 Blind students use the same textbooks as everyone else, but every diagram must be hand-made into a **tactile graphic**: 10–15 minutes for a simple one, hours for a complex one ([TactileNet](https://arxiv.org/abs/2504.04722)), around 300 hours per textbook ([ASEE](https://nemo.asee.org/public/conferences/327/papers/38322/download)). Students wait weeks ([Carleton](https://carleton.ca/news/story/communicating-visual-information-vision-impaired)). AI describers say *what* a diagram is, not *how it's built*, which is what a blind learner needs.
