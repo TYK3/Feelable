@@ -35,9 +35,15 @@ pinned: false
   <img alt="Gemini" src="https://img.shields.io/badge/Gemini-3.5%20Flash-8E75B2?style=flat-square&logo=googlegemini&logoColor=white&labelColor=17171C">
 </p>
 
+<a id="-watch-the-demo"></a>
+
 <p align="center">
-  <a href="https://feelable.onrender.com"><img src="docs/img/readme/skull-lateral.jpg" alt="A labelled skull diagram on the left; on the right, Feelable's tactile page: each bone outlined with its own texture, braille labels beside each part" width="88%"></a>
+  <a href="docs/video/feelable-demo.mp4"><img src="docs/video/preview.gif" alt="Feelable demo preview: the slider moves between a labelled skull diagram and its tactile version" width="80%"></a><br>
+  <a href="docs/video/feelable-demo.mp4"><b>▶ Watch the full demo (2 min 54 s)</b></a> · <a href="docs/video/feelable-demo.srt">subtitles</a>
 </p>
+
+The video shows the story behind Feelable, then a real photo being processed (not sped up), the dense skull lesson and its Scan details, the teacher's fix tools, a flowchart and a bus map, publishing with a QR code and 3D relief, and a student exploring on a phone. It was recorded from the running app and narrated with an open text-to-speech model (Kokoro); [`docs/video/src`](docs/video/src) rebuilds it.
+
 
 <table align="center">
 <tr>
@@ -67,17 +73,6 @@ pinned: false
 | 🎯 [The judging criteria](#-how-feelable-meets-each-judging-criterion) | ❓ [Questions and answers](#-questions-and-answers) |
 
 </details>
-
----
-
-## 🎬 Watch the demo
-
-<p align="center">
-  <a href="docs/video/feelable-demo.mp4"><img src="docs/video/preview.gif" alt="Feelable demo preview: the slider moves between a labelled skull diagram and its tactile version" width="80%"></a><br>
-  <a href="docs/video/feelable-demo.mp4"><b>▶ Watch the full demo (2 min 54 s)</b></a> · <a href="docs/video/feelable-demo.srt">subtitles</a>
-</p>
-
-The video shows the story behind Feelable, then a real photo being processed (not sped up), the dense skull lesson and its Scan details, the teacher's fix tools, a flowchart and a bus map, publishing with a QR code and 3D relief, and a student exploring on a phone. It was recorded from the running app and narrated with an open text-to-speech model (Kokoro); [`docs/video/src`](docs/video/src) rebuilds it.
 
 ---
 
