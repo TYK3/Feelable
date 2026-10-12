@@ -1,6 +1,6 @@
 # Demo video
 
-**The finished video is [`docs/video/feelable-demo.mp4`](docs/video/feelable-demo.mp4) (2 min 54 s), with timed subtitles in [`docs/video/feelable-demo.srt`](docs/video/feelable-demo.srt).** The subtitle file doubles as a voiceover script if you want to record narration over it. The scripts that recorded and edited it are in [`docs/video/src`](docs/video/src).
+**The finished video is [`docs/video/feelable-demo.mp4`](docs/video/feelable-demo.mp4) (2 min 54 s), narrated, with subtitles that match the narration in [`docs/video/feelable-demo.srt`](docs/video/feelable-demo.srt).** The voices come from the open Kokoro-82M text-to-speech model (Apache 2.0), run locally with sherpa-onnx. The scripts that recorded and edited it are in [`docs/video/src`](docs/video/src).
 
 Below is the original shot plan, kept for reference.
 

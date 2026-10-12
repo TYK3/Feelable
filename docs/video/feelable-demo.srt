@@ -1,116 +1,116 @@
 1
-00:00:00,300 --> 00:00:04,233
-Feelable. Every diagram, feelable. Snap a textbook diagram, and get a picture a blind student can feel and hear.
+00:00:00,500 --> 00:00:03,324
+This is Feelable. Every diagram, feelable.
 
 2
-00:00:04,833 --> 00:00:09,233
-Image AI makes amazing pictures: comics, outfit try-ons, room redesigns. But every one of them is made for people who can see.
+00:00:04,833 --> 00:00:09,008
+Image AI makes amazing pictures. But only for people who can see.
 
 3
-00:00:09,833 --> 00:00:13,233
-So we asked the opposite question: who does image AI leave out?
+00:00:09,733 --> 00:00:12,255
+So we asked: who does image AI leave out?
 
 4
-00:00:13,833 --> 00:00:20,233
-Blind students learn from the same textbooks, but every diagram is remade by hand. That takes hours for a complex diagram, around 300 hours per textbook, and students wait weeks.
+00:00:13,733 --> 00:00:20,286
+Blind students. Every diagram in their textbooks is remade by hand. It takes hours, and they wait weeks.
 
 5
-00:00:20,833 --> 00:00:26,766
-So we use image AI not to make a new picture for the eyes, but to remake a picture for the fingers: a swell-paper print, a 3D relief, and a phone that talks.
+00:00:20,833 --> 00:00:24,825
+So Feelable uses image AI to remake a picture for the fingers.
 
 6
-00:00:27,374 --> 00:00:33,656
-Feelable turns a diagram into something a blind student can feel and hear
+00:00:27,467 --> 00:00:30,454
+Touch a part of the example, and it tells you what it is.
 
 7
-00:00:33,656 --> 00:00:41,891
-Ten reviewed lessons: five basic, five complex
+00:00:33,867 --> 00:00:39,213
+There are ten ready-made lessons, five basic and five complex, from biology to maps.
 
 8
-00:00:42,213 --> 00:00:43,230
-A teacher takes a photo of a worksheet Water cycle, photographed on a desk
+00:00:42,300 --> 00:00:44,670
+Now, a photo of a real worksheet.
 
 9
-00:00:43,230 --> 00:01:01,461
-Real processing, not sped up Read labels → find parts → tactile rules → braille, PDF and 3D
+00:00:45,100 --> 00:00:55,579
+This is real processing, not sped up. Feelable reads every label, finds each part, and applies the rules for touch: raised outlines, a different texture for each neighbour, and braille.
 
 10
-00:01:01,461 --> 00:01:07,023
-Evaporation, condensation, precipitation and collection become arrows you can follow Every part gets its own texture and a braille label
+00:01:01,700 --> 00:01:05,689
+Evaporation and rain become arrows you can follow with a finger.
 
 11
-00:01:07,337 --> 00:01:12,129
-The hard case: a dense textbook skull with 27 labelled parts
+00:01:07,433 --> 00:01:13,419
+Now the hard case: a textbook skull, with twenty-seven small labels, and bones of almost the same colour.
 
 12
-00:01:12,129 --> 00:01:13,931
-Original on the left, tactile on the right Textures for each bone, sutures as raised lines, braille beside every part
+00:01:14,133 --> 00:01:24,782
+Scan details shows exactly what the AI saw. Every label it read, every pointer it followed, and every bone split along a real edge. Even the sutures are traced where two bones meet.
 
 13
-00:01:13,931 --> 00:01:16,048
-Scan details: what the image AI saw, step by step
+00:01:28,633 --> 00:01:33,439
+The teacher stays in charge. Anything uncertain is listed first, with a fix.
 
 14
-00:01:16,048 --> 00:01:18,983
-Scan details: what the image AI saw, step by step Every label read with neural OCR, blurry words re-read up close
+00:01:33,633 --> 00:01:40,526
+Missing a part? Click inside it, and Feelable suggests the outline. Students only see a lesson after the teacher approves it.
 
 15
-00:01:18,983 --> 00:01:21,847
-Scan details: what the image AI saw, step by step Every pointer line followed from its label to its tip
+00:01:44,067 --> 00:01:45,977
+It understands structure, too.
 
 16
-00:01:21,847 --> 00:01:24,696
-Scan details: what the image AI saw, step by step Bones split along their real edges, even when they share a colour
+00:01:46,567 --> 00:01:49,813
+A flowchart is spoken with its yes and no branches.
 
 17
-00:01:24,696 --> 00:01:28,220
-Scan details: what the image AI saw, step by step Sutures traced as the border two bones share
+00:01:50,600 --> 00:01:53,334
+And on a bus map, it works out where the routes meet.
 
 18
-00:01:28,536 --> 00:01:30,997
-The teacher stays in charge Anything uncertain is listed first, with a fix for each
+00:01:56,800 --> 00:02:01,099
+Approve, and it's ready. Print it on swell paper, or share a QR code.
 
 19
-00:01:30,997 --> 00:01:36,626
-Draw a missing part on the photo Click inside it and Feelable suggests the outline
+00:02:04,700 --> 00:02:08,605
+There's even a 3D printable relief of the same diagram.
 
 20
-00:01:36,626 --> 00:01:43,748
-Zoom in to check the edge Students only see a lesson after the teacher approves it
+00:02:20,533 --> 00:02:23,646
+And with no printer at all, a student explores on a phone.
 
 21
-00:01:44,073 --> 00:01:46,503
-Not just shapes: structure A flowchart becomes boxes and arrows a student can follow
+00:02:24,633 --> 00:02:25,790
+[phone] Nucleus.
 
 22
-00:01:46,503 --> 00:01:50,308
-“Soil dry? A decision. Yes: open valve. No: log reading.” What the student hears when they touch the diamond
+00:02:26,633 --> 00:02:27,968
+[phone] Nucleolus.
 
 23
-00:01:50,602 --> 00:01:52,879
-A bus map becomes stations and routes Dashed and solid routes stay distinct by touch, not by colour
+00:02:28,633 --> 00:02:29,918
+[phone] Golgi body.
 
 24
-00:01:52,879 --> 00:01:56,486
-“Central: an interchange” Feelable works out where routes meet from the picture itself
+00:02:30,633 --> 00:02:32,101
+[phone] Mitochondrion.
 
 25
-00:01:56,690 --> 00:02:01,708
-Approve and publish Then print it, 3D-print it, or hand the student a QR code
+00:02:32,683 --> 00:02:34,182
+[phone] Cell membrane.
 
 26
-00:02:01,708 --> 00:02:20,130
-A 3D-printable relief of the same diagram
+00:02:34,683 --> 00:02:36,016
+[phone] Ribosomes.
 
 27
-00:02:20,433 --> 00:02:41,033
-No printer? The student's phone talks. Touch a part to hear its name, double-tap to hear more, and feel a buzz at every edge.
+00:02:36,933 --> 00:02:40,141
+[phone] Golgi body. Inside the cytoplasm.
 
 28
-00:02:41,633 --> 00:02:48,566
-We measure where every outline lands against targets we annotated by hand: valid targets went from 67 to 104 of 142, flowchart arrows 11 of 11, bus routes 15 of 15.
+00:02:41,633 --> 00:02:48,660
+We measure where every outline lands. Valid targets rose from sixty-seven to a hundred and four, out of a hundred and forty-two.
 
 29
-00:02:49,166 --> 00:02:53,566
-Feelable. Every diagram, feelable. Try it at feelable dot onrender dot com.
+00:02:49,267 --> 00:02:51,862
+Feelable. Every diagram, feelable.
 

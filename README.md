@@ -77,7 +77,7 @@ pinned: false
   <a href="docs/video/feelable-demo.mp4"><b>▶ Watch the full demo (2 min 54 s)</b></a> · <a href="docs/video/feelable-demo.srt">subtitles</a>
 </p>
 
-The video shows the story behind Feelable, then a real photo being processed (not sped up), the dense skull lesson and its Scan details, the teacher's fix tools, a flowchart and a bus map, publishing with a QR code and 3D relief, and a student exploring on a phone. It was recorded from the running app; [`docs/video/src`](docs/video/src) rebuilds it.
+The video shows the story behind Feelable, then a real photo being processed (not sped up), the dense skull lesson and its Scan details, the teacher's fix tools, a flowchart and a bus map, publishing with a QR code and 3D relief, and a student exploring on a phone. It was recorded from the running app and narrated with an open text-to-speech model (Kokoro); [`docs/video/src`](docs/video/src) rebuilds it.
 
 ---
 
@@ -512,6 +512,7 @@ Concerns about this project can go to the organisers through **#help** on Discor
 |---|---|
 | **Google Gemini 3.5 Flash / Flash-Lite** (vision) | Inside the product: finding structures whose pointer is lost, naming unlabelled parts, writing spoken descriptions |
 | **Google Gemini text-to-speech** | Inside the product: the natural voice in touch mode |
+| **Kokoro-82M** text-to-speech (open model) | The demo video's narration and the phone's voice in it (not used inside the product) |
 | **Claude (Anthropic), through Claude Code** | Building the product: an AI coding assistant for code, tests, the QA harness and documentation. Commits it helped write carry a `Co-Authored-By: Claude` trailer. |
 
 </details>
@@ -521,6 +522,7 @@ Concerns about this project can go to the organisers through **#help** on Discor
 
 - **PP-OCR** text detection and recognition models (PaddleOCR, Apache 2.0), run through **RapidOCR** (`rapidocr-onnxruntime`, Apache 2.0) on **ONNX Runtime** (MIT)
 - **Google Gemini 3.5 Flash, Flash-Lite and text-to-speech** through the Gemini API
+- **Kokoro-82M** (Apache 2.0), run with **sherpa-onnx** (Apache 2.0): the narration voices in the demo video only
 
 </details>
 
