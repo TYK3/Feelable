@@ -44,9 +44,15 @@ Real diagrams are messy: leader lines that stop short, a membrane broken by an o
 
 ## Accomplishments we're proud of
 - On a 24-image benchmark of dense anatomy figures (skulls, eye, ear, kidney, digestive system, heart, organ paintings, low-res screenshots), labels read correctly rose from 94 % to 99 % and labels that became a named, feelable shape from 52 % to 71 % — offline, before Gemini.
-- 12 sample diagrams, including an angled phone photo and two dense textbook figures, open instantly.
+- Ten reviewed lessons (five basic, five complex: skull, cell, circuit, flowchart, bus map) open instantly, plus an extended library.
 - Robustness-tested on 239 images from the internet: objects, animals, scenes, maps, charts, handwriting, odd file formats and phone-like distortions. No crashes, and junk output down from 192 to 114 images.
-- 255 backend tests and end-to-end browser checks at desktop and phone sizes pass. Every exported 3D model is checked to be a clean, watertight solid. Every part speaks its own name in touch mode on both phone and desktop.
+- 304 backend tests and end-to-end browser checks at desktop and phone sizes pass. Every exported 3D model is checked to be a clean, watertight solid. Every part speaks its own name in touch mode on both phone and desktop.
+
+## Credits and AI tools used
+- **Inside the product:** Google Gemini 3.5 Flash / Flash-Lite (vision grounding, part names, descriptions) and Gemini text-to-speech. PP-OCR models via RapidOCR on ONNX Runtime.
+- **To build it:** Claude (Anthropic), through Claude Code, as an AI coding assistant for code, tests and documentation.
+- **Libraries:** OpenCV, NumPy, Pillow, Shapely, trimesh, RapidFuzz, FastAPI, React, three.js, Vite and others. Full list in the README.
+- **Images:** OpenStax (CC BY 4.0) figures, our own CC0 artwork, and public test images whose sources are listed in `qa/robustness/manifest.csv`.
 
 ## What's next
 Testing with teachers of the visually impaired (QTVIs) and blind students; embosser export; a shared, teacher-approved library so each textbook diagram only has to be converted once; and more diagram types (maps, geometry, circuits with symbols). Feelable is free to try and the vision pipeline runs without paid APIs, so a school can use it from day one.
